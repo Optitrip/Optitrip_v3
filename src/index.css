@@ -1,0 +1,27 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-size: 12px;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.navbar-brand img {
+  margin-left: 15px;
+  margin-right: 30px;
+}
+
+#show_routes_div {
+  position: absolute;
+  z-index: 999; /* Asegura que el card esté en la parte superior */
+  background-color: white; /* Establece un fondo blanco para el card */
+  padding: 20px; /* Añade un espacio de relleno para el contenido */
+}

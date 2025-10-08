@@ -84,19 +84,16 @@ export default function SelectVehiclesComponent({ state, setState }) {
                 {isCardBodyOpen && (
                     <div className="card-body" style={{ background: '#E4E4E4', padding: 1 }}>
                         <div className="text-center mt-2 mb-2">
-                            <span className="d-inline-block" data-bs-toggle="tooltip" title="Opción no disponible">
-                                <button
-                                    className="btn mx-1 p-2 custom-btn-vehicles"
-                                    type="button"
-                                    disabled
-                                    style={{ cursor: 'not-allowed' }}
-                                >
-                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                        <i className="icon-icono-auto" style={{ fontSize: 23, color: 'inherit' }}></i>
-                                        <span className='btn-title' style={{ color: 'inherit' }}>Auto</span>
-                                    </div>
-                                </button>
-                            </span>
+                            <button
+                                className="btn mx-1 p-2 custom-btn-vehicles"
+                                onClick={() => handleButtonClick('auto', 'car')}
+                                style={getButtonStyle('auto')}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <i className="icon-icono-auto" style={{ fontSize: 23, color: activeButton === 'auto' ? 'white' : 'inherit' }}></i>
+                                    <span className='btn-title' style={{ color: activeButton === 'auto' ? 'white' : 'inherit' }}>Auto</span>
+                                </div>
+                            </button>
                             <span className="d-inline-block" data-bs-toggle="tooltip" title="Opción no disponible">
                                 <button
                                     className="btn mx-1 p-2 custom-btn-vehicles"

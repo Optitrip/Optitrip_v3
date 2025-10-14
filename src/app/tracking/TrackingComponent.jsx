@@ -281,6 +281,11 @@ export default function TrackingComponent(props) {
             props.mapDrivers.removeObjects(props.mapDrivers.getObjects());
 
             filteredDrivers.forEach((driver) => {
+                // Verificar que el driver tenga tracking y location antes de acceder
+                if (!driver.tracking || !driver.tracking.location) {
+                    return; // Saltar este driver si no tiene tracking
+                }
+
                 const { latitude, longitude } = driver.tracking.location;
 
                 // Solo agregar marcadores si la latitud y longitud no son 0
@@ -295,8 +300,11 @@ export default function TrackingComponent(props) {
         }
 
         // Contar conductores activos e inactivos
-        const offlineCount = filteredDrivers.filter(driver => driver.tracking.status === "Fuera de línea").length;
-        const onlineCount = filteredDrivers.length - offlineCount;
+        const offlineCount = filteredDrivers.filter(driver =>
+            driver.tracking && driver.tracking.status === "Fuera de línea"
+        ).length;
+        const driversWithTracking = filteredDrivers.filter(driver => driver.tracking).length;
+        const onlineCount = driversWithTracking - offlineCount;
 
         setDriversOnline(onlineCount);
         setDriversOffline(offlineCount);
@@ -309,10 +317,14 @@ export default function TrackingComponent(props) {
         let filtered = [...filteredDrivers];
 
         if (status === 'offline') {
-            filtered = filtered.filter((user) => user.tracking.status === 'Fuera de línea');
+            filtered = filtered.filter((user) =>
+                user.tracking && user.tracking.status === 'Fuera de línea'
+            );
 
         } else if (status === 'online') {
-            filtered = filtered.filter((user) => user.tracking.status !== 'Fuera de línea');
+            filtered = filtered.filter((user) =>
+                user.tracking && user.tracking.status !== 'Fuera de línea'
+            );
 
         } else {
             filtered = [...filteredDrivers];
@@ -330,7 +342,7 @@ export default function TrackingComponent(props) {
             return str.toUpperCase();
         }
     };
-    
+
     return (
         <div className="card-body p-0">
             <div className="row">
@@ -470,20 +482,31 @@ export default function TrackingComponent(props) {
                             </div>
                             <div className="pt-2 pb-4">
                                 {filteredDriversStatus.map((driver, index) => {
-                                    // Obtiene el color de fondo basado en el estado del conductor
-                                    const backgroundColor = statusColors[driver.tracking.status] || '#535353'; // Color predeterminado
+                                    // Verificar que tenga tracking antes de acceder al status
+                                    const driverStatus = driver.tracking?.status || 'Fuera de línea';
+                                    const backgroundColor = statusColors[driverStatus] || '#535353';
 
                                     return (
                                         <div key={index} className="col-12 pt-2" style={{ paddingLeft: 8, paddingRight: 8 }}>
-                                            <button id={`btnReportsDriver${index}`} type="button" className={'btn btn-lg btn-light'} onClick={() => handleZoomLocation(driver.tracking.location.latitude, driver.tracking.location.longitude)} style={{ width: '100%', height: 40, padding: 0, paddingLeft: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'left', borderRadius: 10 }}>
+                                            <button id={`btnReportsDriver${index}`} type="button" className={'btn btn-lg btn-light'} onClick={() => {
+                                                if (driver.tracking?.location?.latitude && driver.tracking?.location?.longitude) {
+                                                    handleZoomLocation(driver.tracking.location.latitude, driver.tracking.location.longitude);
+                                                }
+                                            }} style={{ width: '100%', height: 40, padding: 0, paddingLeft: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'left', borderRadius: 10 }}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5.0 -10.0 110.0 135.0" className={'icon-active-report'} style={{ width: '30px', height: '30px', paddingTop: 2, background: backgroundColor, borderRadius: 6 }}>
                                                     <path d="m57.711 64.23c-1.0234-1.0234-2.418-1.6055-3.8672-1.6055l-22.645 0.003906-4.0938-20.16h22.109c3.0195 0 5.4727-2.4453 5.4727-5.4727 0-3.0195-2.4492-5.4727-5.4727-5.4727l-28.801 0.003906c-1.6445 0-3.1953 0.73438-4.2344 2.0078-1.0391 1.2695-1.4531 2.9414-1.125 4.5547l6.3125 31.105c0.51953 2.5469 2.7617 4.3828 5.3633 4.3828h24.852l18.414 18.414c1.0664 1.0703 2.4688 1.6055 3.8672 1.6055 1.3984 0 2.8008-0.53125 3.8672-1.6055 2.1367-2.1367 2.1367-5.6016 0-7.7344zm23.77-32.703h-13.332v-6.5781c0-3.0195-2.4492-5.4727-5.4727-5.4727-3.0195 0-5.4727 2.4492-5.4727 5.4727v21.98c0 3.0195 2.4492 5.4727 5.4727 5.4727 3.0234 0 5.4727-2.4492 5.4727-5.4727v-4.4609h13.332c3.0195 0 5.4727-2.4453 5.4727-5.4727-0.003906-3.0195-2.4531-5.4688-5.4727-5.4688zm-57.785-25.117c5.8828 0 10.648 4.7695 10.648 10.648 0 5.8828-4.7695 10.648-10.648 10.648-5.8789 0-10.648-4.7656-10.648-10.648 0-5.8789 4.7695-10.648 10.648-10.648z" />
                                                 </svg>
                                                 <div className="mr-3" style={{ marginLeft: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                                     <span className={'text-driver-name'} style={{ fontWeight: 'bold' }}>{driver.name}</span>
-                                                    <span className={'text-driver-date'}>{getCurrentLocalDateTime(driver.tracking.location.timestamp) || '--/--/----, --:--:--'}</span>
+                                                    <span className={'text-driver-date'}>
+                                                        {driver.tracking?.location?.timestamp
+                                                            ? getCurrentLocalDateTime(driver.tracking.location.timestamp)
+                                                            : '--/--/----, --:--:--'}
+                                                    </span>
                                                 </div>
-                                                <span className={'text-driver-date pl-2 pr-2 ml-1'} style={{ border: '2px solid', borderColor: backgroundColor, borderRadius: 10, fontSize: 10, color: backgroundColor, fontWeight: 'bold' }}>{convertToUpperCase(driver.tracking.status)}</span>
+                                                <span className={'text-driver-date pl-2 pr-2 ml-1'} style={{ border: '2px solid', borderColor: backgroundColor, borderRadius: 10, fontSize: 10, color: backgroundColor, fontWeight: 'bold' }}>
+                                                    {convertToUpperCase(driverStatus)}
+                                                </span>
                                             </button>
                                         </div>
                                     );

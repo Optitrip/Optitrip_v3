@@ -32,13 +32,13 @@ export const here_api_routes = (state, setState, map, colors, index) => {
 
     let selectedCardIndex = null;
 
-    const handleCardClick = (index, lines, map, tolls_total, setState) => {
+    const handleCardClick = (index, lines, map, tolls_total, setState, forceSelect = false) => {
         // Obtener la tarjeta seleccionada previamente
         const prevSelectedCard = document.querySelector('.selected-card');
         const selectedCard = document.querySelector(`#route-card-${index}`);
 
         // Si la tarjeta seleccionada es la misma que la previamente seleccionada
-        if (prevSelectedCard && selectedCard && prevSelectedCard === selectedCard) {
+        if (prevSelectedCard && selectedCard && prevSelectedCard === selectedCard && !forceSelect) {
             // Deseleccionar la tarjeta
             selectedCard.classList.remove('selected-card');
             const selectedLabel = selectedCard.querySelector('.text-route');
@@ -376,7 +376,7 @@ export const here_api_routes = (state, setState, map, colors, index) => {
                                                 <label className='text-modal-5' style={{ paddingLeft: 0 }}>{arrival_time}</label>
                                                 <label className='text-modal-6'>{instructions[parseInt(instructions.length / 2)]}</label>
                                                 <p style={{ color: '#007BFF', cursor: 'pointer', textDecoration: 'underline', margin: '0px' }} onClick={() => {
-                                                    handleCardClick(index, lines, map, tolls_total, setState);
+                                                    handleCardClick(index, lines, map, tolls_total, setState, true);
                                                     createIndications(colors[index], formattedTime, distance, tolls_total, instructions, state.destinations[0].name, state.destinations[state.destinations.length - 1].name);
                                                 }}>Indicaciones</p>
                                             </div>

@@ -128,7 +128,7 @@ export default function AssignRouteComponent(state) {
                 arrivalTime,
                 distance,
                 durationTrip,
-                status,  
+                status,
                 avoidAreas: state.state.avoid_zones.map(zone => ({
                     name: zone.name,
                     points: zone.points,
@@ -138,14 +138,18 @@ export default function AssignRouteComponent(state) {
                 avoidHighways: state.state.avoid_highways,
                 transportation: state.state.transportation,
                 mode: state.state.mode,
-                traffic: state.state.traffic,
+                traffic: (() => {
+                    const trafficValue = state.state.traffic;
+                    if (trafficValue === 'enabled' || trafficValue === true) return true;
+                    if (trafficValue === 'disabled' || trafficValue === false) return false;
+                    return false; // default para 'default' u otros valores
+                })(),
                 timeType: state.state.time_type,
                 scheduledTime: state.state.time
             };
 
             // Llamar al servicio para asignar la ruta
             await assignRouteService(routeData);
-            console.log('🚀 Datos a enviar:', JSON.stringify(routeData, null, 2));
 
             // Cerrar el modal después de completar la asignación
             handleModalClose();

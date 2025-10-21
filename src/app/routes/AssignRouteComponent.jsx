@@ -145,6 +145,7 @@ export default function AssignRouteComponent(state) {
 
             // Llamar al servicio para asignar la ruta
             await assignRouteService(routeData);
+            console.log('🚀 Datos a enviar:', JSON.stringify(routeData, null, 2));
 
             // Cerrar el modal después de completar la asignación
             handleModalClose();

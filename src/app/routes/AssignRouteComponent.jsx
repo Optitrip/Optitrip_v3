@@ -128,7 +128,19 @@ export default function AssignRouteComponent(state) {
                 arrivalTime,
                 distance,
                 durationTrip,
-                status,  // Agregar el estado calculado
+                status,  
+                avoidAreas: state.state.avoid_zones.map(zone => ({
+                    name: zone.name,
+                    points: zone.points,
+                    color: zone.color
+                })),
+                avoidParameters: state.state.avoid_parameters,
+                avoidHighways: state.state.avoid_highways,
+                transportation: state.state.transportation,
+                mode: state.state.mode,
+                traffic: state.state.traffic,
+                timeType: state.state.time_type,
+                scheduledTime: state.state.time
             };
 
             // Llamar al servicio para asignar la ruta

@@ -113,17 +113,6 @@ export default function AssignRouteComponent(state) {
                 email: assignedBy.email
             };
 
-            console.log("========== DEBUG FRONTEND ==========");
-            console.log("avoid_zones:", state.state.avoid_zones);
-            console.log("avoid_parameters:", state.state.avoid_parameters);
-            console.log("avoid_highways:", state.state.avoid_highways);
-            console.log("transportation:", state.state.transportation);
-            console.log("mode:", state.state.mode);
-            console.log("traffic:", state.state.traffic);
-            console.log("time_type:", state.state.time_type);
-            console.log("time:", state.state.time);
-            console.log("====================================");
-
             // Construir la solicitud de la ruta
             const routeData = {
                 url,
@@ -140,11 +129,37 @@ export default function AssignRouteComponent(state) {
                 distance,
                 durationTrip,
                 status,
-                avoidAreas: state.state.avoid_zones.map(zone => ({
-                    name: zone.name,
-                    points: zone.points,
-                    color: zone.color
-                })),
+                avoidAreas: state.state.avoid_zones.map(zone => {
+                    // Convertir los puntos al formato correcto [[lat, lng], ...]
+                    let convertedPoints = [];
+
+                    if (Array.isArray(zone.points)) {
+                        // Si ya es un array de arrays
+                        convertedPoints = zone.points.map(point => {
+                            if (Array.isArray(point) && point.length === 2) {
+                                return [point[0], point[1]];
+                            }
+                            // Si es un objeto {lat, lng} o similar
+                            return [point[0] || point.lat, point[1] || point.lng];
+                        });
+                    } else if (zone.LineString && zone.LineString.Ya) {
+                        // Si viene del objeto LineString de HERE Maps
+                        convertedPoints = zone.LineString.Ya.map(coord => [coord.lat, coord.lng]);
+                    }
+
+                    console.log("Zona convertida:", {
+                        name: zone.name,
+                        originalPoints: zone.points,
+                        convertedPoints: convertedPoints,
+                        color: zone.color
+                    });
+
+                    return {
+                        name: zone.name,
+                        points: convertedPoints,
+                        color: zone.color
+                    };
+                }),
                 avoidParameters: state.state.avoid_parameters,
                 avoidHighways: state.state.avoid_highways,
                 transportation: state.state.transportation,

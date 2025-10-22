@@ -113,6 +113,17 @@ export default function AssignRouteComponent(state) {
                 email: assignedBy.email
             };
 
+            console.log("========== DEBUG FRONTEND ==========");
+            console.log("avoid_zones:", state.state.avoid_zones);
+            console.log("avoid_parameters:", state.state.avoid_parameters);
+            console.log("avoid_highways:", state.state.avoid_highways);
+            console.log("transportation:", state.state.transportation);
+            console.log("mode:", state.state.mode);
+            console.log("traffic:", state.state.traffic);
+            console.log("time_type:", state.state.time_type);
+            console.log("time:", state.state.time);
+            console.log("====================================");
+
             // Construir la solicitud de la ruta
             const routeData = {
                 url,

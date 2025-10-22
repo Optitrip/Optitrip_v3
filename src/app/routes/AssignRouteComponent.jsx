@@ -113,6 +113,13 @@ export default function AssignRouteComponent(state) {
                 email: assignedBy.email
             };
 
+            const routeSections = state.state.response?.routes?.[selectedOption]?.sections || [];
+            const sectionsToSave = routeSections.map(section => ({
+                polyline: section.polyline,
+                departure: section.departure,
+                arrival: section.arrival
+            }));
+
             // Construir la solicitud de la ruta
             const routeData = {
                 url,
@@ -130,7 +137,6 @@ export default function AssignRouteComponent(state) {
                 durationTrip,
                 status,
                 avoidAreas: state.state.avoid_zones.map(zone => {
-                    // Convertir los puntos al formato correcto [[lat, lng], ...]
                     let convertedPoints = [];
 
                     if (Array.isArray(zone.points)) {
@@ -168,10 +174,11 @@ export default function AssignRouteComponent(state) {
                     const trafficValue = state.state.traffic;
                     if (trafficValue === 'enabled' || trafficValue === true) return true;
                     if (trafficValue === 'disabled' || trafficValue === false) return false;
-                    return false; // default para 'default' u otros valores
+                    return false;
                 })(),
                 timeType: state.state.time_type,
-                scheduledTime: state.state.time
+                scheduledTime: state.state.time,
+                routeSections: sectionsToSave
             };
 
             // Llamar al servicio para asignar la ruta

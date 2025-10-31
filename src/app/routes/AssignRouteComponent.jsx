@@ -119,23 +119,9 @@ export default function AssignRouteComponent(state) {
                 .filter(section => {
                     // Filtrar sections con polylines muy cortos (menos de 20 caracteres = puntos duplicados)
                     const isValidPolyline = section.polyline && section.polyline.length >= 20;
-
-                    console.log("Evaluando section:", {
-                        polylineLength: section.polyline?.length,
-                        isValid: isValidPolyline,
-                        departure: section.departure?.place?.location,
-                        arrival: section.arrival?.place?.location
-                    });
-
                     return isValidPolyline;
                 })
                 .map(section => {
-                    console.log("Guardando section válida:", {
-                        polylineLength: section.polyline?.length,
-                        hasDeparture: !!section.departure,
-                        hasArrival: !!section.arrival
-                    });
-
                     return {
                         polyline: section.polyline,
                         departureTime: section.departure?.time,
@@ -143,8 +129,6 @@ export default function AssignRouteComponent(state) {
                     };
                 });
 
-            console.log("Total sections válidas a guardar:", sectionsToSave.length);
-            console.log("Sections filtradas:", sectionsToSave);
 
             // Construir la solicitud de la ruta
             const routeData = {
@@ -178,13 +162,6 @@ export default function AssignRouteComponent(state) {
                         // Si viene del objeto LineString de HERE Maps
                         convertedPoints = zone.LineString.Ya.map(coord => [coord.lat, coord.lng]);
                     }
-
-                    console.log("Zona convertida:", {
-                        name: zone.name,
-                        originalPoints: zone.points,
-                        convertedPoints: convertedPoints,
-                        color: zone.color
-                    });
 
                     return {
                         name: zone.name,

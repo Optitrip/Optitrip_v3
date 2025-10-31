@@ -138,8 +138,6 @@ export const here_api_routes = (state, setState, map, colors, index) => {
         const selectedRouteInfo = respuesta[0].routes[index];
         const sections = selectedRouteInfo.sections;
 
-        console.log(respuesta[0].routes)
-
         let totalDistance = 0;
         let totalDuration = 0;
         let instruccionsRoute = [];

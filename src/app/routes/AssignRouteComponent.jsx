@@ -114,11 +114,22 @@ export default function AssignRouteComponent(state) {
             };
 
             const routeSections = state.state.response?.routes?.[selectedOption]?.sections || [];
-            const sectionsToSave = routeSections.map(section => ({
-                polyline: section.polyline,
-                departure: section.departure,
-                arrival: section.arrival
-            }));
+            const sectionsToSave = routeSections.map(section => {
+                console.log("Guardando section:", {
+                    polylineLength: section.polyline?.length,
+                    hasDeparture: !!section.departure,
+                    hasArrival: !!section.arrival
+                });
+
+                return {
+                    polyline: section.polyline,
+                    departureTime: section.departure?.time,
+                    arrivalTime: section.arrival?.time
+                };
+            });
+
+            console.log("Total sections a guardar:", sectionsToSave.length);
+            console.log("Sections completas:", sectionsToSave);
 
             // Construir la solicitud de la ruta
             const routeData = {

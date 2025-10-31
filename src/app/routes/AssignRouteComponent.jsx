@@ -114,22 +114,37 @@ export default function AssignRouteComponent(state) {
             };
 
             const routeSections = state.state.response?.routes?.[selectedOption]?.sections || [];
-            const sectionsToSave = routeSections.map(section => {
-                console.log("Guardando section:", {
-                    polylineLength: section.polyline?.length,
-                    hasDeparture: !!section.departure,
-                    hasArrival: !!section.arrival
+            // FILTRAR SECTIONS FANTASMAS
+            const sectionsToSave = routeSections
+                .filter(section => {
+                    // Filtrar sections con polylines muy cortos (menos de 20 caracteres = puntos duplicados)
+                    const isValidPolyline = section.polyline && section.polyline.length >= 20;
+
+                    console.log("Evaluando section:", {
+                        polylineLength: section.polyline?.length,
+                        isValid: isValidPolyline,
+                        departure: section.departure?.place?.location,
+                        arrival: section.arrival?.place?.location
+                    });
+
+                    return isValidPolyline;
+                })
+                .map(section => {
+                    console.log("Guardando section válida:", {
+                        polylineLength: section.polyline?.length,
+                        hasDeparture: !!section.departure,
+                        hasArrival: !!section.arrival
+                    });
+
+                    return {
+                        polyline: section.polyline,
+                        departureTime: section.departure?.time,
+                        arrivalTime: section.arrival?.time
+                    };
                 });
 
-                return {
-                    polyline: section.polyline,
-                    departureTime: section.departure?.time,
-                    arrivalTime: section.arrival?.time
-                };
-            });
-
-            console.log("Total sections a guardar:", sectionsToSave.length);
-            console.log("Sections completas:", sectionsToSave);
+            console.log("Total sections válidas a guardar:", sectionsToSave.length);
+            console.log("Sections filtradas:", sectionsToSave);
 
             // Construir la solicitud de la ruta
             const routeData = {

@@ -84,10 +84,8 @@ async function handleLogin(event) {
         }
     } catch (error) {
         showLoginForm();
-
         // Determinar el mensaje según el error
         let errorTitle = '';
-
         if (error.message.includes('Campos incompletos')) {
             errorTitle = '¡Campos incompletos! Por favor completa todos los campos';
         } else if (error.message.includes('Invalid email or password')) {

@@ -200,66 +200,54 @@ export const here_api_routes = (state, setState, map, colors, index) => {
     if (state.destinations.length >= 2 || state.transportation != "" || state.mode != "") {
 
         let indicaciones = [];
-        let departure_time_content = `&${state.time_type}=${state.time}:30`;
-        let avoid_content = "&avoid[features]=";
-        state.avoid_parameters.forEach(element => {
-            avoid_content += `${element},`;
-        })
-        if (state.avoid_parameters <= 0) {
-            avoid_content = "";
-        }
-        let avoid_area = "";
-        if (state.avoid_zones.length > 0) {
-            avoid_area = "&avoid[areas]=";
-            state.avoid_zones.forEach(avoid_zone => {
-                avoid_area += `polygon:`;
-                avoid_zone.points.forEach(point => {
-                    avoid_area += `${point[0]},${point[1]};`;
-                })
-                avoid_area += `|`;
-            });
-        }
-        departure_time_content = "";
+        // Manejo de tiempo de salida/llegada
+        let departure_time_content = "";
         if (state.time_type == "Llegar a las:") {
-            departure_time_content = `&arrivalTime=${state.time}:00`;
+            const arrivalDate = new Date(state.time);
+            departure_time_content = `&arrivalTime=${arrivalDate.toISOString()}`;
         }
         else if (state.time_type == "Salir a las:") {
-            departure_time_content = `&departureTime=${state.time}:00`;
+            const departureDate = new Date(state.time);
+            departure_time_content = `&departureTime=${departureDate.toISOString()}`;
         }
 
+        // Construcción de waypoints (vias)
         let vias = ``;
-        for (let index = 0; index < state.destinations.length; index++) {
-            if (index != 0 && index != state.destinations.length - 1) {
-                vias += `&via=${state.destinations[index].string}!stopDuration=${state.destinations[index].duration.toString()}`;
-            }
+        for (let index = 1; index < state.destinations.length - 1; index++) {
+            vias += `&via=${state.destinations[index].lat},${state.destinations[index].lng}!stopDuration=${state.destinations[index].duration}`;
         }
+
+        // Parámetros de evitación
+        let avoid_content = "";
+        if (state.avoid_parameters.length > 0) {
+            avoid_content = "&avoid[features]=" + state.avoid_parameters.join(',');
+        }
+
+        // Áreas a evitar (polígonos)
+        let avoid_area = "";
+        if (state.avoid_zones.length > 0) {
+            const polygons = state.avoid_zones.map(zone => {
+                const points = zone.points.map(p => `${p[0]},${p[1]}`).join(';');
+                return `polygon:${points}`;
+            }).join('|');
+            avoid_area = `&avoid[areas]=${polygons}`;
+        }
+
+        // Parámetros del vehículo (camión)
         let number_of_axles = "";
         let type_of_truck = "";
-        let type_of_trailer = "";
         let number_of_trailers = "";
         if (state.transportation == "truck") {
             number_of_axles = `&vehicle[axleCount]=${state.number_of_axles}`;
             type_of_truck = `&vehicle[type]=${state.type_of_truck}`;
-            type_of_trailer = state.type_of_trailer;
             number_of_trailers = `&vehicle[trailerCount]=${state.number_of_trailers}`;
         }
-        let fetch_link = `https://router.hereapi.com/v8/routes
-        ?apikey=${apiKeyHERE}&lang=es
-        &origin=${state.destinations[0].string}${avoid_area}
-        &destination=${state.destinations[state.destinations.length - 1].string}${vias}
-        &routingMode=${state.mode}
-        &traffic[mode]=${state.traffic ? "default" : "disabled"}
-        &return=polyline%2Csummary%2Cactions%2Cinstructions${state.transportation != pedestrian.here_value ? "%2Ctolls" : ""}
-        &transportMode=${state.transportation}
-        ${departure_time_content}
-        ${avoid_content}
-        ${vias}
-        ${number_of_axles}
-        ${number_of_trailers}
-        ${type_of_truck}
-        &alternatives=3`;
-        fetch_link = fetch_link.replace(/ /g, '');
-        fetch_link = fetch_link.replace(/\n/g, '');
+
+        // Tráfico correcto
+        const trafficMode = state.traffic === "default" || state.traffic === true ? "default" : "disabled";
+
+        // Construcción de URL limpia
+        let fetch_link = `https://router.hereapi.com/v8/routes?apikey=${apiKeyHERE}&lang=es&origin=${state.destinations[0].lat},${state.destinations[0].lng}&destination=${state.destinations[state.destinations.length - 1].lat},${state.destinations[state.destinations.length - 1].lng}${vias}&routingMode=${state.mode}&traffic[mode]=${trafficMode}&return=polyline,summary,actions,instructions${state.transportation != pedestrian.here_value ? ",tolls" : ""}&transportMode=${state.transportation}${departure_time_content}${avoid_content}${avoid_area}${number_of_axles}${number_of_trailers}${type_of_truck}&alternatives=3`;
         setState(prevState => ({ ...prevState, url: fetch_link }));
         fetch(fetch_link)
             .then(response => {

@@ -17,7 +17,8 @@ async function loginService(email, password) {
             };
 
         } else {
-            throw new Error('Credenciales incorrectas');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Credenciales incorrectas');
         }
 
     } catch (error) {

@@ -84,31 +84,29 @@ async function handleLogin(event) {
         }
     } catch (error) {
         showLoginForm();
-        if (error.message === 'Credenciales incorrectas') {
-            Swal.fire({
-                title: '¡Credenciales incorrectas! Por favor, inténtelo de nuevo',
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'Aceptar',
-                width: '400px',
-                padding: '2rem',
-                customClass: {
-                    title: 'title-handle',
-                    popup: 'popup-handle'
-                }
-            });
+
+        // Determinar el mensaje según el error
+        let errorTitle = '';
+
+        if (error.message.includes('Campos incompletos')) {
+            errorTitle = '¡Campos incompletos! Por favor completa todos los campos';
+        } else if (error.message.includes('Invalid email or password')) {
+            errorTitle = '¡Credenciales incorrectas! Por favor, inténtelo de nuevo';
         } else {
-            Swal.fire({
-                title: '¡Error inesperado! Por favor, inténtelo de nuevo',
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'Aceptar',
-                width: '400px',
-                padding: '2rem',
-                customClass: {
-                    title: 'title-handle',
-                    popup: 'popup-handle'
-                }
-            });
+            errorTitle = '¡Error inesperado! Por favor, inténtelo de nuevo';
         }
+
+        Swal.fire({
+            title: errorTitle,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Aceptar',
+            width: '400px',
+            padding: '2rem',
+            customClass: {
+                title: 'title-handle',
+                popup: 'popup-handle'
+            }
+        });
     }
 }
 

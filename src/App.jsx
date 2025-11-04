@@ -152,9 +152,10 @@ export default function App(props) {
         appContainerRef.current = document.getElementById('app-container');
         userSectionRef.current = document.getElementById('users');
         reportSectionRef.current = document.getElementById('reports');
+        menuRoutesRef.current = document.getElementById('menuRoutes'); 
 
         const observerCallback = () => {
-            if (!appContainerRef.current || !userSectionRef.current || !reportSectionRef.current) {
+            if (!appContainerRef.current || !userSectionRef.current || !reportSectionRef.current || !menuRoutesRef.current) {
                 return;
             }
 
@@ -162,10 +163,12 @@ export default function App(props) {
             const userSectionDisplay = window.getComputedStyle(userSectionRef.current).display;
             const reportSectionDisplay = window.getComputedStyle(reportSectionRef.current).display;
 
+            const isRoutesActive = menuRoutesRef.current.classList.contains('btn-primary');
+
             if (appContainerDisplay === 'block') {
-                if (userSectionDisplay === 'none' && reportSectionDisplay === 'none') {
+                if (userSectionDisplay === 'none' && reportSectionDisplay === 'none' && isRoutesActive) {
                     setInitialized(true);
-                    setShowBtnSearch(true);
+                    setShowBtnSearch(true); // Solo muestra el buscador si está en Rutas
                 } else {
                     setInitialized(false);
                     setShowBtnSearch(false);
@@ -180,6 +183,7 @@ export default function App(props) {
         observer.observe(appContainerRef.current, { attributes: true, attributeFilter: ['style'] });
         observer.observe(userSectionRef.current, { attributes: true, attributeFilter: ['style'] });
         observer.observe(reportSectionRef.current, { attributes: true, attributeFilter: ['style'] });
+        observer.observe(menuRoutesRef.current, { attributes: true, attributeFilter: ['class'] }); // Observa cambios en la clase
 
         observerCallback(); // Initial check
 

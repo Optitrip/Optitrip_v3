@@ -280,7 +280,7 @@ export default function TrackingComponent(props) {
         if (props.mapDrivers) {
             props.mapDrivers.removeObjects(props.mapDrivers.getObjects());
 
-            filteredDrivers.forEach((driver) => {
+            filteredDriversStatus.forEach((driver) => {
                 // Verificar que el driver tenga tracking y location antes de acceder
                 if (!driver.tracking || !driver.tracking.location) {
                     return; // Saltar este driver si no tiene tracking

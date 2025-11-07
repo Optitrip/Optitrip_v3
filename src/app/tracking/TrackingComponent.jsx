@@ -277,6 +277,9 @@ export default function TrackingComponent(props) {
 
     // Actualizar mapa con marcadores
     useEffect(() => {
+         if (filterStatus === 'all') {
+            setFilteredDriversStatus(filteredDrivers);
+        }
         if (props.mapDrivers) {
             props.mapDrivers.removeObjects(props.mapDrivers.getObjects());
 
@@ -295,10 +298,6 @@ export default function TrackingComponent(props) {
             });
         }
 
-        if (filterStatus === 'all') {
-            setFilteredDriversStatus(filteredDrivers);
-        }
-
         // Contar conductores activos e inactivos
         const offlineCount = filteredDrivers.filter(driver =>
             driver.tracking && driver.tracking.status === "Fuera de línea"
@@ -309,7 +308,7 @@ export default function TrackingComponent(props) {
         setDriversOnline(onlineCount);
         setDriversOffline(offlineCount);
 
-    }, [filteredDrivers, props.mapDrivers]);
+    }, [filteredDrivers, filteredDriversStatus, filterStatus, props.mapDrivers]);
 
     const handleFilterStatusChange = (status) => {
         setFilterStatus(status);

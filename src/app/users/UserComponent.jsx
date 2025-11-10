@@ -21,6 +21,7 @@ export default function UserComponent(stateUser) {
     const [currentEditUser, setCurrentEditUser] = useState(null);
     const [showMoveAccountModal, setShowMoveAccountModal] = useState(false);
     const [selectedAccountToMove, setSelectedAccountToMove] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
     const [newUser, setNewUser] = useState({
         superior_account: '',
         type_user: '',
@@ -112,6 +113,7 @@ export default function UserComponent(stateUser) {
 
     const handleCloseModalCreate = () => {
         setShowModalCreate(false);
+        setFieldErrors({}); // Limpiar errores
         // Limpiar el formulario al cerrar el modal
         setNewUser({
             superior_account: '',
@@ -123,9 +125,18 @@ export default function UserComponent(stateUser) {
             rol_id: ''
         });
     };
-
     const handleInputChange = (event) => {
         const { name, value } = event.target;
+
+        // Limpiar el error del campo cuando el usuario empiece a escribir
+        if (fieldErrors[name]) {
+            setFieldErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
+
         // Validar y actualizar el campo de teléfono
         if (name === 'phone') {
             // Permitir solo números y limitar a 10 caracteres
@@ -295,56 +306,15 @@ export default function UserComponent(stateUser) {
     };
 
     const handleCreateUser = async () => {
-        if (newUser.superior_account && newUser.type_user && newUser.name && newUser.email && newUser.password && newUser.phone) {
-            try {
-                let rol_id;
-                switch (newUser.type_user) {
-                    case 'Administrador':
-                        rol_id = '665a3fa1b9397c6a4a0756cd';
-                        break;
-                    case 'Cliente':
-                        rol_id = '666744007348f2ae62817a74';
-                        break;
-                    case 'Conductor':
-                        rol_id = '6677d0702c684374a602531d';
-                        break;
-                    default:
-                        break;
-                }
+        // Validar campos
+        const errors = {};
+        if (!newUser.type_user || newUser.type_user === 'Seleccionar opción') errors.type_user = true;
+        if (!newUser.name.trim()) errors.name = true;
+        if (!newUser.email.trim()) errors.email = true;
+        if (!newUser.phone.trim()) errors.phone = true;
 
-                const userWithRoleId = { ...newUser, rol_id };
-                await createUserService(userWithRoleId);
-                setShowModalCreate(false);
-                const { users } = await getUsersService();
-                setDataUsers(users);
-
-                // Actualizar filteredUsers después de obtener los nuevos datos de los usuarios
-                const filtered = users.filter(user => user.superior_account === selectedSuperiorAccount);
-                setFilteredUsers(filtered);
-
-                setNewUser({
-                    superior_account: '',
-                    type_user: '',
-                    name: '',
-                    email: '',
-                    password: '111111',
-                    phone: '',
-                    rol_id: ''
-                });
-            } catch (error) {
-                Swal.fire({
-                    title: '¡Error inesperado! Por favor, inténtelo de nuevo',
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'Aceptar',
-                    width: '400px',
-                    padding: '2rem',
-                    customClass: {
-                        title: 'title-handle',
-                        popup: 'popup-handle'
-                    }
-                });
-            }
-        } else {
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors);
             Swal.fire({
                 title: '¡Campos incompletos! Favor de completar los campos faltantes',
                 confirmButtonColor: '#d33',
@@ -356,6 +326,49 @@ export default function UserComponent(stateUser) {
                     popup: 'popup-handle'
                 }
             });
+            return; // Detener la ejecución
+        }
+
+        // Limpiar errores si todo está correcto
+        setFieldErrors({});
+
+        try {
+            let rol_id;
+            switch (newUser.type_user) {
+                case 'Administrador':
+                    rol_id = '665a3fa1b9397c6a4a0756cd';
+                    break;
+                case 'Cliente':
+                    rol_id = '666744007348f2ae62817a74';
+                    break;
+                case 'Conductor':
+                    rol_id = '6677d0702c684374a602531d';
+                    break;
+                default:
+                    break;
+            }
+
+            const userWithRoleId = { ...newUser, rol_id };
+            await createUserService(userWithRoleId);
+            setShowModalCreate(false);
+            const { users } = await getUsersService();
+            setDataUsers(users);
+
+            // Actualizar filteredUsers después de obtener los nuevos datos de los usuarios
+            const filtered = users.filter(user => user.superior_account === selectedSuperiorAccount);
+            setFilteredUsers(filtered);
+
+            setNewUser({
+                superior_account: '',
+                type_user: '',
+                name: '',
+                email: '',
+                password: '111111',
+                phone: '',
+                rol_id: ''
+            });
+        } catch (error) {
+            // El modal permanece abierto para que el usuario corrija
         }
     };
 
@@ -887,6 +900,7 @@ export default function UserComponent(stateUser) {
                                         name="type_user"
                                         value={newUser.type_user}
                                         onChange={handleInputChange}
+                                        style={{ borderColor: fieldErrors.type_user ? 'red' : '', borderWidth: fieldErrors.type_user ? '2px' : '' }}
                                     >
                                         <option>Seleccionar opción</option>
                                         <option value="Administrador">Administrador</option>
@@ -903,6 +917,7 @@ export default function UserComponent(stateUser) {
                                         value={newUser.name}
                                         onChange={handleInputChange}
                                         placeholder='Ingrese el nombre del usuario'
+                                        style={{ borderColor: fieldErrors.name ? 'red' : '', borderWidth: fieldErrors.name ? '2px' : '' }}
                                     />
                                 </div>
                                 <div className="col-12 mt-2">
@@ -914,6 +929,7 @@ export default function UserComponent(stateUser) {
                                         value={newUser.email}
                                         onChange={handleInputChange}
                                         placeholder='Ingrese el correo electrónico'
+                                        style={{ borderColor: fieldErrors.email ? 'red' : '', borderWidth: fieldErrors.email ? '2px' : '' }}
                                     />
                                 </div>
                                 <div className="col-12 mt-2">
@@ -936,6 +952,7 @@ export default function UserComponent(stateUser) {
                                         value={newUser.phone}
                                         onChange={handleInputChange}
                                         placeholder='Ingrese el teléfono'
+                                        style={{ borderColor: fieldErrors.phone ? 'red' : '', borderWidth: fieldErrors.phone ? '2px' : '' }}
                                     />
                                 </div>
                             </div>

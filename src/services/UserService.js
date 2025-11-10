@@ -177,7 +177,7 @@ async function updateUserService(userId, user) {
 
         if (response.ok) {
             Swal.fire({
-                title: '¡El usuario se ha creado correctamente!',
+                title: '¡El usuario se ha actualizado correctamente!',
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Aceptar',
                 width: '400px',

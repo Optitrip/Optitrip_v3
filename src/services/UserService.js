@@ -123,6 +123,7 @@ async function createUserService(user) {
                     popup: 'popup-handle'
                 }
             });
+            return { success: true }; // Indicar éxito
 
         } else if (response.status === 400) {
             Swal.fire({
@@ -136,6 +137,7 @@ async function createUserService(user) {
                     popup: 'popup-handle'
                 }
             });
+            throw new Error('Email already exists'); // Lanzar error
 
         } else {
             Swal.fire({
@@ -149,19 +151,24 @@ async function createUserService(user) {
                     popup: 'popup-handle'
                 }
             });
+            throw new Error('Unexpected server response'); // Lanzar error
         }
     } catch (error) {
-        Swal.fire({
-            title: '¡Error inesperado! Por favor, inténtelo de nuevo',
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Aceptar',
-            width: '400px',
-            padding: '2rem',
-            customClass: {
-                title: 'title-handle',
-                popup: 'popup-handle'
-            }
-        });
+        // Si es un error de red u otro error no manejado
+        if (error.message !== 'Email already exists' && error.message !== 'Unexpected server response') {
+            Swal.fire({
+                title: '¡Error inesperado! Por favor, inténtelo de nuevo',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Aceptar',
+                width: '400px',
+                padding: '2rem',
+                customClass: {
+                    title: 'title-handle',
+                    popup: 'popup-handle'
+                }
+            });
+        }
+        throw error; // Re-lanzar el error para que sea capturado en el componente
     }
 }
 

@@ -21,8 +21,17 @@ export default function ReportComponent() {
     const [reportByStatus, setReportByStatus] = useState(null);
     const [reportByCustomer, setReportByCustomer] = useState(null);
     const [error, setError] = useState(null);
+    const [dateError, setDateError] = useState('');
 
     const imagePath = '/logo_optitrip.png';
+
+    // Función para validar el rango de fechas
+    const validateDateRange = (start, end) => {
+        if (!start || !end) return true;
+        const startDateTime = new Date(start);
+        const endDateTime = new Date(end);
+        return startDateTime <= endDateTime;
+    };
 
     useEffect(() => {
         fetchUsers();
@@ -57,10 +66,16 @@ export default function ReportComponent() {
     }, [users]);
 
     const fetchReportDetailsDriver = async () => {
+        if (!validateDateRange(startDate, endDate)) {
+            setDateError('La fecha de inicio no puede ser posterior a la fecha de fin');
+            setReportByDriver(null);
+            return;
+        }
         try {
             const { data } = await getReportDetailsByDriver(startDate, endDate, selectedDriver);
             setReportByDriver(data);
             setError(null);
+            setDateError('');
         } catch (error) {
             setError(error.message);
             setReportByDriver(null);
@@ -68,10 +83,16 @@ export default function ReportComponent() {
     };
 
     const fetchReportDetailsRoute = async () => {
+        if (!validateDateRange(startDate, endDate)) {
+            setDateError('La fecha de inicio no puede ser posterior a la fecha de fin');
+            setReportByStatus(null);
+            return;
+        }
         try {
             const { data } = await getReportDetailsByStatus(startDate, endDate, selectedDriver, status);
             setReportByStatus(data);
             setError(null);
+            setDateError('');
         } catch (error) {
             setError(error.message);
             setReportByStatus(null);
@@ -79,10 +100,16 @@ export default function ReportComponent() {
     };
 
     const fetchReportDetailsCustomer = async () => {
+        if (!validateDateRange(startDate, endDate)) {
+            setDateError('La fecha de inicio no puede ser posterior a la fecha de fin');
+            setReportByCustomer(null);
+            return;
+        }
         try {
             const { data } = await getReportDetailsByCustomer(startDate, endDate, selectedCustomer);
             setReportByCustomer(data);
             setError(null);
+            setDateError('');
         } catch (error) {
             setError(error.message);
             setReportByCustomer(null);
@@ -95,6 +122,7 @@ export default function ReportComponent() {
         setSelectedDriver('');
         setStatus('');
         setSelectedCustomer('');
+        setDateError('');
         setReportsRoutes(false);
         setReportsCustomers(false);
         setReportsDriver(true);
@@ -106,6 +134,7 @@ export default function ReportComponent() {
         setSelectedDriver('');
         setStatus('');
         setSelectedCustomer('');
+        setDateError('');
         setReportsDriver(false);
         setReportsCustomers(false);
         setReportsRoutes(true);
@@ -117,6 +146,7 @@ export default function ReportComponent() {
         setSelectedDriver('');
         setStatus('');
         setSelectedCustomer('');
+        setDateError('');
         setReportsDriver(false);
         setReportsRoutes(false);
         setReportsCustomers(true);
@@ -713,7 +743,17 @@ export default function ReportComponent() {
                                             className="form-control"
                                             type="datetime-local"
                                             value={startDate}
-                                            onChange={(e) => setStartDate(e.target.value)}
+                                            onChange={(e) => {
+                                                const newStartDate = e.target.value;
+                                                setStartDate(newStartDate);
+                                                if (endDate && newStartDate) {
+                                                    if (!validateDateRange(newStartDate, endDate)) {
+                                                        setDateError('La fecha de inicio no puede ser posterior a la fecha de fin');
+                                                    } else {
+                                                        setDateError('');
+                                                    }
+                                                }
+                                            }}
                                             required
                                         />
                                     </div>
@@ -724,7 +764,18 @@ export default function ReportComponent() {
                                             className="form-control"
                                             type="datetime-local"
                                             value={endDate}
-                                            onChange={(e) => setEndDate(e.target.value)}
+                                            min={startDate}
+                                            onChange={(e) => {
+                                                const newEndDate = e.target.value;
+                                                setEndDate(newEndDate);
+                                                if (startDate && newEndDate) {
+                                                    if (!validateDateRange(startDate, newEndDate)) {
+                                                        setDateError('La fecha de fin no puede ser anterior a la fecha de inicio');
+                                                    } else {
+                                                        setDateError('');
+                                                    }
+                                                }
+                                            }}
                                             required
                                         />
                                     </div>
@@ -746,6 +797,15 @@ export default function ReportComponent() {
                                             </div>
                                         </div>
                                     </div>
+                                    {dateError && (
+                                        <div className="col-12 p-0 pl-4 pr-4 mb-2">
+                                            <div className="alert alert-danger" role="alert" style={{ padding: '8px', marginBottom: '0', fontSize: '14px' }}>
+                                                <i className="fas fa-exclamation-triangle mr-2"></i>
+                                                {dateError}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="col-lg-12 mt-2 mb-2">
                                         <button className="btn btn-primary float-right" onClick={generateDriverPDF} style={{ display: 'flex', alignItems: 'center' }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125" x="0px" y="0px" width="20" height="20" style={{ marginRight: '4px', marginTop: '4px' }}>
@@ -857,7 +917,17 @@ export default function ReportComponent() {
                                             className="form-control"
                                             type="datetime-local"
                                             value={startDate}
-                                            onChange={(e) => setStartDate(e.target.value)}
+                                            onChange={(e) => {
+                                                const newStartDate = e.target.value;
+                                                setStartDate(newStartDate);
+                                                if (endDate && newStartDate) {
+                                                    if (!validateDateRange(newStartDate, endDate)) {
+                                                        setDateError('La fecha de inicio no puede ser posterior a la fecha de fin');
+                                                    } else {
+                                                        setDateError('');
+                                                    }
+                                                }
+                                            }}
                                             required
                                         />
                                     </div>
@@ -868,7 +938,18 @@ export default function ReportComponent() {
                                             className="form-control"
                                             type="datetime-local"
                                             value={endDate}
-                                            onChange={(e) => setEndDate(e.target.value)}
+                                            min={startDate}
+                                            onChange={(e) => {
+                                                const newEndDate = e.target.value;
+                                                setEndDate(newEndDate);
+                                                if (startDate && newEndDate) {
+                                                    if (!validateDateRange(startDate, newEndDate)) {
+                                                        setDateError('La fecha de fin no puede ser anterior a la fecha de inicio');
+                                                    } else {
+                                                        setDateError('');
+                                                    }
+                                                }
+                                            }}
                                             required
                                         />
                                     </div>
@@ -890,6 +971,15 @@ export default function ReportComponent() {
                                             </div>
                                         </div>
                                     </div>
+                                    {dateError && (
+                                        <div className="col-12 p-0 pl-4 pr-4 mb-2">
+                                            <div className="alert alert-danger" role="alert" style={{ padding: '8px', marginBottom: '0', fontSize: '14px' }}>
+                                                <i className="fas fa-exclamation-triangle mr-2"></i>
+                                                {dateError}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="col-lg-3 col-md-6 col-sm-6 col-12 p-0 pl-4 pr-4 mb-2">
                                         <div className="d-flex align-items-center">
                                             <label htmlFor="selectCount" className="mr-2 mb-0 text-modal">Estatus:</label>
@@ -992,7 +1082,17 @@ export default function ReportComponent() {
                                             className="form-control"
                                             type="datetime-local"
                                             value={startDate}
-                                            onChange={(e) => setStartDate(e.target.value)}
+                                            onChange={(e) => {
+                                                const newStartDate = e.target.value;
+                                                setStartDate(newStartDate);
+                                                if (endDate && newStartDate) {
+                                                    if (!validateDateRange(newStartDate, endDate)) {
+                                                        setDateError('La fecha de inicio no puede ser posterior a la fecha de fin');
+                                                    } else {
+                                                        setDateError('');
+                                                    }
+                                                }
+                                            }}
                                             required
                                         />
                                     </div>
@@ -1003,7 +1103,18 @@ export default function ReportComponent() {
                                             className="form-control"
                                             type="datetime-local"
                                             value={endDate}
-                                            onChange={(e) => setEndDate(e.target.value)}
+                                            min={startDate}
+                                            onChange={(e) => {
+                                                const newEndDate = e.target.value;
+                                                setEndDate(newEndDate);
+                                                if (startDate && newEndDate) {
+                                                    if (!validateDateRange(startDate, newEndDate)) {
+                                                        setDateError('La fecha de fin no puede ser anterior a la fecha de inicio');
+                                                    } else {
+                                                        setDateError('');
+                                                    }
+                                                }
+                                            }}
                                             required
                                         />
                                     </div>
@@ -1025,6 +1136,14 @@ export default function ReportComponent() {
                                             </div>
                                         </div>
                                     </div>
+                                    {dateError && (
+                                        <div className="col-12 p-0 pl-4 pr-4 mb-2">
+                                            <div className="alert alert-danger" role="alert" style={{ padding: '8px', marginBottom: '0', fontSize: '14px' }}>
+                                                <i className="fas fa-exclamation-triangle mr-2"></i>
+                                                {dateError}
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className="col-lg-12 mt-2 mb-2">
                                         <button className="btn btn-primary float-right" onClick={generateCustomerPDF} style={{ display: 'flex', alignItems: 'center' }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125" x="0px" y="0px" width="20" height="20" style={{ marginRight: '4px', marginTop: '4px' }}>

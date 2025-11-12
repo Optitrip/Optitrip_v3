@@ -94,10 +94,8 @@ export default function TrackingComponent(props) {
         const fetchUsersDriver = async () => {
             if (selectedSuperiorAccount) {
                 try {
-                    console.log(`[${new Date().toISOString()}] Consultando conductores...`);
                     const { users } = await getUsersDriverService(selectedSuperiorAccount);
                     setFilteredDrivers(users);
-                    console.log(`[${new Date().toISOString()}] ${users.length} conductores actualizados`);
                 } catch (error) {
                     setError(error.message);
                 }

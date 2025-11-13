@@ -196,6 +196,11 @@ export const here_api_routes = (state, setState, map, colors, index) => {
     const cardDataRoutes = document.getElementById('data-routes');
     const cardRoutes = document.getElementById('routes-container');
     cardRoutes.innerHTML = '';
+    setState(prevState => ({
+        ...prevState,
+        response: null,
+        selectedCardIndex: null
+    }));
 
     if (state.destinations.length >= 2 || state.transportation != "" || state.mode != "") {
 

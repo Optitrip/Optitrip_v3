@@ -258,6 +258,14 @@ export const here_api_routes = (state, setState, map, colors, index) => {
                 response.json()
                     .then(info => {
                         respuesta.push(info);
+
+                        // DEBUG: Ver estructura de sections de HERE API
+                        console.log('Sections de HERE API:', info.routes[0].sections.map((s, i) => ({
+                            index: i,
+                            polylineLength: s.polyline?.length,
+                            hasActions: s.actions?.length > 0,
+                            distance: s.summary?.length
+                        })));
                         const contentData = (
                             <div className="card mt-0">
                                 <div className="card-header card-module" style={{ padding: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', height: 15 }}>

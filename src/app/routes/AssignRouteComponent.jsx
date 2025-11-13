@@ -114,20 +114,28 @@ export default function AssignRouteComponent(state) {
             };
 
             const routeSections = state.state.response?.routes?.[selectedOption]?.sections || [];
-            // FILTRAR SECTIONS FANTASMAS
+
+            // FILTRAR SECTIONS FANTASMAS - Solo secciones con datos de navegación reales
             const sectionsToSave = routeSections
                 .filter(section => {
-                    // Filtrar sections con polylines muy cortos (menos de 20 caracteres = puntos duplicados)
-                    const isValidPolyline = section.polyline && section.polyline.length >= 20;
-                    return isValidPolyline;
+                    // Verificar que tenga polyline válido Y que tenga acciones de navegación
+                    const hasValidPolyline = section.polyline && section.polyline.length >= 50; // Aumentar umbral
+                    const hasActions = section.actions && section.actions.length > 0;
+                    const hasSummary = section.summary && section.summary.length > 0;
+
+                    // Una sección válida debe tener polyline Y (acciones O distancia significativa)
+                    return hasValidPolyline && (hasActions || hasSummary);
                 })
                 .map(section => {
                     return {
                         polyline: section.polyline,
                         departureTime: section.departure?.time,
-                        arrivalTime: section.arrival?.time
+                        arrivalTime: section.arrival?.time,
+                        distance: section.summary?.length || 0 
                     };
                 });
+
+            console.log('Secciones válidas a guardar:', sectionsToSave.length);
 
 
             // Construir la solicitud de la ruta

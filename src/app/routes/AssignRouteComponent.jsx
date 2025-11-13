@@ -143,8 +143,6 @@ export default function AssignRouteComponent(state) {
                     };
                 });
 
-            console.log('Secciones válidas a guardar:', sectionsToSave.length);
-
 
             // Construir la solicitud de la ruta
             const routeData = {

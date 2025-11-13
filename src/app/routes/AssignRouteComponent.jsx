@@ -118,20 +118,28 @@ export default function AssignRouteComponent(state) {
             // FILTRAR SECTIONS FANTASMAS - Solo secciones con datos de navegación reales
             const sectionsToSave = routeSections
                 .filter(section => {
-                    // Verificar que tenga polyline válido Y que tenga acciones de navegación
-                    const hasValidPolyline = section.polyline && section.polyline.length >= 50; // Aumentar umbral
+                    const hasPolyline = section.polyline && section.polyline.length > 0;
                     const hasActions = section.actions && section.actions.length > 0;
-                    const hasSummary = section.summary && section.summary.length > 0;
+                    const hasDistance = section.summary && section.summary.length > 0;
 
-                    // Una sección válida debe tener polyline Y (acciones O distancia significativa)
-                    return hasValidPolyline && (hasActions || hasSummary);
+                    const isValid = hasPolyline && (hasActions || hasDistance);
+
+                    if (!isValid) {
+                        console.warn('Sección filtrada:', {
+                            polylineLength: section.polyline?.length,
+                            hasActions,
+                            distance: section.summary?.length
+                        });
+                    }
+
+                    return isValid;
                 })
                 .map(section => {
                     return {
                         polyline: section.polyline,
                         departureTime: section.departure?.time,
                         arrivalTime: section.arrival?.time,
-                        distance: section.summary?.length || 0 
+                        distance: section.summary?.length || 0
                     };
                 });
 

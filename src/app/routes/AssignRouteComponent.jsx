@@ -254,7 +254,7 @@ export default function AssignRouteComponent(state) {
                                         name="driver"
                                         onChange={(e) => setSelectedDriver(e.target.value)}
                                     >
-                                        <option value=""></option>
+                                        <option value="Sin seleccionar"></option>
                                         {filteredDrivers.map(user => (
                                             <option key={user._id} value={user._id}>{user.name}</option>
                                         ))}
@@ -267,7 +267,7 @@ export default function AssignRouteComponent(state) {
                                         name="customer"
                                         onChange={(e) => setSelectedCustomer(e.target.value)}
                                     >
-                                        <option value=""></option>
+                                        <option value="Sin seleccionar"></option>
                                         {filteredCustomers.map(user => (
                                             <option key={user._id} value={user._id}>{user.name}</option>
                                         ))}

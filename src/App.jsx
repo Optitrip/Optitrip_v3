@@ -319,7 +319,7 @@ export default function App(props) {
 
     // useEffect(() => {
     //     const cleanButton = document.querySelector('.btn-clean[type="button"]');
-    const finishBtn = document.querySelector('.btn-finish[type="button"]');
+    // const finishBtn = document.querySelector('.btn-finish[type="button"]');
 
     //     const handleCleanButtonClick = () => {
     //         state.destinations.forEach(destination => {
@@ -344,9 +344,9 @@ export default function App(props) {
     //         cleanButton.classList.add('disabled');
     //     };
 
-    finishBtn.addEventListener("click", () => {
-        window.location.reload();
-    });
+    //finishBtn.addEventListener("click", () => {
+    //    window.location.reload();
+    //});
 
     //     cleanButton.addEventListener('click', handleCleanButtonClick);
 

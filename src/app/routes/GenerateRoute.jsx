@@ -220,7 +220,16 @@ export const here_api_routes = (state, setState, map, colors, index) => {
 
     const cardDataRoutes = document.getElementById('data-routes');
     const cardRoutes = document.getElementById('routes-container');
+
+    // Limpiamos las tarjetas de rutas anteriores
     cardRoutes.innerHTML = '';
+
+    // Buscamos si existe el botón de asignar viejo y lo borramos
+    const existingAssignBtn = document.getElementById('btn-assign-route');
+    if (existingAssignBtn) {
+        existingAssignBtn.remove();
+    }
+
     setState(prevState => ({
         ...prevState,
         response: null,

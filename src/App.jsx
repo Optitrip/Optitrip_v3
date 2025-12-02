@@ -727,17 +727,6 @@ export default function App(props) {
         mapDrivers.setZoom(18);
     }
 
-    const handleAssignRouteClick = () => {
-        // Limpiar el contenedor
-        if (divAssignRoute) {
-            divAssignRoute.innerHTML = '';
-
-            // Renderizar el modal de asignación
-            const root = ReactDOM.createRoot(divAssignRoute);
-            root.render(<AssignRouteComponent state={state} />);
-        }
-    };
-
     return (
         <div>
             <div className="container clearfix" style={{ zIndex: 1, position: "absolute", top: 50, right: 30, margin: "10px", width: "350px" }}>

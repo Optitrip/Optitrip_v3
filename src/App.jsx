@@ -274,18 +274,6 @@ export default function App(props) {
     }, []);
 
     useEffect(() => {
-        const handleOpenAssignModal = () => {
-            handleAssignRouteClick();
-        };
-
-        window.addEventListener('openAssignModal', handleOpenAssignModal);
-
-        return () => {
-            window.removeEventListener('openAssignModal', handleOpenAssignModal);
-        };
-    }, [state]);
-
-    useEffect(() => {
         map.addEventListener('contextmenu', handleContextMenu);
 
         return () => {

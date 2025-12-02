@@ -33,6 +33,18 @@ export default function AssignRouteComponent(state) {
         setFilteredCustomers(customers);
     }, [users]);
 
+    useEffect(() => {
+        const handleOpenEvent = () => {
+            handleModalShow();
+        };
+
+        window.addEventListener('openAssignModal', handleOpenEvent);
+
+        return () => {
+            window.removeEventListener('openAssignModal', handleOpenEvent);
+        };
+    }, []);
+
     // Actualiza los usuarios cada vez que se muestre el modal
     const handleModalShow = async () => {
         await fetchUsers();
@@ -234,11 +246,6 @@ export default function AssignRouteComponent(state) {
 
     return (
         <>
-            <button className="btn p-0 pr-1 pt-1" type="button" style={{ background: '#E4E4E4' }} onClick={handleModalShow}>
-                <svg xmlns="http://www.w3.org/2000/svg" data-name="Layer 1" viewBox="0 0 100 125" x="0px" y="0px" style={{ width: '25px', height: '25px' }}>
-                    <path d="M41.46,87.24H70a9.86,9.86,0,0,0,9.86-9.86V22.62A9.86,9.86,0,0,0,70,12.76H41.46a9.86,9.86,0,0,0-9.86,9.86V46.13H20.18v7.49H31.6V77.38A9.86,9.86,0,0,0,41.46,87.24ZM38.94,26.87H72.48V73H38.94V53.62h11.9l-5.71,5.7,5.3,5.3,9.82-9.83,5.3-5.29-5.3-5.3-9.82-9.82-5.3,5.29,6.46,6.46H38.94Z" />
-                </svg>
-            </button>
             <Modal show={showModal} onHide={handleModalClose}>
                 <Modal.Header className='custom-header-modal py-1' style={{ display: 'flex', justifyContent: 'center', alignContent: 'center' }} closeButton={false}>
                     <Modal.Title className='p-0' id="title-edition-destination">Asignar ruta</Modal.Title>

@@ -355,24 +355,22 @@ export default function App(props) {
         const cleanButton = document.querySelector('.btn-clean');
 
         const handleCleanButtonClick = () => {
-            // LIMPIAR MARCADORES (Destinos)
-            state.destinations.forEach(destination => {
-                if (destination.marker) {
-                    map.removeObject(destination.marker);
-                }
-            });
-
-            //LIMPIAR RUTAS (Líneas azules)
-            if (state.lines && state.lines.length > 0) {
-                state.lines.forEach(line => {
-                    if (line.polyline) map.removeObject(line.polyline);
-                });
-            }
-
-            // Buscamos todos los objetos en el mapa que sean polígonos y los removemos
             map.getObjects().forEach(obj => {
+                
                 if (obj instanceof H.map.Polygon) {
                     map.removeObject(obj);
+                }
+
+                if (obj instanceof H.map.Polyline) {
+                    map.removeObject(obj);
+                }
+
+                if (obj instanceof H.map.Marker) {
+                    const isCurrentPosition = state.ephemiral_marker && state.ephemiral_marker.includes(obj);
+
+                    if (!isCurrentPosition) {
+                        map.removeObject(obj);
+                    }
                 }
             });
 
@@ -381,26 +379,31 @@ export default function App(props) {
                 assignButton.remove();
             }
 
-            // al modificar el estado anteriormente. Definimos los valores vacíos explícitamente.
+            // Buscamos el input de fecha/hora en el HTML y lo vaciamos a la fuerza
+            const timeInput = document.querySelector('input[type="datetime-local"]');
+            if (timeInput) {
+                timeInput.value = "";
+            }
+
             const cleanState = {
                 created: true, 
-                current_position: state.current_position, // Mantenemos tu ubicación actual
+                current_position: state.current_position, // Conservamos la ubicación
                 destinations: [],
                 transportation: "",
                 type_of_truck: "tractor",
                 number_of_axles: "2",
                 type_of_trailer: "Remolque",
                 number_of_trailers: "1",
-                time: "",           // Esto limpiará el input de hora
+                time: "",           // Reseteamos la variable de tiempo
                 time_type: "Salir ahora",
                 mode: "",
                 traffic: "default",
                 avoid_parameters: [],
                 avoid_highways: [],
-                avoid_zones: [],    // Esto vacía la lista lógica de zonas
+                avoid_zones: [],
                 edit_avoid_zone: 0,
                 modal_parameter_opened: "destinations_parameter",
-                ephemiral_marker: [],
+                ephemiral_marker: state.ephemiral_marker, // Conservamos la referencia al marker azul
                 show_results: false,
                 show_indications: false,
                 lines: [],

@@ -275,12 +275,13 @@ export default function App(props) {
     }, []);
 
     useEffect(() => {
+        // Necesitamos renovarlo cada vez que el estado cambie (state) para que no use datos viejos.
         map.addEventListener('contextmenu', handleContextMenu);
 
         return () => {
             map.removeEventListener('contextmenu', handleContextMenu);
         };
-    }, [map]);
+    }, [map, state]); 
 
     useEffect(() => {
         const storedUserData = sessionStorage.getItem('data_user'); // Obtener los datos del usuario desde sessionStorage

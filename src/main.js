@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         divMapDrivers.style.display = 'none';
         divMap.style.display = 'block';
-        cardTracing.style.display = 'none'
+        cardTracing.style.display = 'none';
         divUsers.style.display = 'none';
         divReports.style.display = 'none';
         cardCreate.style.display = 'block';

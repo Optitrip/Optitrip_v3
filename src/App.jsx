@@ -152,7 +152,7 @@ export default function App(props) {
         appContainerRef.current = document.getElementById('app-container');
         userSectionRef.current = document.getElementById('users');
         reportSectionRef.current = document.getElementById('reports');
-        menuRoutesRef.current = document.getElementById('menuRoutes'); 
+        menuRoutesRef.current = document.getElementById('menuRoutes');
 
         const observerCallback = () => {
             if (!appContainerRef.current || !userSectionRef.current || !reportSectionRef.current || !menuRoutesRef.current) {
@@ -272,6 +272,18 @@ export default function App(props) {
             }
         };
     }, []);
+
+    useEffect(() => {
+        const handleOpenAssignModal = () => {
+            handleAssignRouteClick();
+        };
+
+        window.addEventListener('openAssignModal', handleOpenAssignModal);
+
+        return () => {
+            window.removeEventListener('openAssignModal', handleOpenAssignModal);
+        };
+    }, [state]);
 
     useEffect(() => {
         map.addEventListener('contextmenu', handleContextMenu);
@@ -726,6 +738,17 @@ export default function App(props) {
         mapDrivers.setCenter({ lat: lat, lng: lng });
         mapDrivers.setZoom(18);
     }
+
+    const handleAssignRouteClick = () => {
+        // Limpiar el contenedor
+        if (divAssignRoute) {
+            divAssignRoute.innerHTML = '';
+
+            // Renderizar el modal de asignación
+            const root = ReactDOM.createRoot(divAssignRoute);
+            root.render(<AssignRouteComponent state={state} />);
+        }
+    };
 
     return (
         <div>

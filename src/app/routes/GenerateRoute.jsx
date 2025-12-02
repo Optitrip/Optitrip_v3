@@ -69,6 +69,12 @@ export const here_api_routes = (state, setState, map, colors, index) => {
                 tolls_total: null,
             }));
 
+            // Ocultar botón de Asignar cuando se deselecciona
+            const assignButton = document.getElementById('btn-assign-route');
+            if (assignButton) {
+                assignButton.remove();
+            }
+
             return; // Salir del método para evitar la selección de la misma tarjeta
         }
 
@@ -166,6 +172,25 @@ export const here_api_routes = (state, setState, map, colors, index) => {
             selectedCardIndex: index,
             instructions: instruccionsRoute,
         }));
+
+        // Mostrar botón de Asignar cuando se selecciona una ruta
+        const containerBtnRoutes = document.getElementById('container-btn-routes');
+        let assignButton = document.getElementById('btn-assign-route');
+
+        if (!assignButton) {
+            assignButton = document.createElement('button');
+            assignButton.id = 'btn-assign-route';
+            assignButton.className = 'btn btn-primary mx-5';
+            assignButton.style.cssText = 'border: none; border-radius: 5px;';
+            assignButton.textContent = 'Asignar';
+            assignButton.type = 'button';
+
+            assignButton.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('openAssignModal'));
+            });
+
+            containerBtnRoutes.appendChild(assignButton);
+        }
     };
 
     const formatTime = (seconds) => {

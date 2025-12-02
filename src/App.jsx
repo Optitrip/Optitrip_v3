@@ -352,6 +352,60 @@ export default function App(props) {
     // }, [state, setState]);
 
     useEffect(() => {
+        const cleanButton = document.querySelector('.btn-clean');
+
+        const handleCleanButtonClick = () => {
+            // 1. Eliminar marcadores visuales del mapa
+            state.destinations.forEach(destination => {
+                if (destination.marker) {
+                    map.removeObject(destination.marker);
+                }
+            });
+
+            // 2. Eliminar líneas (rutas pintadas) si existen
+            if (state.lines && state.lines.length > 0) {
+                state.lines.forEach(line => {
+                    if (line.polyline) map.removeObject(line.polyline);
+                });
+            }
+
+            // IMPORTANTE: Mantenemos la 'current_position' para no perder la ubicación del usuario
+            setState(prevState => ({
+                ...default_state,
+                current_position: prevState.current_position,
+                created: true // Mantenemos created en true para que no oculte el panel si es necesario
+            }));
+        };
+
+        if (cleanButton) {
+            // Asignar el evento click
+            cleanButton.addEventListener('click', handleCleanButtonClick);
+
+            // Verificar si hay datos sucios para cambiar el color del botón
+            // (Si hay destinos, transporte seleccionado, modo de viaje, etc.)
+            const hasData = state.destinations.length > 0 || 
+                            state.transportation !== "" || 
+                            state.mode !== "" ||
+                            state.avoid_parameters.length > 0;
+
+            if (hasData) {
+                cleanButton.style.backgroundColor = '#DC3545'; // Color Rojo (Activo)
+                cleanButton.classList.remove('disabled');
+            } else {
+                cleanButton.style.backgroundColor = '#767676'; // Color Gris (Desactivado)
+                cleanButton.classList.add('disabled');
+            }
+        }
+
+        // Limpieza del event listener al desmontar o actualizar
+        return () => {
+            if (cleanButton) {
+                cleanButton.removeEventListener('click', handleCleanButtonClick);
+            }
+        };
+    }, [state]); // Se ejecuta cada vez que 'state' cambia
+
+    useEffect(() => {
         const calculateBtn = document.querySelector('.btn-calculate[type="button"]');
         const createRouteCard = document.getElementById('create-route');
         const menuRoutesBtn = document.getElementById('menuRoutes');

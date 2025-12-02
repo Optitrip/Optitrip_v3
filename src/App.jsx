@@ -355,26 +355,67 @@ export default function App(props) {
         const cleanButton = document.querySelector('.btn-clean');
 
         const handleCleanButtonClick = () => {
-            // 1. Eliminar marcadores visuales del mapa
+            // LIMPIAR MARCADORES (Destinos)
             state.destinations.forEach(destination => {
                 if (destination.marker) {
                     map.removeObject(destination.marker);
                 }
             });
 
-            // 2. Eliminar líneas (rutas pintadas) si existen
+            //LIMPIAR RUTAS (Líneas azules)
             if (state.lines && state.lines.length > 0) {
                 state.lines.forEach(line => {
                     if (line.polyline) map.removeObject(line.polyline);
                 });
             }
 
-            // IMPORTANTE: Mantenemos la 'current_position' para no perder la ubicación del usuario
-            setState(prevState => ({
-                ...default_state,
-                current_position: prevState.current_position,
-                created: true // Mantenemos created en true para que no oculte el panel si es necesario
-            }));
+            // Buscamos todos los objetos en el mapa que sean polígonos y los removemos
+            map.getObjects().forEach(obj => {
+                if (obj instanceof H.map.Polygon) {
+                    map.removeObject(obj);
+                }
+            });
+
+            const assignButton = document.getElementById('btn-assign-route');
+            if (assignButton) {
+                assignButton.remove();
+            }
+
+            // al modificar el estado anteriormente. Definimos los valores vacíos explícitamente.
+            const cleanState = {
+                created: true, 
+                current_position: state.current_position, // Mantenemos tu ubicación actual
+                destinations: [],
+                transportation: "",
+                type_of_truck: "tractor",
+                number_of_axles: "2",
+                type_of_trailer: "Remolque",
+                number_of_trailers: "1",
+                time: "",           // Esto limpiará el input de hora
+                time_type: "Salir ahora",
+                mode: "",
+                traffic: "default",
+                avoid_parameters: [],
+                avoid_highways: [],
+                avoid_zones: [],    // Esto vacía la lista lógica de zonas
+                edit_avoid_zone: 0,
+                modal_parameter_opened: "destinations_parameter",
+                ephemiral_marker: [],
+                show_results: false,
+                show_indications: false,
+                lines: [],
+                tolls_total: 0,
+                url: "",
+                selectedCardIndex: null,
+                departureTime: "",
+                arrivalTime: "",
+                distance: 0,
+                durationTrip: "",
+                instructions: [],
+                response: null
+            };
+
+            setState(cleanState);
         };
 
         if (cleanButton) {

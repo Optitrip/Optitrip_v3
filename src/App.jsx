@@ -139,6 +139,7 @@ export default function App(props) {
     const [error, setError] = useState('');
     const [initialized, setInitialized] = useState(false);
     const [isMenuRoutesPrimary, setIsMenuRoutesPrimary] = useState(false);
+    const [formKey, setFormKey] = useState(0);
 
     const appContainerRef = useRef(null);
     const menuRoutesRef = useRef(null);
@@ -419,6 +420,7 @@ export default function App(props) {
             };
 
             setState(cleanState);
+            setFormKey(prevKey => prevKey + 1);
         };
 
         if (cleanButton) {
@@ -851,7 +853,7 @@ export default function App(props) {
             }
             {
                 ReactDOM.createPortal(
-                    <div>
+                    <div key={formKey}>
                         <SelectDestinationsComponent state={state} setState={setState} changeDestination={changeDestination} addToDestinations={addToDestinations} createMarker={createMarker} map={map} moveMapToPlace={moveMapToPlace} />
                         <SelectVehiclesComponent state={state} setState={setState} />
                         <TypeTripComponent state={state} setState={setState} />

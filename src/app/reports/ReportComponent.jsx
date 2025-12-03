@@ -1028,8 +1028,7 @@ export default function ReportComponent() {
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Kilometraje total</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Duración</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Estatus</th>
-                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Detalles</th>
-                                                    </tr>
+                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Acciones</th>                                                    </tr>
                                                 </thead>
                                                 <tbody>
                                                     {reportByStatus && !reportByStatus.error && reportByStatus.results.length > 0 ? (
@@ -1047,15 +1046,41 @@ export default function ReportComponent() {
                                                                     <td>{trip.tripDuration}</td>
                                                                     <td>{trip.status}</td>
                                                                     <td>
-                                                                        {trip.status === 'Completado' ? (
-                                                                            <button
-                                                                                className="btn btn-link"
-                                                                                style={{ padding: 0, border: 'none', background: 'none', color: '#007BFF', cursor: 'pointer' }}
-                                                                                onClick={() => generateRouteWithPODPDF(trip.codeRoute)}
-                                                                            >
-                                                                                Ver
-                                                                            </button>
-                                                                        ) : null}
+                                                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', alignItems: 'center' }}>
+
+                                                                            {trip.status === 'Completado' && (
+                                                                                <button
+                                                                                    className="btn btn-link"
+                                                                                    style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer' }}
+                                                                                    onClick={() => generateRouteWithPODPDF(trip.codeRoute)}
+                                                                                    title="Descargar reporte PDF"
+                                                                                >
+                                                                                    <img
+                                                                                        src="/iconos principales/descargar.svg"
+                                                                                        alt="Descargar"
+                                                                                        width="20"
+                                                                                        height="20"
+                                                                                    />
+                                                                                </button>
+                                                                            )}
+
+                                                                            {/* Solo aparece si la ruta es "no iniciada" o "futura" */}
+                                                                            {(trip.status === 'Ruta no iniciada' || trip.status === 'Ruta futura') && (
+                                                                                <button
+                                                                                    className="btn btn-link"
+                                                                                    style={{ padding: 0, border: 'none', background: 'none', cursor: 'not-allowed', opacity: 0.5 }}
+                                                                                    title="Editar ruta (No disponible por el momento)"
+                                                                                    disabled={true}
+                                                                                >
+                                                                                    <img
+                                                                                        src="/iconos principales/editar.svg"
+                                                                                        alt="Editar"
+                                                                                        width="20"
+                                                                                        height="20"
+                                                                                    />
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
                                                                     </td>
                                                                 </tr>
                                                             ))}

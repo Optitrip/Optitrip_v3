@@ -729,110 +729,145 @@ export default function App(props) {
     }
 
     const loadRouteForEditing = async (routeId) => {
-        try {
-            const { getRouteByIdService } = await import('./services/RouteService.js');
-            const routeData = await getRouteByIdService(routeId);
+    try {
+        const { getRouteByIdService } = await import('./services/RouteService.js');
+        const routeData = await getRouteByIdService(routeId);
 
-            // Limpiar el mapa antes de cargar
-            map.getObjects().forEach(obj => {
-                if (obj instanceof H.map.Polygon ||
-                    obj instanceof H.map.Polyline ||
-                    (obj instanceof H.map.Marker && !state.ephemiral_marker.includes(obj))) {
-                    map.removeObject(obj);
-                }
-            });
+        // Limpiar el mapa antes de cargar (Objetos previos)
+        map.getObjects().forEach(obj => {
+            if (obj instanceof H.map.Polygon ||
+                obj instanceof H.map.Polyline ||
+                (obj instanceof H.map.Marker && !state.ephemiral_marker.includes(obj))) {
+                map.removeObject(obj);
+            }
+        });
 
-            // Cargar destinos (origen, waypoints, destino)
-            const allPoints = [
-                routeData.origin,
-                ...routeData.waypoints,
-                routeData.destination
-            ];
+        // Cargar destinos (Markers)
+        const allPoints = [
+            routeData.origin,
+            ...routeData.waypoints,
+            routeData.destination
+        ];
 
-            const loadedDestinations = [];
-            allPoints.forEach((point, index) => {
-                const marker = createMarker(
-                    map,
-                    point.lat,
-                    point.lng,
-                    index,
-                    loadedDestinations,
-                    index === 0 ? "#00BD2A" : index === allPoints.length - 1 ? "#DC3545" : "#9FA6B2"
-                );
+        const loadedDestinations = [];
+        allPoints.forEach((point, index) => {
+            const marker = createMarker(
+                map,
+                point.lat,
+                point.lng,
+                index,
+                loadedDestinations,
+                index === 0 ? "#00BD2A" : index === allPoints.length - 1 ? "#DC3545" : "#9FA6B2"
+            );
 
-                loadedDestinations[index] = {
-                    ...point,
-                    marker: marker,
-                    string: `${point.lat},${point.lng}`
-                };
-            });
+            loadedDestinations[index] = {
+                ...point,
+                marker: marker,
+                string: `${point.lat},${point.lng}`
+            };
+        });
 
-            // Cargar zonas a evitar si existen
-            const loadedAvoidZones = [];
-            if (routeData.avoidAreas && routeData.avoidAreas.length > 0) {
-                routeData.avoidAreas.forEach((area, index) => {
-                    const points = area.points.map(([lat, lng]) => ({ lat, lng }));
-                    const lineString = new H.geo.LineString();
-                    points.forEach(point => lineString.pushLatLng(point.lat, point.lng));
-                    if (points.length > 0) {
-                        lineString.pushLatLng(points[0].lat, points[0].lng);
-                    }
-
-                    const polygon = new H.map.Polygon(lineString, {
-                        style: {
-                            fillColor: area.color || 'rgba(255, 0, 0, 0.3)',
-                            strokeColor: area.color || '#FF0000',
-                            lineWidth: 2
-                        }
-                    });
-
-                    map.addObject(polygon);
-
-                    loadedAvoidZones.push({
-                        name: area.name,
-                        points: area.points,
-                        color: area.color,
-                        polygon: polygon,
-                        LineString: lineString
-                    });
+        const loadedAvoidZones = [];
+        if (routeData.avoidAreas && routeData.avoidAreas.length > 0) {
+            routeData.avoidAreas.forEach((area) => {
+                const points = area.points.map(p => {
+                    return Array.isArray(p) ? { lat: p[0], lng: p[1] } : p;
                 });
-            }
+                
+                const lineString = new H.geo.LineString();
+                
+                points.forEach(point => lineString.pushPoint({ lat: point.lat, lng: point.lng })); 
+                
+                // Cerrar el polígono si es necesario
+                if (points.length > 0) {
+                    lineString.pushPoint({ lat: points[0].lat, lng: points[0].lng });
+                }
 
-            // Actualizar el estado con todos los datos de la ruta
-            setState({
-                ...state,
-                isEditMode: true,
-                editingRouteId: routeId,
-                destinations: loadedDestinations,
-                transportation: routeData.transportation || "truck",
-                type_of_truck: routeData.type_of_truck || "tractor",
-                number_of_axles: routeData.number_of_axles || "2",
-                number_of_trailers: routeData.number_of_trailers || "1",
-                time: routeData.scheduledTime || "",
-                time_type: routeData.timeType || "Salir ahora",
-                mode: routeData.mode || "fast",
-                traffic: routeData.traffic ? "enabled" : "disabled",
-                avoid_parameters: routeData.avoidParameters || [],
-                avoid_highways: routeData.avoidHighways || [],
-                avoid_zones: loadedAvoidZones,
-                created: true
-            });
+                const polygon = new H.map.Polygon(lineString, {
+                    style: {
+                        fillColor: area.color || 'rgba(255, 0, 0, 0.3)',
+                        strokeColor: area.color || '#FF0000',
+                        lineWidth: 2
+                    }
+                });
 
-            // Centrar el mapa en el origen
-            if (loadedDestinations.length > 0) {
-                moveMapToPlace(map, loadedDestinations[0].lat, loadedDestinations[0].lng);
-            }
+                map.addObject(polygon);
 
-        } catch (error) {
-            console.error('Error al cargar la ruta:', error);
-            Swal.fire({
-                title: 'Error al cargar la ruta',
-                text: 'No se pudieron cargar los datos de la ruta',
-                icon: 'error',
-                confirmButtonColor: '#d33'
+                loadedAvoidZones.push({
+                    name: area.name,
+                    points: area.points,
+                    color: area.color,
+                    polygon: polygon,
+                    LineString: lineString
+                });
             });
         }
-    };
+
+        // Esto hace que se vea la línea azul/verde de la ruta
+        const loadedLines = [];
+        if (routeData.routeSections && routeData.routeSections.length > 0) {
+            routeData.routeSections.forEach(section => {
+                if (section.polyline) {
+                    const lineString = H.geo.LineString.fromFlexiblePolyline(section.polyline);
+                    
+                    const routeLine = new H.map.Polyline(lineString, {
+                        style: {
+                            lineWidth: 4,
+                            strokeColor: 'rgba(0, 128, 255, 0.7)' // Color azul clásico
+                        }
+                    });
+                    
+                    map.addObject(routeLine);
+                    
+                    // Guardamos la referencia para poder borrarla con el botón "Limpiar"
+                    loadedLines.push({
+                        polyline: routeLine
+                    });
+                }
+            });
+        }
+
+        // El input espera "YYYY-MM-DDThh:mm", si viene en ISO puede fallar
+        let formattedTime = "";
+        if (routeData.scheduledTime) {
+            const dateObj = new Date(routeData.scheduledTime);
+            // Ajuste simple para obtener formato local correcto
+            dateObj.setMinutes(dateObj.getMinutes() - dateObj.getTimezoneOffset()); 
+            formattedTime = dateObj.toISOString().slice(0, 16);
+        }
+
+        // Actualizar el estado con TODOS los datos
+        setState({
+            ...state,
+            isEditMode: true,
+            editingRouteId: routeId,
+            destinations: loadedDestinations,
+            transportation: routeData.transportation || "truck", // Asegura que coincida con el value del select/botón
+            type_of_truck: routeData.type_of_truck || "tractor",
+            number_of_axles: routeData.number_of_axles || "2",
+            number_of_trailers: routeData.number_of_trailers || "1",
+            time: formattedTime, // Usamos la fecha formateada
+            time_type: routeData.timeType || "Salir ahora",
+            mode: routeData.mode || "fast",
+            traffic: routeData.traffic ? "enabled" : "default", // Ajustado a "default" o lo que use tu componente
+            avoid_parameters: routeData.avoidParameters || [],
+            avoid_highways: routeData.avoidHighways || [],
+            avoid_zones: loadedAvoidZones,
+            lines: loadedLines, // Guardamos las líneas en el estado
+            created: true
+        });
+
+        setFormKey(prev => prev + 1);
+
+        // Centrar el mapa
+        if (loadedDestinations.length > 0) {
+            moveMapToPlace(map, loadedDestinations[0].lat, loadedDestinations[0].lng);
+        }
+
+    } catch (error) {
+        console.error('Error al cargar la ruta:', error);
+    }
+};
 
     const successCallback = (position) => {
         localStorage.setItem("current_position", JSON.stringify({ "lat": position.coords.latitude, "lng": position.coords.longitude }));

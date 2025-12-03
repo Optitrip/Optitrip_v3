@@ -9,7 +9,7 @@ export function SelectDestinationsComponent(props) {
         reply_places: [],
     });
     const [selectedPlace, setSelectedPlace] = useState(null);
-    const [isCardBodyOpen, setIsCardBodyOpen] = useState(true);
+    const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || true);
     const [showModal, setShowModal] = useState(false);
     const [minutes, setMinutes] = useState(0);
     const [load, setLoad] = useState(0);

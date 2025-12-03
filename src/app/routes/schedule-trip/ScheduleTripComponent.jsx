@@ -6,7 +6,7 @@ export default function ScheduleTripComponent({ state, setState }) {
         time: state.time,
         time_type: state.time_type,
     });
-    const [isCardBodyOpen, setIsCardBodyOpen] = useState(false);
+    const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
 
     const values_select_time = ["Salir ahora", "Salir a las:", "Llegar a las:"];
 

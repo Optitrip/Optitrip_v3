@@ -3,7 +3,7 @@ import '../../../App.css';
 import { Modal, Button } from 'react-bootstrap';
 
 export default function SelectVehiclesComponent({ state, setState }) {
-    const [isCardBodyOpen, setIsCardBodyOpen] = useState(false);
+    const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
     const [activeButton, setActiveButton] = useState(state.activeVehicleButton || null);
     const [showModal, setShowModal] = useState(false);
     const [selectedAxles, setSelectedAxles] = useState(state.number_of_axles || '2');

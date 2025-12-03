@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import '../../../App.css';
 
 export default function ParametersAvoidComponent({ state, setState, map }) {
-    const [isCardBodyOpen, setIsCardBodyOpen] = useState(false);
+    const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
     const [isAreaCardOpen, setIsAreaCardOpen] = useState(false);
     const [isIndicationsVisible, setIsIndicationsVisible] = useState(false);
     const [isMaximizeButtonVisible, setIsMaximizeButtonVisible] = useState(false);

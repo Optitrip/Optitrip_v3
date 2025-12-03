@@ -6,6 +6,7 @@ import { here_api_routes } from './app/routes/GenerateRoute.jsx';
 import { getCookie } from './cookies.js';
 import './App.css'
 import './style.css'
+import { decode } from './decode.js';
 import { SearchComponent } from './app/routes/search/SearchComponent.jsx';
 import { SelectDestinationsComponent } from './app/routes/select-destinations/SelectDestinationsComponent.jsx';
 import SelectVehiclesComponent from './app/routes/select-vehicles/SelectVehiclesComponent.jsx';
@@ -733,16 +734,16 @@ export default function App(props) {
         const { getRouteByIdService } = await import('./services/RouteService.js');
         const routeData = await getRouteByIdService(routeId);
 
-        // Limpiar el mapa antes de cargar (Objetos previos)
         map.getObjects().forEach(obj => {
-            if (obj instanceof H.map.Polygon ||
-                obj instanceof H.map.Polyline ||
-                (obj instanceof H.map.Marker && !state.ephemiral_marker.includes(obj))) {
+            const isMarker = obj instanceof H.map.Marker;
+            const isPolygon = obj instanceof H.map.Polygon;
+            const isPolyline = obj instanceof H.map.Polyline;
+            
+            if ((isMarker || isPolygon || isPolyline) && !state.ephemiral_marker.includes(obj)) {
                 map.removeObject(obj);
             }
         });
 
-        // Cargar destinos (Markers)
         const allPoints = [
             routeData.origin,
             ...routeData.waypoints,
@@ -751,13 +752,15 @@ export default function App(props) {
 
         const loadedDestinations = [];
         allPoints.forEach((point, index) => {
+            const color = index === 0 ? "#00BD2A" : (index === allPoints.length - 1 ? "#DC3545" : "#9FA6B2");
+            
             const marker = createMarker(
                 map,
                 point.lat,
                 point.lng,
                 index,
                 loadedDestinations,
-                index === 0 ? "#00BD2A" : index === allPoints.length - 1 ? "#DC3545" : "#9FA6B2"
+                color
             );
 
             loadedDestinations[index] = {
@@ -770,23 +773,22 @@ export default function App(props) {
         const loadedAvoidZones = [];
         if (routeData.avoidAreas && routeData.avoidAreas.length > 0) {
             routeData.avoidAreas.forEach((area) => {
-                const points = area.points.map(p => {
-                    return Array.isArray(p) ? { lat: p[0], lng: p[1] } : p;
-                });
+                const points = area.points.map(p => Array.isArray(p) ? { lat: p[0], lng: p[1] } : p);
                 
                 const lineString = new H.geo.LineString();
+                points.forEach(point => lineString.pushPoint({ lat: point.lat, lng: point.lng }));
                 
-                points.forEach(point => lineString.pushPoint({ lat: point.lat, lng: point.lng })); 
-                
-                // Cerrar el polígono si es necesario
+                // Cerrar el polígono
                 if (points.length > 0) {
                     lineString.pushPoint({ lat: points[0].lat, lng: points[0].lng });
                 }
 
+                const polygonColor = area.color || '#FF0000';
+                
                 const polygon = new H.map.Polygon(lineString, {
                     style: {
-                        fillColor: area.color || 'rgba(255, 0, 0, 0.3)',
-                        strokeColor: area.color || '#FF0000',
+                        fillColor: polygonColor + '4D', // Agrega transparencia (30%)
+                        strokeColor: polygonColor,
                         lineWidth: 2
                     }
                 });
@@ -803,63 +805,77 @@ export default function App(props) {
             });
         }
 
-        // Esto hace que se vea la línea azul/verde de la ruta
         const loadedLines = [];
         if (routeData.routeSections && routeData.routeSections.length > 0) {
             routeData.routeSections.forEach(section => {
                 if (section.polyline) {
-                    const lineString = H.geo.LineString.fromFlexiblePolyline(section.polyline);
+                    const decodedData = decode(section.polyline);
+                    
+                    const lineString = new H.geo.LineString();
+                    decodedData.polyline.forEach(coords => {
+                        lineString.pushPoint({ lat: coords[0], lng: coords[1] });
+                    });
                     
                     const routeLine = new H.map.Polyline(lineString, {
                         style: {
-                            lineWidth: 4,
-                            strokeColor: 'rgba(0, 128, 255, 0.7)' // Color azul clásico
+                            lineWidth: 5,
+                            strokeColor: '#007BFF' // Azul ruta
                         }
                     });
                     
                     map.addObject(routeLine);
                     
-                    // Guardamos la referencia para poder borrarla con el botón "Limpiar"
                     loadedLines.push({
-                        polyline: routeLine
+                        polyline: routeLine,
+                        isVisible: true,
+                        originalColor: '#007BFF'
                     });
                 }
             });
         }
 
-        // El input espera "YYYY-MM-DDThh:mm", si viene en ISO puede fallar
+        let activeBtn = null;
+        const transport = routeData.transportation || "";
+        
+        if (transport === "car") activeBtn = "auto";
+        else if (transport === "truck") activeBtn = "camion";
+        else if (transport === "scooter") activeBtn = "moto"; 
+
         let formattedTime = "";
         if (routeData.scheduledTime) {
-            const dateObj = new Date(routeData.scheduledTime);
-            // Ajuste simple para obtener formato local correcto
-            dateObj.setMinutes(dateObj.getMinutes() - dateObj.getTimezoneOffset()); 
-            formattedTime = dateObj.toISOString().slice(0, 16);
+            formattedTime = routeData.scheduledTime.substring(0, 16);
         }
 
-        // Actualizar el estado con TODOS los datos
         setState({
             ...state,
             isEditMode: true,
             editingRouteId: routeId,
             destinations: loadedDestinations,
-            transportation: routeData.transportation || "truck", // Asegura que coincida con el value del select/botón
+            
+            // Datos de Vehículo
+            transportation: transport,
+            activeVehicleButton: activeBtn,
             type_of_truck: routeData.type_of_truck || "tractor",
             number_of_axles: routeData.number_of_axles || "2",
             number_of_trailers: routeData.number_of_trailers || "1",
-            time: formattedTime, // Usamos la fecha formateada
-            time_type: routeData.timeType || "Salir ahora",
+            
+            // Datos de Tiempo y Modo
+            time: formattedTime,
+            time_type: routeData.timeType || "Salir a las:",
             mode: routeData.mode || "fast",
-            traffic: routeData.traffic ? "enabled" : "default", // Ajustado a "default" o lo que use tu componente
+            traffic: routeData.traffic ? "default" : "disabled",
+            
+            // Evitación y Líneas
             avoid_parameters: routeData.avoidParameters || [],
             avoid_highways: routeData.avoidHighways || [],
             avoid_zones: loadedAvoidZones,
-            lines: loadedLines, // Guardamos las líneas en el estado
+            lines: loadedLines,
+            
             created: true
         });
 
         setFormKey(prev => prev + 1);
 
-        // Centrar el mapa
         if (loadedDestinations.length > 0) {
             moveMapToPlace(map, loadedDestinations[0].lat, loadedDestinations[0].lng);
         }

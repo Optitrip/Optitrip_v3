@@ -607,13 +607,15 @@ export default function ReportComponent() {
                 doc.text('Información detallada', 14, 128);
 
                 // Mostrar información de cada punto
-                if (reportByPoint && !reportByPoint.error && reportByPoint.data.results && reportByPoint.data.results.length > 0) {
+                if (reportByPoint && !reportByPoint.error && reportByPoint.results && reportByPoint.results.length > 0) {
                     let startY = 135; // Ajustar la posición vertical inicial
 
-                    reportByPoint.data.results.forEach((point) => {
+                    reportByPoint.results.forEach((point) => {
                         // Acceder al objeto dentro del array point.point
                         const pointData = point.point[0];
                         const commentsText = point.comments && point.comments.trim() !== "" ? point.comments : "Sin comentarios";
+                        const deliveryStatus = point.deliveryStatus || "Sin información";
+                        const captureTime = point.createdAt ? convertUTCToLocal(point.createdAt) : "Sin registro";
                         const imgSignature = `data:image/png;base64,${point.signature}`;
                         const images = point.images;
                         const pageWidth = doc.internal.pageSize.getWidth();
@@ -623,28 +625,38 @@ export default function ReportComponent() {
                             doc.setFont("helvetica", "bold");
                             doc.setFontSize(10);
 
-                            doc.text(`Tipo:`, 14, startY);
+                            doc.text(`Estado de entrega:`, 14, startY);
                             doc.setFont("helvetica", "normal");
-                            doc.text(`${pointData.type}`, 14 + doc.getTextWidth("Tipo:  "), startY);
+                            doc.text(`${deliveryStatus}`, 14 + doc.getTextWidth("Estado de entrega:   "), startY);
 
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Ubicación:`, 14, startY + 8);
+                            doc.text(`Tipo:`, 14, startY + 8);
                             doc.setFont("helvetica", "normal");
-                            doc.text(`${pointData.name}`, 14 + doc.getTextWidth("Ubicación:   "), startY + 8);
+                            doc.text(`${pointData.type}`, 14 + doc.getTextWidth("Tipo:  "), startY + 8);
 
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Comentarios:`, 14, startY + 16);
+                            doc.text(`Ubicación:`, 14, startY + 16);
                             doc.setFont("helvetica", "normal");
-                            doc.text(`${commentsText}`, 14 + doc.getTextWidth("Comentarios:   "), startY + 16);
+                            doc.text(`${pointData.name}`, 14 + doc.getTextWidth("Ubicación:   "), startY + 16);
 
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Fotos:`, 14, startY + 26);
+                            doc.text(`Comentarios:`, 14, startY + 24);
+                            doc.setFont("helvetica", "normal");
+                            doc.text(`${commentsText}`, 14 + doc.getTextWidth("Comentarios:   "), startY + 24);
+
+                            doc.setFont("helvetica", "bold");
+                            doc.text(`Hora de captura:`, 14, startY + 32);
+                            doc.setFont("helvetica", "normal");
+                            doc.text(`${captureTime} hrs`, 14 + doc.getTextWidth("Hora de captura:   "), startY + 32);
+
+                            doc.setFont("helvetica", "bold");
+                            doc.text(`Fotos:`, 14, startY + 42);
 
                             if (images && images.length > 0) {
                                 const imageWidth = 40; // Ancho de cada imagen
                                 const imageHeight = 70; // Alto de cada imagen
                                 const margin = 10; // Margen entre imágenes
-                                let imgStartY = startY + 30; // Posición vertical inicial para las imágenes
+                                let imgStartY = startY + 46; // Posición vertical inicial para las imágenes
                                 let imgStartX = 14; // Posición horizontal inicial para las imágenes
 
                                 images.forEach((image, idx) => {
@@ -662,11 +674,11 @@ export default function ReportComponent() {
                             }
 
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Firma:`, centerX + 15, startY + 120 - 5);
-                            doc.addImage(imgSignature, 'PNG', centerX, startY + 120 - 5, 50, 30);
+                            doc.text(`Firma:`, centerX + 15, startY + 136 - 5); 
+                            doc.addImage(imgSignature, 'PNG', centerX, startY + 136 - 5, 50, 30);
 
                             // Actualizar posición vertical para el siguiente punto
-                            startY += 14; // Ajusta el espacio entre puntos
+                            startY += 180; 
                         }
                     });
 
@@ -685,31 +697,31 @@ export default function ReportComponent() {
     };
 
     const handleEditRoute = (routeId) => {
-    // Cambiar a la vista de rutas
-    const menuRoutesBtn = document.getElementById('menuRoutes');
-    const menuReportsBtn = document.getElementById('menuReports');
-    
-    if (menuReportsBtn) {
-        menuReportsBtn.classList.remove('btn-primary');
-        menuReportsBtn.classList.add('btn-outline-primary');
-    }
-    
-    if (menuRoutesBtn) {
-        menuRoutesBtn.classList.remove('btn-outline-primary');
-        menuRoutesBtn.classList.add('btn-primary');
-    }
+        // Cambiar a la vista de rutas
+        const menuRoutesBtn = document.getElementById('menuRoutes');
+        const menuReportsBtn = document.getElementById('menuReports');
 
-    // Mostrar la tarjeta de creación de rutas
-    const createRouteCard = document.getElementById('create-route');
-    if (createRouteCard) {
-        createRouteCard.style.display = 'block';
-    }
+        if (menuReportsBtn) {
+            menuReportsBtn.classList.remove('btn-primary');
+            menuReportsBtn.classList.add('btn-outline-primary');
+        }
 
-    // Disparar evento personalizado con el routeId
-    window.dispatchEvent(new CustomEvent('loadRouteForEdit', { 
-        detail: { routeId } 
-    }));
-};
+        if (menuRoutesBtn) {
+            menuRoutesBtn.classList.remove('btn-outline-primary');
+            menuRoutesBtn.classList.add('btn-primary');
+        }
+
+        // Mostrar la tarjeta de creación de rutas
+        const createRouteCard = document.getElementById('create-route');
+        if (createRouteCard) {
+            createRouteCard.style.display = 'block';
+        }
+
+        // Disparar evento personalizado con el routeId
+        window.dispatchEvent(new CustomEvent('loadRouteForEdit', {
+            detail: { routeId }
+        }));
+    };
 
     return (
         <div>

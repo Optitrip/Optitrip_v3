@@ -684,10 +684,37 @@ export default function ReportComponent() {
         }
     };
 
+    const handleEditRoute = (routeId) => {
+    // Cambiar a la vista de rutas
+    const menuRoutesBtn = document.getElementById('menuRoutes');
+    const menuReportsBtn = document.getElementById('menuReports');
+    
+    if (menuReportsBtn) {
+        menuReportsBtn.classList.remove('btn-primary');
+        menuReportsBtn.classList.add('btn-outline-primary');
+    }
+    
+    if (menuRoutesBtn) {
+        menuRoutesBtn.classList.remove('btn-outline-primary');
+        menuRoutesBtn.classList.add('btn-primary');
+    }
+
+    // Mostrar la tarjeta de creación de rutas
+    const createRouteCard = document.getElementById('create-route');
+    if (createRouteCard) {
+        createRouteCard.style.display = 'block';
+    }
+
+    // Disparar evento personalizado con el routeId
+    window.dispatchEvent(new CustomEvent('loadRouteForEdit', { 
+        detail: { routeId } 
+    }));
+};
+
     return (
         <div>
             <div className="row">
-                <div className='col-lg-3 col-md-4 col-sm-12 mt-3 pl-3'>
+                <div className='col-md-4 col-sm-12 mt-3 pl-3' style={{ flex: '0 0 21%', maxWidth: '21%' }}>
                     <div className="card" style={{ height: 'fit-content', maxHeight: 'calc(100vh - 55px - 20px)', overflowY: 'auto', overflowX: 'hidden', borderRadius: '10px', height: isCardBodyOpen ? 'calc(100vh - 20px)' : 'fit-content', zIndex: 1 }}>
                         <div className="card-header" id="card-report-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', padding: '0px' }}>
                             <span style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>Tipos de reporte</span>
@@ -731,7 +758,7 @@ export default function ReportComponent() {
                         )}
                     </div>
                 </div>
-                <div className='col-lg-9 col-md-8 col-sm-12 mt-3'>
+                <div className='col-md-8 col-sm-12 mt-3' style={{ flex: '0 0 79%', maxWidth: '79%' }}>
                     <div className="card" style={{ zIndex: 1, height: 'calc(-20px + 100vh)', overflowY: 'auto', overflowX: 'hidden', maxHeight: 'calc(-75px + 100vh)' }}>
                         {reportsDrivers && (
                             <div className="card-body p-3">
@@ -1019,16 +1046,16 @@ export default function ReportComponent() {
                                                 <thead style={{ border: '2px' }}>
                                                     <tr style={{ height: '20px', backgroundColor: '#C8C8C8' }}>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">No.</th>
-                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Conductor</th>
-                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Fecha de inicio</th>
+                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle', minWidth: '130px' }} scope="col">Conductor</th>                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Fecha de inicio</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Origen</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Fecha de finalización</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Destino</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Total de paradas</th>
-                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Kilometraje total</th>
+                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle', minWidth: '140px' }} scope="col">Kilometraje total</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Duración</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Estatus</th>
-                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Acciones</th>                                                    </tr>
+                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle', width: '80px' }} scope="col">Acciones</th>
+                                                    </tr>
                                                 </thead>
                                                 <tbody>
                                                     {reportByStatus && !reportByStatus.error && reportByStatus.results.length > 0 ? (
@@ -1047,7 +1074,6 @@ export default function ReportComponent() {
                                                                     <td>{trip.status}</td>
                                                                     <td>
                                                                         <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', alignItems: 'center' }}>
-
                                                                             {trip.status === 'Completado' && (
                                                                                 <button
                                                                                     className="btn btn-link"
@@ -1064,13 +1090,13 @@ export default function ReportComponent() {
                                                                                 </button>
                                                                             )}
 
-                                                                            {/* Solo aparece si la ruta es "no iniciada" o "futura" */}
+                                                                            {/*Botón de editar */}
                                                                             {(trip.status === 'Ruta no iniciada' || trip.status === 'Ruta futura') && (
                                                                                 <button
                                                                                     className="btn btn-link"
-                                                                                    style={{ padding: 0, border: 'none', background: 'none', cursor: 'not-allowed', opacity: 0.5 }}
-                                                                                    title="Editar ruta (No disponible por el momento)"
-                                                                                    disabled={true}
+                                                                                    style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer' }}
+                                                                                    onClick={() => handleEditRoute(trip.routeId)}
+                                                                                    title="Editar ruta"
                                                                                 >
                                                                                     <img
                                                                                         src="/iconos principales/editar.svg"

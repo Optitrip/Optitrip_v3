@@ -71,6 +71,8 @@ var default_state = {
     distance: 0,
     durationTrip: "",
     instructions: [],
+    isEditMode: false,
+    editingRouteId: null,
 };
 
 var currentBubble = null;
@@ -281,7 +283,7 @@ export default function App(props) {
         return () => {
             map.removeEventListener('contextmenu', handleContextMenu);
         };
-    }, [map, state]); 
+    }, [map, state]);
 
     useEffect(() => {
         const storedUserData = sessionStorage.getItem('data_user'); // Obtener los datos del usuario desde sessionStorage
@@ -358,7 +360,7 @@ export default function App(props) {
 
         const handleCleanButtonClick = () => {
             map.getObjects().forEach(obj => {
-                
+
                 if (obj instanceof H.map.Polygon) {
                     map.removeObject(obj);
                 }
@@ -388,7 +390,7 @@ export default function App(props) {
             }
 
             const cleanState = {
-                created: true, 
+                created: true,
                 current_position: state.current_position, // Conservamos la ubicación
                 destinations: [],
                 transportation: "",
@@ -417,7 +419,9 @@ export default function App(props) {
                 distance: 0,
                 durationTrip: "",
                 instructions: [],
-                response: null
+                response: null,
+                isEditMode: false,
+                editingRouteId: null
             };
 
             setState(cleanState);
@@ -430,10 +434,10 @@ export default function App(props) {
 
             // Verificar si hay datos sucios para cambiar el color del botón
             // (Si hay destinos, transporte seleccionado, modo de viaje, etc.)
-            const hasData = state.destinations.length > 0 || 
-                            state.transportation !== "" || 
-                            state.mode !== "" ||
-                            state.avoid_parameters.length > 0;
+            const hasData = state.destinations.length > 0 ||
+                state.transportation !== "" ||
+                state.mode !== "" ||
+                state.avoid_parameters.length > 0;
 
             if (hasData) {
                 cleanButton.style.backgroundColor = '#DC3545'; // Color Rojo (Activo)
@@ -506,6 +510,19 @@ export default function App(props) {
             };
         }
     }, [state, setState]);
+
+    useEffect(() => {
+        const handleLoadRouteEvent = (event) => {
+            const { routeId } = event.detail;
+            loadRouteForEditing(routeId);
+        };
+
+        window.addEventListener('loadRouteForEdit', handleLoadRouteEvent);
+
+        return () => {
+            window.removeEventListener('loadRouteForEdit', handleLoadRouteEvent);
+        };
+    }, [map, state]);
 
     const handleContextMenu = (ev) => {
         const menuRoutes = document.getElementById('menuRoutes');
@@ -710,6 +727,112 @@ export default function App(props) {
         moveMapToPlace(map, lat, lng);
         return marker;
     }
+
+    const loadRouteForEditing = async (routeId) => {
+        try {
+            const { getRouteByIdService } = await import('./services/RouteService.js');
+            const routeData = await getRouteByIdService(routeId);
+
+            // Limpiar el mapa antes de cargar
+            map.getObjects().forEach(obj => {
+                if (obj instanceof H.map.Polygon ||
+                    obj instanceof H.map.Polyline ||
+                    (obj instanceof H.map.Marker && !state.ephemiral_marker.includes(obj))) {
+                    map.removeObject(obj);
+                }
+            });
+
+            // Cargar destinos (origen, waypoints, destino)
+            const allPoints = [
+                routeData.origin,
+                ...routeData.waypoints,
+                routeData.destination
+            ];
+
+            const loadedDestinations = [];
+            allPoints.forEach((point, index) => {
+                const marker = createMarker(
+                    map,
+                    point.lat,
+                    point.lng,
+                    index,
+                    loadedDestinations,
+                    index === 0 ? "#00BD2A" : index === allPoints.length - 1 ? "#DC3545" : "#9FA6B2"
+                );
+
+                loadedDestinations[index] = {
+                    ...point,
+                    marker: marker,
+                    string: `${point.lat},${point.lng}`
+                };
+            });
+
+            // Cargar zonas a evitar si existen
+            const loadedAvoidZones = [];
+            if (routeData.avoidAreas && routeData.avoidAreas.length > 0) {
+                routeData.avoidAreas.forEach((area, index) => {
+                    const points = area.points.map(([lat, lng]) => ({ lat, lng }));
+                    const lineString = new H.geo.LineString();
+                    points.forEach(point => lineString.pushLatLng(point.lat, point.lng));
+                    if (points.length > 0) {
+                        lineString.pushLatLng(points[0].lat, points[0].lng);
+                    }
+
+                    const polygon = new H.map.Polygon(lineString, {
+                        style: {
+                            fillColor: area.color || 'rgba(255, 0, 0, 0.3)',
+                            strokeColor: area.color || '#FF0000',
+                            lineWidth: 2
+                        }
+                    });
+
+                    map.addObject(polygon);
+
+                    loadedAvoidZones.push({
+                        name: area.name,
+                        points: area.points,
+                        color: area.color,
+                        polygon: polygon,
+                        LineString: lineString
+                    });
+                });
+            }
+
+            // Actualizar el estado con todos los datos de la ruta
+            setState({
+                ...state,
+                isEditMode: true,
+                editingRouteId: routeId,
+                destinations: loadedDestinations,
+                transportation: routeData.transportation || "truck",
+                type_of_truck: routeData.type_of_truck || "tractor",
+                number_of_axles: routeData.number_of_axles || "2",
+                number_of_trailers: routeData.number_of_trailers || "1",
+                time: routeData.scheduledTime || "",
+                time_type: routeData.timeType || "Salir ahora",
+                mode: routeData.mode || "fast",
+                traffic: routeData.traffic ? "enabled" : "disabled",
+                avoid_parameters: routeData.avoidParameters || [],
+                avoid_highways: routeData.avoidHighways || [],
+                avoid_zones: loadedAvoidZones,
+                created: true
+            });
+
+            // Centrar el mapa en el origen
+            if (loadedDestinations.length > 0) {
+                moveMapToPlace(map, loadedDestinations[0].lat, loadedDestinations[0].lng);
+            }
+
+        } catch (error) {
+            console.error('Error al cargar la ruta:', error);
+            Swal.fire({
+                title: 'Error al cargar la ruta',
+                text: 'No se pudieron cargar los datos de la ruta',
+                icon: 'error',
+                confirmButtonColor: '#d33'
+            });
+        }
+    };
 
     const successCallback = (position) => {
         localStorage.setItem("current_position", JSON.stringify({ "lat": position.coords.latitude, "lng": position.coords.longitude }));

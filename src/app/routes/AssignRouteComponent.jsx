@@ -210,10 +210,13 @@ export default function AssignRouteComponent(state) {
                 routeSections: sectionsToSave
             };
 
-            // Llamar al servicio para asignar la ruta
-            await assignRouteService(routeData);
+            if (state.state.isEditMode && state.state.editingRouteId) {
+                const { updateRouteService } = await import('../../services/RouteService.js');
+                await updateRouteService(state.state.editingRouteId, routeData);
+            } else {
+                await assignRouteService(routeData);
+            }
 
-            // Cerrar el modal después de completar la asignación
             handleModalClose();
 
         } catch (error) {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../../../App.css';
 
 export default function TypeTripComponent({ state, setState }) {
-    const [isCardBodyOpen, setIsCardBodyOpen] = useState(false);
+    const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
     const [activeMode, setActiveMode] = useState(state.mode || null);
     const [traffic, setTraffic] = useState(state.traffic || 'default');  // Cambiado a 'default' como valor inicial
     const setStateRef = useRef(setState);

@@ -730,160 +730,177 @@ export default function App(props) {
     }
 
     const loadRouteForEditing = async (routeId) => {
-    try {
-        const { getRouteByIdService } = await import('./services/RouteService.js');
-        const routeData = await getRouteByIdService(routeId);
+        try {
+            const { getRouteByIdService } = await import('./services/RouteService.js');
+            const routeData = await getRouteByIdService(routeId);
 
-        map.getObjects().forEach(obj => {
-            const isMarker = obj instanceof H.map.Marker;
-            const isPolygon = obj instanceof H.map.Polygon;
-            const isPolyline = obj instanceof H.map.Polyline;
-            
-            if ((isMarker || isPolygon || isPolyline) && !state.ephemiral_marker.includes(obj)) {
-                map.removeObject(obj);
-            }
-        });
+            // Eliminamos todo excepto el marcador de posición actual (GPS)
+            map.getObjects().forEach(obj => {
+                const isMarker = obj instanceof H.map.Marker;
+                const isPolygon = obj instanceof H.map.Polygon;
+                const isPolyline = obj instanceof H.map.Polyline;
 
-        const allPoints = [
-            routeData.origin,
-            ...routeData.waypoints,
-            routeData.destination
-        ];
-
-        const loadedDestinations = [];
-        allPoints.forEach((point, index) => {
-            const color = index === 0 ? "#00BD2A" : (index === allPoints.length - 1 ? "#DC3545" : "#9FA6B2");
-            
-            const marker = createMarker(
-                map,
-                point.lat,
-                point.lng,
-                index,
-                loadedDestinations,
-                color
-            );
-
-            loadedDestinations[index] = {
-                ...point,
-                marker: marker,
-                string: `${point.lat},${point.lng}`
-            };
-        });
-
-        const loadedAvoidZones = [];
-        if (routeData.avoidAreas && routeData.avoidAreas.length > 0) {
-            routeData.avoidAreas.forEach((area) => {
-                const points = area.points.map(p => Array.isArray(p) ? { lat: p[0], lng: p[1] } : p);
-                
-                const lineString = new H.geo.LineString();
-                points.forEach(point => lineString.pushPoint({ lat: point.lat, lng: point.lng }));
-                
-                // Cerrar el polígono
-                if (points.length > 0) {
-                    lineString.pushPoint({ lat: points[0].lat, lng: points[0].lng });
+                if ((isMarker || isPolygon || isPolyline) && !state.ephemiral_marker.includes(obj)) {
+                    map.removeObject(obj);
                 }
-
-                const polygonColor = area.color || '#FF0000';
-                
-                const polygon = new H.map.Polygon(lineString, {
-                    style: {
-                        fillColor: polygonColor + '4D', // Agrega transparencia (30%)
-                        strokeColor: polygonColor,
-                        lineWidth: 2
-                    }
-                });
-
-                map.addObject(polygon);
-
-                loadedAvoidZones.push({
-                    name: area.name,
-                    points: area.points,
-                    color: area.color,
-                    polygon: polygon,
-                    LineString: lineString
-                });
             });
-        }
 
-        const loadedLines = [];
-        if (routeData.routeSections && routeData.routeSections.length > 0) {
-            routeData.routeSections.forEach(section => {
-                if (section.polyline) {
-                    const decodedData = decode(section.polyline);
-                    
+            const allPoints = [
+                routeData.origin,
+                ...routeData.waypoints,
+                routeData.destination
+            ];
+
+            const loadedDestinations = [];
+            allPoints.forEach((point, index) => {
+                const color = index === 0 ? "#00BD2A" : (index === allPoints.length - 1 ? "#DC3545" : "#9FA6B2");
+
+                const marker = createMarker(
+                    map,
+                    point.lat,
+                    point.lng,
+                    index,
+                    loadedDestinations,
+                    color
+                );
+
+                loadedDestinations[index] = {
+                    ...point,
+                    marker: marker,
+                    string: `${point.lat},${point.lng}`
+                };
+            });
+
+            const loadedAvoidZones = [];
+            if (routeData.avoidAreas && routeData.avoidAreas.length > 0) {
+                const vertexIcon = new H.map.Icon(
+                    '<svg width="12" height="12" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" x="1" y="1" style="fill:white;stroke:gray;stroke-width:1" /></svg>',
+                    { anchor: { x: 6, y: 6 } }
+                );
+
+                routeData.avoidAreas.forEach((area) => {
+                    const points = area.points.map(p => Array.isArray(p) ? { lat: p[0], lng: p[1] } : p);
+
                     const lineString = new H.geo.LineString();
-                    decodedData.polyline.forEach(coords => {
-                        lineString.pushPoint({ lat: coords[0], lng: coords[1] });
+                    const polygonGroup = new H.map.Group(); // Agrupamos polígono y puntos
+
+                    points.forEach(point => {
+                        lineString.pushPoint({ lat: point.lat, lng: point.lng });
+
+                        const vertexMarker = new H.map.Marker({ lat: point.lat, lng: point.lng }, { icon: vertexIcon });
+                        vertexMarker.draggable = true;
+                        polygonGroup.addObject(vertexMarker);
                     });
-                    
-                    const routeLine = new H.map.Polyline(lineString, {
+
+                    // Cerrar el polígono
+                    if (points.length > 0) {
+                        lineString.pushPoint({ lat: points[0].lat, lng: points[0].lng });
+                    }
+
+                    const polygon = new H.map.Polygon(lineString, {
                         style: {
-                            lineWidth: 5,
-                            strokeColor: '#007BFF' // Azul ruta
+                            fillColor: 'rgba(255, 0, 0, 0.4)', // Rojo transparente
+                            strokeColor: '#FF0000',            // Borde rojo sólido
+                            lineWidth: 2
                         }
                     });
-                    
-                    map.addObject(routeLine);
-                    
-                    loadedLines.push({
-                        polyline: routeLine,
-                        isVisible: true,
-                        originalColor: '#007BFF'
+
+                    polygonGroup.addObject(polygon);
+                    map.addObject(polygonGroup);
+
+                    loadedAvoidZones.push({
+                        name: area.name,
+                        points: area.points,
+                        color: area.color,
+                        polygon: polygon,
+                        LineString: lineString,
+                        group: polygonGroup // Guardamos referencia al grupo
                     });
-                }
+                });
+            }
+
+            const loadedLines = [];
+            if (routeData.routeSections && routeData.routeSections.length > 0) {
+                routeData.routeSections.forEach(section => {
+                    if (section.polyline) {
+                        // Decodificar
+                        const decodedData = decode(section.polyline);
+                        const lineString = new H.geo.LineString();
+
+                        decodedData.polyline.forEach(coords => {
+                            lineString.pushPoint({ lat: coords[0], lng: coords[1] });
+                        });
+
+                        const routeLine = new H.map.Polyline(lineString, {
+                            style: {
+                                lineWidth: 5,
+                                strokeColor: '#00BD2A' 
+                            }
+                        });
+
+                        map.addObject(routeLine);
+
+                        loadedLines.push({
+                            polyline: routeLine,
+                            isVisible: true,
+                            originalColor: '#00BD2A'
+                        });
+                    }
+                });
+            }
+
+            let activeBtn = null;
+            const transport = routeData.transportation || "";
+
+            if (transport === "car") activeBtn = "auto";
+            else if (transport === "truck") activeBtn = "camion";
+            else if (transport === "scooter") activeBtn = "moto";
+            else if (transport === "bus") activeBtn = "bus";
+            else if (transport === "pedestrian") activeBtn = "peaton";
+
+            let formattedTime = "";
+            if (routeData.scheduledTime) {
+                formattedTime = routeData.scheduledTime.substring(0, 16);
+            }
+
+            setState({
+                ...state,
+                isEditMode: true,
+                editingRouteId: routeId,
+                destinations: loadedDestinations,
+
+                // Datos de Vehículo
+                transportation: transport,
+                activeVehicleButton: activeBtn, // Esto activa el botón azul en el componente
+                type_of_truck: routeData.type_of_truck || "tractor",
+                number_of_axles: routeData.number_of_axles || "2",
+                number_of_trailers: routeData.number_of_trailers || "1",
+
+                // Datos de Tiempo y Modo
+                time: formattedTime,
+                time_type: routeData.timeType || "Salir a las:",
+                mode: routeData.mode || "fast",
+                traffic: routeData.traffic ? "default" : "disabled",
+
+                // Evitación y Líneas
+                avoid_parameters: routeData.avoidParameters || [],
+                avoid_highways: routeData.avoidHighways || [],
+                avoid_zones: loadedAvoidZones,
+                lines: loadedLines,
+
+                created: true
             });
+
+            setFormKey(prev => prev + 1);
+
+            if (loadedDestinations.length > 0) {
+                moveMapToPlace(map, loadedDestinations[0].lat, loadedDestinations[0].lng);
+            }
+
+        } catch (error) {
+            console.error('Error al cargar la ruta:', error);
         }
-
-        let activeBtn = null;
-        const transport = routeData.transportation || "";
-        
-        if (transport === "car") activeBtn = "auto";
-        else if (transport === "truck") activeBtn = "camion";
-        else if (transport === "scooter") activeBtn = "moto"; 
-
-        let formattedTime = "";
-        if (routeData.scheduledTime) {
-            formattedTime = routeData.scheduledTime.substring(0, 16);
-        }
-
-        setState({
-            ...state,
-            isEditMode: true,
-            editingRouteId: routeId,
-            destinations: loadedDestinations,
-            
-            // Datos de Vehículo
-            transportation: transport,
-            activeVehicleButton: activeBtn,
-            type_of_truck: routeData.type_of_truck || "tractor",
-            number_of_axles: routeData.number_of_axles || "2",
-            number_of_trailers: routeData.number_of_trailers || "1",
-            
-            // Datos de Tiempo y Modo
-            time: formattedTime,
-            time_type: routeData.timeType || "Salir a las:",
-            mode: routeData.mode || "fast",
-            traffic: routeData.traffic ? "default" : "disabled",
-            
-            // Evitación y Líneas
-            avoid_parameters: routeData.avoidParameters || [],
-            avoid_highways: routeData.avoidHighways || [],
-            avoid_zones: loadedAvoidZones,
-            lines: loadedLines,
-            
-            created: true
-        });
-
-        setFormKey(prev => prev + 1);
-
-        if (loadedDestinations.length > 0) {
-            moveMapToPlace(map, loadedDestinations[0].lat, loadedDestinations[0].lng);
-        }
-
-    } catch (error) {
-        console.error('Error al cargar la ruta:', error);
-    }
-};
+    };
 
     const successCallback = (position) => {
         localStorage.setItem("current_position", JSON.stringify({ "lat": position.coords.latitude, "lng": position.coords.longitude }));

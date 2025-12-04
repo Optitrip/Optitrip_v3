@@ -661,14 +661,14 @@ export default function ReportComponent() {
 
                             // 6. FOTOS
                             doc.setFont("helvetica", "bold");
-                            const photosY = startY + (lineHeight * 5) + 5 + addressExtraHeight; // Un poco más de aire antes de fotos
+                            const photosY = startY + (lineHeight * 5) + 5 + addressExtraHeight; 
                             doc.text(`Fotos:`, 14, photosY);
 
                             let imgEndY = photosY; 
                             
                             if (images && images.length > 0) {
                                 const imageWidth = 50; 
-                                const imageHeight = 50; 
+                                const imageHeight = 60; 
                                 const margin = 10;
                                 let imgStartY = photosY + 5;
                                 let imgStartX = 14;

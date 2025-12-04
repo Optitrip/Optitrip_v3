@@ -622,7 +622,6 @@ export default function ReportComponent() {
                         if (pointData) {
                             doc.setFont("helvetica", "bold");
                             doc.setFontSize(10);
-
                             doc.text(`Tipo:`, 14, startY);
                             doc.setFont("helvetica", "normal");
                             doc.text(`${pointData.type}`, 14 + doc.getTextWidth("Tipo:  "), startY);
@@ -633,40 +632,51 @@ export default function ReportComponent() {
                             doc.text(`${pointData.name}`, 14 + doc.getTextWidth("Ubicación:   "), startY + 8);
 
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Comentarios:`, 14, startY + 16);
+                            doc.text(`Estatus:`, 14, startY + 12);
                             doc.setFont("helvetica", "normal");
-                            doc.text(`${commentsText}`, 14 + doc.getTextWidth("Comentarios:   "), startY + 16);
+                            const statusText = point.deliveryStatus || "No registrado";
+                            doc.text(`${statusText}`, 14 + doc.getTextWidth("Estatus:   "), startY + 12);
 
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Fotos:`, 14, startY + 26);
+                            doc.text(`Hora de captura:`, 14, startY + 18);
+                            doc.setFont("helvetica", "normal");
+                            const timeText = point.createdAt ? `${convertUTCToLocal(point.createdAt)} hrs` : "N/A";
+                            doc.text(`${timeText}`, 14 + doc.getTextWidth("Hora de captura:   "), startY + 18);
+
+                            doc.setFont("helvetica", "bold");
+                            doc.text(`Comentarios:`, 14, startY + 24);
+                            doc.setFont("helvetica", "normal");
+                            doc.text(`${commentsText}`, 14 + doc.getTextWidth("Comentarios:   "), startY + 24);
+
+                            doc.setFont("helvetica", "bold");
+                            doc.text(`Fotos:`, 14, startY + 32);
 
                             if (images && images.length > 0) {
-                                const imageWidth = 40; // Ancho de cada imagen
-                                const imageHeight = 70; // Alto de cada imagen
-                                const margin = 10; // Margen entre imágenes
-                                let imgStartY = startY + 30; // Posición vertical inicial para las imágenes
-                                let imgStartX = 14; // Posición horizontal inicial para las imágenes
+                                const imageWidth = 40;
+                                const imageHeight = 70;
+                                const margin = 10;
+                                let imgStartY = startY + 36;
+                                let imgStartX = 14;
 
                                 images.forEach((image, idx) => {
                                     const imgUrl = `data:image/png;base64,${image.imageUrl}`;
 
-                                    // Verificar si la imagen excede el ancho de la página
                                     if (imgStartX + imageWidth > pageWidth - 14) {
-                                        imgStartX = 14; // Reiniciar posición horizontal
-                                        imgStartY += imageHeight + margin; // Avanzar a la siguiente fila
+                                        imgStartX = 14;
+                                        imgStartY += imageHeight + margin;
                                     }
 
-                                    doc.addImage(imgUrl, 'PNG', imgStartX, imgStartY, imageWidth, imageHeight); // Agregar imagen
-                                    imgStartX += imageWidth + margin; // Avanzar a la siguiente posición horizontal
+                                    doc.addImage(imgUrl, 'PNG', imgStartX, imgStartY, imageWidth, imageHeight);
+                                    imgStartX += imageWidth + margin;
                                 });
                             }
 
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Firma:`, centerX + 15, startY + 120 - 5);
-                            doc.addImage(imgSignature, 'PNG', centerX, startY + 120 - 5, 50, 30);
+                            doc.text(`Firma:`, centerX + 15, startY + 125);
+                            doc.addImage(imgSignature, 'PNG', centerX, startY + 125, 50, 30);
 
                             // Actualizar posición vertical para el siguiente punto
-                            startY += 14; // Ajusta el espacio entre puntos
+                            startY += 160; // Ajusta el espacio entre puntos
                         }
                     });
 
@@ -685,31 +695,31 @@ export default function ReportComponent() {
     };
 
     const handleEditRoute = (routeId) => {
-    // Cambiar a la vista de rutas
-    const menuRoutesBtn = document.getElementById('menuRoutes');
-    const menuReportsBtn = document.getElementById('menuReports');
-    
-    if (menuReportsBtn) {
-        menuReportsBtn.classList.remove('btn-primary');
-        menuReportsBtn.classList.add('btn-outline-primary');
-    }
-    
-    if (menuRoutesBtn) {
-        menuRoutesBtn.classList.remove('btn-outline-primary');
-        menuRoutesBtn.classList.add('btn-primary');
-    }
+        // Cambiar a la vista de rutas
+        const menuRoutesBtn = document.getElementById('menuRoutes');
+        const menuReportsBtn = document.getElementById('menuReports');
 
-    // Mostrar la tarjeta de creación de rutas
-    const createRouteCard = document.getElementById('create-route');
-    if (createRouteCard) {
-        createRouteCard.style.display = 'block';
-    }
+        if (menuReportsBtn) {
+            menuReportsBtn.classList.remove('btn-primary');
+            menuReportsBtn.classList.add('btn-outline-primary');
+        }
 
-    // Disparar evento personalizado con el routeId
-    window.dispatchEvent(new CustomEvent('loadRouteForEdit', { 
-        detail: { routeId } 
-    }));
-};
+        if (menuRoutesBtn) {
+            menuRoutesBtn.classList.remove('btn-outline-primary');
+            menuRoutesBtn.classList.add('btn-primary');
+        }
+
+        // Mostrar la tarjeta de creación de rutas
+        const createRouteCard = document.getElementById('create-route');
+        if (createRouteCard) {
+            createRouteCard.style.display = 'block';
+        }
+
+        // Disparar evento personalizado con el routeId
+        window.dispatchEvent(new CustomEvent('loadRouteForEdit', {
+            detail: { routeId }
+        }));
+    };
 
     return (
         <div>

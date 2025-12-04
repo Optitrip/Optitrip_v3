@@ -537,7 +537,7 @@ export default function ReportComponent() {
             const formattedDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()} ${String(currentDate.getHours()).padStart(2, '0')}:${String(currentDate.getMinutes()).padStart(2, '0')}`;
             const nameDocument = `${String(currentDate.getDate())}_${String(currentDate.getMonth() + 1)}_${currentDate.getFullYear()}_${String(currentDate.getHours())}_${String(currentDate.getMinutes())}`;
 
-            // Imagen
+            // Imagen Logo
             const img = new Image();
             img.src = imagePath;
             img.onload = function () {
@@ -558,13 +558,10 @@ export default function ReportComponent() {
                 // Ancho de la página
                 const pageWidth = doc.internal.pageSize.getWidth();
 
-                // Ancho disponible para la columna derecha (ajustar según sea necesario)
+                // Ancho disponible para la columna derecha
                 const rightColumnWidth = 70;
-
-                // Posiciones de la columna derecha
                 const rightColumnX = pageWidth - rightColumnWidth - 15;
 
-                // Agregar texto en la columna izquierda
                 doc.text(`Código de ruta:`, 14, 60);
                 doc.setFont("helvetica", "normal");
                 doc.text(`${codeRoute}`, 14 + doc.getTextWidth("Código de ruta:    "), 60);
@@ -589,9 +586,9 @@ export default function ReportComponent() {
                 doc.setFont("helvetica", "bold");
                 doc.text(`Asignación realizada por:`, 14, 102);
                 doc.setFont("helvetica", "normal");
-                doc.text(`${reportByPoint.data.assignedByName}`, 14 + doc.getTextWidth("Asignación realizada por:     "), 102);
+                doc.text(`${reportByPoint.data.assignedByName}`, 14 + doc.getTextWidth("Asignación realizada por:      "), 102);
 
-                // Agregar texto en la columna derecha
+                // Columna derecha
                 doc.setFont("helvetica", "bold");
                 doc.text(`Fecha de asignación:`, rightColumnX, 60);
                 doc.setFont("helvetica", "normal");
@@ -602,16 +599,14 @@ export default function ReportComponent() {
                 doc.setFont("helvetica", "normal");
                 doc.text(`${reportByPoint.data.tripDuration}`, rightColumnX + doc.getTextWidth(`Duración del viaje:    `), 68);
 
-                // Resumen
+                // Título Sección Detallada
                 doc.setFontSize(14);
                 doc.text('Información detallada', 14, 128);
 
-                // Mostrar información de cada punto
                 if (reportByPoint && !reportByPoint.error && reportByPoint.data.results && reportByPoint.data.results.length > 0) {
-                    let startY = 135; // Ajustar la posición vertical inicial
+                    let startY = 135; 
 
                     reportByPoint.data.results.forEach((point) => {
-                        // Acceder al objeto dentro del array point.point
                         const pointData = point.point[0];
                         const commentsText = point.comments && point.comments.trim() !== "" ? point.comments : "Sin comentarios";
                         const imgSignature = `data:image/png;base64,${point.signature}`;
@@ -619,43 +614,63 @@ export default function ReportComponent() {
                         const pageWidth = doc.internal.pageSize.getWidth();
                         const centerX = (pageWidth - 50) / 2;
 
+                        if (startY > 250) {
+                            doc.addPage();
+                            startY = 20; 
+                        }
+
                         if (pointData) {
+                            const lineHeight = 7; 
+
+                            // 1. TIPO
                             doc.setFont("helvetica", "bold");
                             doc.setFontSize(10);
                             doc.text(`Tipo:`, 14, startY);
                             doc.setFont("helvetica", "normal");
                             doc.text(`${pointData.type}`, 14 + doc.getTextWidth("Tipo:  "), startY);
 
+                            // 2. UBICACIÓN
+                            // Usamos splitTextToSize para que si la dirección es muy larga, baje de renglón
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Ubicación:`, 14, startY + 8);
+                            doc.text(`Ubicación:`, 14, startY + lineHeight);
                             doc.setFont("helvetica", "normal");
-                            doc.text(`${pointData.name}`, 14 + doc.getTextWidth("Ubicación:   "), startY + 8);
+                            const addressLines = doc.splitTextToSize(`${pointData.name}`, pageWidth - 45); 
+                            doc.text(addressLines, 14 + doc.getTextWidth("Ubicación:   "), startY + lineHeight);
+                            
+                            const addressExtraHeight = (addressLines.length - 1) * 5; 
 
+                            // 3. ESTATUS 
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Estatus:`, 14, startY + 12);
+                            doc.text(`Estatus:`, 14, startY + (lineHeight * 2) + addressExtraHeight);
                             doc.setFont("helvetica", "normal");
                             const statusText = point.deliveryStatus || "No registrado";
-                            doc.text(`${statusText}`, 14 + doc.getTextWidth("Estatus:   "), startY + 12);
+                            doc.text(`${statusText}`, 14 + doc.getTextWidth("Estatus:   "), startY + (lineHeight * 2) + addressExtraHeight);
 
+                            // 4. HORA DE CAPTURA
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Hora de captura:`, 14, startY + 18);
+                            doc.text(`Hora de captura:`, 14, startY + (lineHeight * 3) + addressExtraHeight);
                             doc.setFont("helvetica", "normal");
                             const timeText = point.createdAt ? `${convertUTCToLocal(point.createdAt)} hrs` : "N/A";
-                            doc.text(`${timeText}`, 14 + doc.getTextWidth("Hora de captura:   "), startY + 18);
+                            doc.text(`${timeText}`, 14 + doc.getTextWidth("Hora de captura:   "), startY + (lineHeight * 3) + addressExtraHeight);
 
+                            // 5. COMENTARIOS
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Comentarios:`, 14, startY + 24);
+                            doc.text(`Comentarios:`, 14, startY + (lineHeight * 4) + addressExtraHeight);
                             doc.setFont("helvetica", "normal");
-                            doc.text(`${commentsText}`, 14 + doc.getTextWidth("Comentarios:   "), startY + 24);
+                            doc.text(`${commentsText}`, 14 + doc.getTextWidth("Comentarios:   "), startY + (lineHeight * 4) + addressExtraHeight);
 
+                            // 6. FOTOS
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Fotos:`, 14, startY + 32);
+                            const photosY = startY + (lineHeight * 5) + 5 + addressExtraHeight; // Un poco más de aire antes de fotos
+                            doc.text(`Fotos:`, 14, photosY);
 
+                            let imgEndY = photosY; 
+                            
                             if (images && images.length > 0) {
-                                const imageWidth = 40;
-                                const imageHeight = 70;
+                                const imageWidth = 50; 
+                                const imageHeight = 50; 
                                 const margin = 10;
-                                let imgStartY = startY + 36;
+                                let imgStartY = photosY + 5;
                                 let imgStartX = 14;
 
                                 images.forEach((image, idx) => {
@@ -668,21 +683,26 @@ export default function ReportComponent() {
 
                                     doc.addImage(imgUrl, 'PNG', imgStartX, imgStartY, imageWidth, imageHeight);
                                     imgStartX += imageWidth + margin;
+                                    
+                                    imgEndY = imgStartY + imageHeight; 
                                 });
+                            } else {
+                                imgEndY = photosY + 10; 
                             }
 
                             doc.setFont("helvetica", "bold");
-                            doc.text(`Firma:`, centerX + 15, startY + 125);
-                            doc.addImage(imgSignature, 'PNG', centerX, startY + 125, 50, 30);
+                            const signatureLabelY = imgEndY + 15;
+                            doc.text(`Firma:`, centerX + 15, signatureLabelY);
+                            doc.addImage(imgSignature, 'PNG', centerX, signatureLabelY + 5, 50, 30);
 
-                            // Actualizar posición vertical para el siguiente punto
-                            startY += 160; // Ajusta el espacio entre puntos
+                            // Calculamos el final de la firma + margen
+                            startY = signatureLabelY + 40 + 15; 
                         }
                     });
 
                 } else {
                     doc.setFontSize(10);
-                    doc.text('No se encontraron datos para la búsqueda establecida', 14, 74);
+                    doc.text('No se encontraron datos para la búsqueda establecida', 14, 135);
                 }
 
                 doc.save(`reporte_pods_${nameDocument}.pdf`);

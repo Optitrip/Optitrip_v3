@@ -668,7 +668,7 @@ export default function ReportComponent() {
                             
                             if (images && images.length > 0) {
                                 const imageWidth = 50; 
-                                const imageHeight = 60; 
+                                const imageHeight = 70; 
                                 const margin = 10;
                                 let imgStartY = photosY + 5;
                                 let imgStartX = 14;

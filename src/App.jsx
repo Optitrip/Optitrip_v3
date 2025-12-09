@@ -152,6 +152,83 @@ export default function App(props) {
     const sessionStorageUser = JSON.parse(sessionStorage.getItem('data_user')) || "";
     const email = sessionStorageUser.email;
 
+    const handleFullReset = () => {
+        console.log("Ejecutando limpieza total...");
+
+        map.getObjects().forEach(obj => {
+            // Borrar Zonas a evitar (Polígonos)
+            if (obj instanceof H.map.Polygon) {
+                map.removeObject(obj);
+            }
+            // Borrar Líneas de ruta
+            if (obj instanceof H.map.Polyline) {
+                map.removeObject(obj);
+            }
+            // Borrar Marcadores (excepto mi ubicación actual)
+            if (obj instanceof H.map.Marker) {
+                const isCurrentPosition = state.ephemiral_marker && state.ephemiral_marker.includes(obj);
+                if (!isCurrentPosition) {
+                    map.removeObject(obj);
+                }
+            }
+            if (obj instanceof H.map.Group) {
+                 map.removeObject(obj);
+            }
+        });
+
+        const assignButton = document.getElementById('btn-assign-route');
+        if (assignButton) {
+            assignButton.remove();
+        }
+
+        const timeInput = document.querySelector('input[type="datetime-local"]');
+        if (timeInput) {
+            timeInput.value = "";
+        }
+
+        const cleanState = {
+            created: true,
+            current_position: state.current_position,
+            destinations: [],
+            transportation: "",
+            type_of_truck: "tractor",
+            number_of_axles: "2",
+            type_of_trailer: "Remolque",
+            number_of_trailers: "1",
+            time: "",
+            time_type: "Salir ahora",
+            mode: "",
+            traffic: "default",
+            avoid_parameters: [],
+            avoid_highways: [],
+            avoid_zones: [],
+            edit_avoid_zone: 0,
+            modal_parameter_opened: "destinations_parameter",
+            ephemiral_marker: state.ephemiral_marker,
+            show_results: false,
+            show_indications: false,
+            lines: [],
+            tolls_total: 0,
+            url: "",
+            selectedCardIndex: null,
+            departureTime: "",
+            arrivalTime: "",
+            distance: 0,
+            durationTrip: "",
+            instructions: [],
+            response: null,
+            isEditMode: false,
+            editingRouteId: null,
+            activeVehicleButton: null 
+        };
+
+        setState(cleanState);
+        
+        resetRoutesModule(state, setState, map);
+
+        setFormKey(prevKey => prevKey + 1);
+    };
+
     useEffect(() => {
         appContainerRef.current = document.getElementById('app-container');
         userSectionRef.current = document.getElementById('users');
@@ -359,103 +436,36 @@ export default function App(props) {
     useEffect(() => {
         const cleanButton = document.querySelector('.btn-clean');
 
-        const handleCleanButtonClick = () => {
-            map.getObjects().forEach(obj => {
-
-                if (obj instanceof H.map.Polygon) {
-                    map.removeObject(obj);
-                }
-
-                if (obj instanceof H.map.Polyline) {
-                    map.removeObject(obj);
-                }
-
-                if (obj instanceof H.map.Marker) {
-                    const isCurrentPosition = state.ephemiral_marker && state.ephemiral_marker.includes(obj);
-
-                    if (!isCurrentPosition) {
-                        map.removeObject(obj);
-                    }
-                }
-            });
-
-            const assignButton = document.getElementById('btn-assign-route');
-            if (assignButton) {
-                assignButton.remove();
-            }
-
-            // Buscamos el input de fecha/hora en el HTML y lo vaciamos a la fuerza
-            const timeInput = document.querySelector('input[type="datetime-local"]');
-            if (timeInput) {
-                timeInput.value = "";
-            }
-
-            const cleanState = {
-                created: true,
-                current_position: state.current_position, // Conservamos la ubicación
-                destinations: [],
-                transportation: "",
-                type_of_truck: "tractor",
-                number_of_axles: "2",
-                type_of_trailer: "Remolque",
-                number_of_trailers: "1",
-                time: "",           // Reseteamos la variable de tiempo
-                time_type: "Salir ahora",
-                mode: "",
-                traffic: "default",
-                avoid_parameters: [],
-                avoid_highways: [],
-                avoid_zones: [],
-                edit_avoid_zone: 0,
-                modal_parameter_opened: "destinations_parameter",
-                ephemiral_marker: state.ephemiral_marker, // Conservamos la referencia al marker azul
-                show_results: false,
-                show_indications: false,
-                lines: [],
-                tolls_total: 0,
-                url: "",
-                selectedCardIndex: null,
-                departureTime: "",
-                arrivalTime: "",
-                distance: 0,
-                durationTrip: "",
-                instructions: [],
-                response: null,
-                isEditMode: false,
-                editingRouteId: null
-            };
-
-            setState(cleanState);
-            setFormKey(prevKey => prevKey + 1);
+        // Usamos la misma función
+        const onCleanClick = () => {
+            handleFullReset();
         };
 
         if (cleanButton) {
-            // Asignar el evento click
-            cleanButton.addEventListener('click', handleCleanButtonClick);
+            cleanButton.addEventListener('click', onCleanClick);
 
-            // Verificar si hay datos sucios para cambiar el color del botón
-            // (Si hay destinos, transporte seleccionado, modo de viaje, etc.)
+            // Lógica visual del botón (rojo o gris)
             const hasData = state.destinations.length > 0 ||
                 state.transportation !== "" ||
                 state.mode !== "" ||
-                state.avoid_parameters.length > 0;
+                state.avoid_parameters.length > 0 ||
+                state.avoid_zones.length > 0; // Agregado avoid_zones a la validación
 
             if (hasData) {
-                cleanButton.style.backgroundColor = '#DC3545'; // Color Rojo (Activo)
+                cleanButton.style.backgroundColor = '#DC3545';
                 cleanButton.classList.remove('disabled');
             } else {
-                cleanButton.style.backgroundColor = '#767676'; // Color Gris (Desactivado)
+                cleanButton.style.backgroundColor = '#767676';
                 cleanButton.classList.add('disabled');
             }
         }
 
-        // Limpieza del event listener al desmontar o actualizar
         return () => {
             if (cleanButton) {
-                cleanButton.removeEventListener('click', handleCleanButtonClick);
+                cleanButton.removeEventListener('click', onCleanClick);
             }
         };
-    }, [state]); // Se ejecuta cada vez que 'state' cambia
+    }, [state]);
 
     useEffect(() => {
         const calculateBtn = document.querySelector('.btn-calculate[type="button"]');
@@ -529,8 +539,8 @@ export default function App(props) {
     useEffect(() => {
         const handleRouteAssigned = () => {
             console.log('Evento routeAssignedSuccessfully recibido');
-            // Llamar a la función de reset
-            resetRoutesModule(state, setState, map);
+            
+            handleFullReset(); 
 
             // Ocultar el contenedor de rutas y mostrar el de creación
             const divRoutes = document.getElementById('show-routes');
@@ -543,6 +553,12 @@ export default function App(props) {
             if (createRouteCard) {
                 createRouteCard.style.display = 'block';
             }
+            
+             const calculateBtn = document.querySelector('.btn-calculate[type="button"]');
+             if(calculateBtn) {
+                 calculateBtn.style.backgroundColor = '#767676';
+                 calculateBtn.classList.add('disabled');
+             }
         };
 
         window.addEventListener('routeAssignedSuccessfully', handleRouteAssigned);
@@ -550,7 +566,7 @@ export default function App(props) {
         return () => {
             window.removeEventListener('routeAssignedSuccessfully', handleRouteAssigned);
         };
-    }, [state, setState, map]);
+    }, [state, map]);
 
     const handleContextMenu = (ev) => {
         const menuRoutes = document.getElementById('menuRoutes');

@@ -16,11 +16,19 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
     useEffect(() => {
         if (avoidZoneIndex >= 0) {
             map.addEventListener('tap', handleAvoidZoneClick);
+
+            map.addEventListener('dragstart', handleDragStart);
+            map.addEventListener('drag', handleDrag);
+            map.addEventListener('dragend', handleDragEnd);
+
             return () => {
                 map.removeEventListener('tap', handleAvoidZoneClick);
+                map.removeEventListener('dragstart', handleDragStart);
+                map.removeEventListener('drag', handleDrag);
+                map.removeEventListener('dragend', handleDragEnd);
             };
         }
-    }, [avoidZoneIndex]);
+    }, [avoidZoneIndex, state.avoid_zones]);
 
     const toggleIndications = () => {
         setIsIndicationsVisible(!isIndicationsVisible);
@@ -101,21 +109,110 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
 
     const editZone = (index) => {
         if (index === -1) {
+            // Crear nueva zona
             const line = new H.geo.LineString();
-            const newZone = { name: `Zona ${state.avoid_zones.length}`, points: [], LineString: line, polygon: null, color: "rgba(250, 0, 0, .4)", icons: [] };
+            const newZone = {
+                name: `Zona ${state.avoid_zones.length}`,
+                points: [],
+                LineString: line,
+                polygon: null,
+                color: "rgba(250, 0, 0, .4)",
+                icons: []
+            };
             const zones = [...state.avoid_zones, newZone];
-            setState(prevState => ({ ...prevState, avoid_zones: zones, edit_avoid_zone: zones.length - 1 }));
+            setState(prevState => ({
+                ...prevState,
+                avoid_zones: zones,
+                edit_avoid_zone: zones.length - 1
+            }));
             setAvoidZoneIndex(zones.length - 1);
+
+            // Configurar valores por defecto en el formulario
+            if (avoidZoneNameRef.current) {
+                avoidZoneNameRef.current.value = newZone.name;
+            }
+            setColor("#FA0000");
+            if (avoidZoneColorInputRef.current) {
+                avoidZoneColorInputRef.current.value = "#FA0000";
+            }
         } else {
+            // Editar zona existente
+            const currentZone = state.avoid_zones[index];
+
+            if (!currentZone) return;
+
+            // Configurar el índice de edición
             setAvoidZoneIndex(index);
             setState(prevState => ({ ...prevState, edit_avoid_zone: index }));
-        }
-        setIsAreaCardOpen(true);
 
-        const currentZone = state.avoid_zones[index];
-        if (avoidZoneNameRef.current) avoidZoneNameRef.current.value = currentZone.name;
-        if (avoidZoneColorPRef.current) avoidZoneColorPRef.current.innerText = currentZone.color;
-        if (avoidZoneColorInputRef.current) avoidZoneColorInputRef.current.value = currentZone.color;
+            // Rellenar formulario con datos existentes
+            if (avoidZoneNameRef.current) {
+                avoidZoneNameRef.current.value = currentZone.name;
+            }
+
+            // Convertir rgba a hex para el input
+            const rgbaToHex = (rgba) => {
+                const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (!match) return "#FF0000";
+
+                const r = parseInt(match[1]);
+                const g = parseInt(match[2]);
+                const b = parseInt(match[3]);
+
+                return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+            };
+
+            const hexColor = rgbaToHex(currentZone.color);
+            setColor(hexColor);
+
+            if (avoidZoneColorInputRef.current) {
+                avoidZoneColorInputRef.current.value = hexColor;
+            }
+            if (avoidZoneColorPRef.current) {
+                avoidZoneColorPRef.current.innerText = currentZone.color;
+            }
+
+            // Recrear los marcadores si no existen o se perdieron
+            if (!currentZone.icons || currentZone.icons.length === 0) {
+                const zones = [...state.avoid_zones];
+                const zone = zones[index];
+                zone.icons = [];
+
+                // Crear marcadores para cada punto existente
+                zone.points.forEach((point, pointIndex) => {
+                    const icono = new H.map.Marker(
+                        { lat: point[0], lng: point[1] },
+                        {
+                            volatility: true,
+                            icon: new H.map.Icon(`<svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="100" height="100" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
+                        <g>
+                            <g xmlns="http://www.w3.org/2000/svg">
+                                <path d="M 10 10 H 90 V 90 H 10 L 10 10" style="fill:rgb(240, 240, 240);stroke-width:3;stroke:grey"/>
+                            </g>
+                        </g>
+                        </svg>`, { size: { w: 15, h: 15 } })
+                        }
+                    );
+
+                    icono.draggable = true;
+                    icono.pointIndex = pointIndex;
+
+                    // Evento para eliminar punto
+                    icono.addEventListener('tap', function (evt) {
+                        evt.stopPropagation();
+                        removePointFromZone(index, pointIndex);
+                    });
+
+                    map.addObject(icono);
+                    zone.icons.push(icono);
+                });
+
+                setState(prevState => ({ ...prevState, avoid_zones: zones }));
+            }
+        }
+
+        // Abrir el modal de edición
+        setIsAreaCardOpen(true);
     };
 
     const handleAvoidZoneClick = (ev) => {
@@ -125,31 +222,60 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
             const zones = [...state.avoid_zones];
             let zone = zones[index];
 
-            if (index === -1) {
+            // Si la zona no existe (nueva zona)
+            if (!zone) {
                 const lineString = new H.geo.LineString();
-                zone = { name: `Zona ${zones.length}`, points: [], LineString: lineString, color: "rgba(250, 0, 0, .4)", icons: [] };
+                zone = {
+                    name: `Zona ${zones.length}`,
+                    points: [],
+                    LineString: lineString,
+                    color: "rgba(250, 0, 0, .4)",
+                    icons: [],
+                    polygon: null
+                };
                 zones.push(zone);
             } else {
+                // Si estamos editando una zona existente, remover el polígono anterior
                 try {
-                    map.removeObject(zone.polygon);
-                } catch { }
+                    if (zone.polygon) {
+                        map.removeObject(zone.polygon);
+                    }
+                } catch (e) {
+                    console.error("Error al remover polígono:", e);
+                }
             }
 
+            // Crear icono para el nuevo punto
+            const pointIndex = zone.points.length; // Guardar el índice del punto
             const icono = new H.map.Marker({ lat: pos.lat, lng: pos.lng }, {
                 volatility: true,
                 icon: new H.map.Icon(`<svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="100" height="100" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
-                <g>
-                    <g xmlns="http://www.w3.org/2000/svg">
-                        <path d="M 10 10 H 90 V 90 H 10 L 10 10" style="fill:rgb(240, 240, 240);stroke-width:3;stroke:grey"/>
-                    </g>
+            <g>
+                <g xmlns="http://www.w3.org/2000/svg">
+                    <path d="M 10 10 H 90 V 90 H 10 L 10 10" style="fill:rgb(240, 240, 240);stroke-width:3;stroke:grey"/>
                 </g>
-                </svg>`, { size: { w: 15, h: 15 } })
+            </g>
+            </svg>`, { size: { w: 15, h: 15 } })
             });
+
+            icono.addEventListener('tap', function (evt) {
+                evt.stopPropagation();
+                removePointFromZone(index, pointIndex);
+            });
+
+            icono.draggable = true;
+
             map.addObject(icono);
+
+            // Guardar referencia al índice del punto en el marcador
+            icono.pointIndex = pointIndex;
             zone.icons.push(icono);
             zone.points.push([pos.lat, pos.lng]);
 
+            // Agregar punto al LineString
             zone.LineString.pushPoint({ lat: pos.lat, lng: pos.lng });
+
+            // Crear nuevo polígono
             const polygon = new H.map.Polygon(zone.LineString, {
                 style: {
                     fillColor: zone.color,
@@ -157,24 +283,30 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
                     lineWidth: 4
                 }
             });
+
             zone.polygon = polygon;
             map.addObject(zone.polygon);
+
+            // Actualizar el estado
+            zones[index] = zone;
             setState(prevState => ({ ...prevState, avoid_zones: zones, edit_avoid_zone: index }));
         }
     };
 
     const saveZone = (zone, save) => {
         let zones = state.avoid_zones.slice();
+
         if (save) {
-            const name = avoidZoneNameRef.current ? avoidZoneNameRef.current.value : "";
+            const name = avoidZoneNameRef.current ? avoidZoneNameRef.current.value.trim() : "";
             const color = avoidZoneColorInputRef.current ? avoidZoneColorInputRef.current.value : "";
+
+            // Validación de nombre
             if (name.length < 1) {
                 Swal.fire({
-                    title: '¡Debe de ingresar un nombre para la zona a guardar!',
+                    title: '¡Debe ingresar un nombre para la zona a guardar!',
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'Aceptar',
                     width: '400px',
-                    height: '150px',
                     padding: '2rem',
                     customClass: {
                         title: 'title-handle',
@@ -183,13 +315,14 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
                 });
                 return;
             }
+
+            // Validación de puntos mínimos
             if (zone.points.length < 3) {
                 Swal.fire({
-                    title: '¡Se requieren al menos tres puntos!',
+                    title: '¡Se requieren al menos tres puntos para crear una zona!',
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'Aceptar',
                     width: '400px',
-                    height: '150px',
                     padding: '2rem',
                     customClass: {
                         title: 'title-handle',
@@ -198,35 +331,99 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
                 });
                 return;
             }
+
+            // Convertir color hex a rgba
+            const hexToRgba = (hex) => {
+                let r = 0, g = 0, b = 0;
+                if (hex.length === 4) {
+                    r = parseInt(hex[1] + hex[1], 16);
+                    g = parseInt(hex[2] + hex[2], 16);
+                    b = parseInt(hex[3] + hex[3], 16);
+                } else if (hex.length === 7) {
+                    r = parseInt(hex[1] + hex[2], 16);
+                    g = parseInt(hex[3] + hex[4], 16);
+                    b = parseInt(hex[5] + hex[6], 16);
+                }
+                return `rgba(${r}, ${g}, ${b}, 0.4)`;
+            };
+
+            const rgbaColor = hexToRgba(color);
+
+            // Actualizar nombre y color
             zone.name = name;
-            zone.color = color;
+            zone.color = rgbaColor;
+
+            // Actualizar el polígono con el color final
+            if (zone.polygon) {
+                map.removeObject(zone.polygon);
+
+                const polygon = new H.map.Polygon(zone.LineString, {
+                    style: {
+                        fillColor: rgbaColor,
+                        strokeColor: rgbaColor,
+                        lineWidth: 4
+                    }
+                });
+
+                zone.polygon = polygon;
+                map.addObject(polygon);
+            }
+
+            // Mostrar mensaje de éxito
+            Swal.fire({
+                title: '¡Zona guardada correctamente!',
+                icon: 'success',
+                confirmButtonColor: '#007BFF',
+                confirmButtonText: 'Aceptar',
+                width: '400px',
+                padding: '2rem',
+                customClass: {
+                    title: 'title-handle',
+                    popup: 'popup-handle'
+                }
+            });
+
         } else {
-            // Verificar si hay íconos antes de intentar eliminarlos
-            if (zone.icons && zone.icons.length > 0) {
+            if (zone && zone.icons && zone.icons.length > 0) {
                 map.removeObjects(zone.icons);
             }
-            if (zone.polygon) {
+            if (zone && zone.polygon) {
                 map.removeObject(zone.polygon);
             }
             zones = zones.filter(z => z !== zone);
         }
+
+        // Actualizar estado y cerrar modal
         setState(prevState => ({ ...prevState, avoid_zones: zones }));
         setIsAreaCardOpen(false);
-        setAvoidZoneIndex(-1);  // Reset index
+        setAvoidZoneIndex(-1);
+
+        // Remover event listeners
         map.removeEventListener('tap', handleAvoidZoneClick);
+        map.removeEventListener('dragstart', handleDragStart);
+        map.removeEventListener('drag', handleDrag);
+        map.removeEventListener('dragend', handleDragEnd);
     };
 
     const points = () => {
-        var points = [];
+        const pointsList = [];
         try {
-            for (let index = 0; index < state.avoid_zones[state.edit_avoid_zone].points.length; index++) {
-                points.push(
-                    <li>{state.avoid_zones[state.edit_avoid_zone].points[index]}</li>
-                )
+            const zone = state.avoid_zones[state.edit_avoid_zone];
+            if (zone && zone.points) {
+                for (let index = 0; index < zone.points.length; index++) {
+                    const point = zone.points[index];
+                    pointsList.push(
+                        <li key={index} style={{ fontSize: '10px', marginBottom: '4px' }}>
+                            Punto {index + 1}: {point[0].toFixed(6)}, {point[1].toFixed(6)}
+                        </li>
+                    );
+                }
             }
-        } catch { }
-        return points;
-    }
+        } catch (error) {
+            console.error("Error al mostrar puntos:", error);
+        }
+        return pointsList;
+    };
 
     // const saveZone = (zone, save) => {
     //     let zones = state.avoid_zones.slice();
@@ -271,9 +468,195 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
         setState(prevState => ({ ...prevState, avoid_zones }));
     }
 
+    const startEditingZone = (index) => {
+        const zone = state.avoid_zones[index];
+
+        // Establecer el índice de la zona que se está editando
+        setAvoidZoneIndex(index);
+        setState(prevState => ({ ...prevState, edit_avoid_zone: index }));
+
+        // Abrir el card de edición
+        setIsAreaCardOpen(true);
+
+        // Rellenar los campos con los datos actuales de la zona
+        if (avoidZoneNameRef.current) {
+            avoidZoneNameRef.current.value = zone.name;
+        }
+
+        // Convertir color rgba a hex para el input color
+        const rgbaToHex = (rgba) => {
+            // Extraer valores RGB del string rgba
+            const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (!match) return "#FF0000";
+
+            const r = parseInt(match[1]);
+            const g = parseInt(match[2]);
+            const b = parseInt(match[3]);
+
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        };
+
+        const hexColor = rgbaToHex(zone.color);
+        setColor(hexColor);
+
+        if (avoidZoneColorInputRef.current) {
+            avoidZoneColorInputRef.current.value = hexColor;
+        }
+        if (avoidZoneColorPRef.current) {
+            avoidZoneColorPRef.current.innerText = zone.color;
+        }
+    };
+
+    const removePointFromZone = (zoneIndex, pointIndex) => {
+        const zones = [...state.avoid_zones];
+        const zone = zones[zoneIndex];
+
+        if (!zone) return;
+
+        // Validar que haya al menos 3 puntos antes de eliminar
+        if (zone.points.length <= 3) {
+            Swal.fire({
+                title: '¡No se puede eliminar! Se requieren al menos 3 puntos para formar una zona',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Aceptar',
+                width: '400px',
+                padding: '2rem',
+                customClass: {
+                    title: 'title-handle',
+                    popup: 'popup-handle'
+                }
+            });
+            return;
+        }
+
+        // Remover el icono del mapa
+        if (zone.icons[pointIndex]) {
+            map.removeObject(zone.icons[pointIndex]);
+            zone.icons.splice(pointIndex, 1);
+        }
+
+        // Remover el punto del array
+        zone.points.splice(pointIndex, 1);
+
+        // Remover el polígono anterior
+        if (zone.polygon) {
+            map.removeObject(zone.polygon);
+        }
+
+        // Reconstruir el LineString con los puntos restantes
+        const newLineString = new H.geo.LineString();
+        zone.points.forEach(point => {
+            newLineString.pushPoint({ lat: point[0], lng: point[1] });
+        });
+        zone.LineString = newLineString;
+
+        // Crear nuevo polígono
+        const polygon = new H.map.Polygon(newLineString, {
+            style: {
+                fillColor: zone.color,
+                strokeColor: zone.color,
+                lineWidth: 4
+            }
+        });
+
+        zone.polygon = polygon;
+        map.addObject(polygon);
+
+        // Actualizar índices de los iconos restantes
+        zone.icons.forEach((icon, idx) => {
+            icon.pointIndex = idx;
+        });
+
+        // Actualizar el estado
+        zones[zoneIndex] = zone;
+        setState(prevState => ({ ...prevState, avoid_zones: zones }));
+    };
+
+    const handleDragStart = (ev) => {
+        const target = ev.target;
+        const pointer = ev.currentPointer;
+
+        if (target instanceof H.map.Marker && target.pointIndex !== undefined) {
+            const targetPosition = map.geoToScreen(target.getGeometry());
+            target['offset'] = new H.math.Point(
+                pointer.viewportX - targetPosition.x,
+                pointer.viewportY - targetPosition.y
+            );
+            behavior.disable();
+        }
+    };
+
+    const handleDrag = (ev) => {
+        const target = ev.target;
+        const pointer = ev.currentPointer;
+
+        if (target instanceof H.map.Marker && target['offset']) {
+            target.setGeometry(
+                map.screenToGeo(
+                    pointer.viewportX - target['offset'].x,
+                    pointer.viewportY - target['offset'].y
+                )
+            );
+        }
+    };
+
+    const handleDragEnd = (ev) => {
+        const target = ev.target;
+
+        if (target instanceof H.map.Marker && target.pointIndex !== undefined) {
+            behavior.enable();
+
+            const newPosition = target.getGeometry();
+            const zoneIndex = avoidZoneIndex;
+            const pointIndex = target.pointIndex;
+
+            // Actualizar la posición del punto en el estado
+            updatePointPosition(zoneIndex, pointIndex, newPosition.lat, newPosition.lng);
+        }
+    };
+
+    const updatePointPosition = (zoneIndex, pointIndex, newLat, newLng) => {
+        const zones = [...state.avoid_zones];
+        const zone = zones[zoneIndex];
+
+        if (!zone) return;
+
+        // Actualizar el punto en el array
+        zone.points[pointIndex] = [newLat, newLng];
+
+        // Remover el polígono anterior
+        if (zone.polygon) {
+            map.removeObject(zone.polygon);
+        }
+
+        // Reconstruir el LineString
+        const newLineString = new H.geo.LineString();
+        zone.points.forEach(point => {
+            newLineString.pushPoint({ lat: point[0], lng: point[1] });
+        });
+        zone.LineString = newLineString;
+
+        // Crear nuevo polígono
+        const polygon = new H.map.Polygon(newLineString, {
+            style: {
+                fillColor: zone.color,
+                strokeColor: zone.color,
+                lineWidth: 4
+            }
+        });
+
+        zone.polygon = polygon;
+        map.addObject(polygon);
+
+        // Actualizar el estado
+        zones[zoneIndex] = zone;
+        setState(prevState => ({ ...prevState, avoid_zones: zones }));
+    };
+
     const changeInColor = (event) => {
         const color = event.target.value;
-        const hexToRgb = (hex) => {
+
+        const hexToRgba = (hex) => {
             let r = 0, g = 0, b = 0;
             if (hex.length === 4) {
                 r = parseInt(hex[1] + hex[1], 16);
@@ -286,30 +669,31 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
             }
             return `rgba(${r}, ${g}, ${b}, 0.4)`;
         };
-        const rgbaColor = hexToRgb(color);
 
+        const rgbaColor = hexToRgba(color);
         setColor(color);
 
-        const zones = state.avoid_zones.slice();
+        const zones = [...state.avoid_zones];
         const zone = zones[state.edit_avoid_zone];
 
         if (zone && zone.polygon) {
+            // Remover el polígono anterior
             map.removeObject(zone.polygon);
 
+            // Crear nuevo polígono con el color actualizado
             const polygon = new H.map.Polygon(zone.LineString, {
                 style: {
                     fillColor: rgbaColor,
                     strokeColor: rgbaColor,
-                    lineWidth: 4,
-                    strokeOpacity: 0.4,
-                    fillOpacity: 0.4,
+                    lineWidth: 4
                 }
             });
 
             zone.polygon = polygon;
+            zone.color = rgbaColor;
             map.addObject(polygon);
 
-            zone.color = rgbaColor;
+            zones[state.edit_avoid_zone] = zone;
             setState(prevState => ({ ...prevState, avoid_zones: zones }));
         }
     };
@@ -320,6 +704,10 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
                 eliminateZone(index);
             };
 
+            const handleEdit = () => {
+                startEditingZone(index);
+            };
+
             return (
                 <div key={index} className="btn-group mb-2 px-2" role="group" aria-label="Button group with nested dropdown" style={{ width: "100%" }}>
                     <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", alignContent: "space-around", width: "90%" }} className="d-flex shadow">
@@ -328,6 +716,9 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
                             <p className="avoid-title pl-3" style={{ minHeight: "100%", height: 20, overflow: "hidden", margin: 0, textAlign: "center" }}>{zone.name}</p>
                         </div>
                     </div>
+                    <button onClick={handleEdit} className="btn m-0 p-0 custom-btn" style={{ marginRight: '2px' }}>
+                        <i className="icon-editar-rutas"></i>
+                    </button>
                     <button onClick={handleClick} className="btn m-0 p-0 custom-btn"><i className="icon-x"></i></button>
                 </div>
             );
@@ -395,6 +786,21 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
                                     <div className="d-flex align-items-center mt-1 mb-4 px-3">
                                         <label htmlFor="avoid_zone_color" className="mr-2 mb-0 text-modal">Color</label>
                                         <input type="color" id="avoid_zone_color" ref={avoidZoneColorInputRef} className="form-control" style={{ flex: '1', height: 20 }} onChange={changeInColor} />
+                                    </div>
+                                </div>
+                                <div className="col-lg-12 col-md-12 col-sm-12 col-12">
+                                    <div className="px-3 mb-3">
+                                        <div className="border rounded p-2" style={{ backgroundColor: '#F0F0F0' }}>
+                                            <p className="text-modal mb-1" style={{ fontSize: '11px', fontWeight: 'bold' }}>
+                                                Instrucciones:
+                                            </p>
+                                            <ul className="text-modal-6 mb-0 pl-3" style={{ fontSize: '10px' }}>
+                                                <li>Haz clic en el mapa para agregar puntos</li>
+                                                <li>Arrastra los puntos para moverlos</li>
+                                                <li>Haz clic en un punto para eliminarlo</li>
+                                                <li>Se requieren mínimo 3 puntos</li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="col-lg-12 col-md-12 col-sm-12 col-12">

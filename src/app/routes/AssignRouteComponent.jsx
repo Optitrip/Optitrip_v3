@@ -15,7 +15,16 @@ export default function AssignRouteComponent(state) {
     const [originalCustomerId, setOriginalCustomerId] = useState(null);
 
     useEffect(() => {
-        fetchUsers();
+        fetchUsers(); // Carga inicial
+        const handleUserUpdate = () => {
+            fetchUsers();
+        };
+
+        window.addEventListener('userListUpdated', handleUserUpdate);
+
+        return () => {
+            window.removeEventListener('userListUpdated', handleUserUpdate);
+        };
     }, []);
 
     const fetchUsers = async () => {

@@ -123,6 +123,7 @@ async function createUserService(user) {
                     popup: 'popup-handle'
                 }
             });
+            window.dispatchEvent(new CustomEvent('userListUpdated'));
             return { success: true }; // Indicar éxito
 
         } else if (response.status === 400) {
@@ -194,6 +195,7 @@ async function updateUserService(userId, user) {
                     popup: 'popup-handle'
                 }
             });
+            window.dispatchEvent(new CustomEvent('userListUpdated'));
 
         } else if (response.status === 404) {
             Swal.fire({
@@ -257,7 +259,7 @@ async function deleteUserService(userId) {
                     popup: 'popup-handle'
                 }
             });
-
+            window.dispatchEvent(new CustomEvent('userListUpdated'));
         } else if (response.status === 404) {
             Swal.fire({
                 title: '¡Respuesta inesperada del servidor! Favor de contactar a soporte',

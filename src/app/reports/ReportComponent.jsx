@@ -34,7 +34,17 @@ export default function ReportComponent() {
     };
 
     useEffect(() => {
-        fetchUsers();
+        fetchUsers(); 
+
+        const handleUserUpdate = () => {
+            fetchUsers();
+        };
+
+        window.addEventListener('userListUpdated', handleUserUpdate);
+
+        return () => {
+            window.removeEventListener('userListUpdated', handleUserUpdate);
+        };
     }, []);
 
     useEffect(() => {

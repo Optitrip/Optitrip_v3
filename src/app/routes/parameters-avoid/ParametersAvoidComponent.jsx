@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../../../App.css';
 
-export default function ParametersAvoidComponent({ state, setState, map }) {
+export default function ParametersAvoidComponent({ state, setState, map, behavior }) {
     const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
     const [isAreaCardOpen, setIsAreaCardOpen] = useState(false);
     const [isIndicationsVisible, setIsIndicationsVisible] = useState(false);
@@ -29,6 +29,33 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
             };
         }
     }, [avoidZoneIndex, state.avoid_zones]);
+
+    useEffect(() => {
+        if (isAreaCardOpen && avoidZoneIndex >= 0) {
+            const currentZone = state.avoid_zones[avoidZoneIndex];
+            if (currentZone) {
+                if (avoidZoneNameRef.current) {
+                    avoidZoneNameRef.current.value = currentZone.name;
+                }
+
+                const rgbaToHex = (rgba) => {
+                    const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                    if (!match) return "#FF0000";
+                    const r = parseInt(match[1]);
+                    const g = parseInt(match[2]);
+                    const b = parseInt(match[3]);
+                    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+                };
+
+                const hexColor = rgbaToHex(currentZone.color);
+                setColor(hexColor);
+
+                if (avoidZoneColorInputRef.current) {
+                    avoidZoneColorInputRef.current.value = hexColor;
+                }
+            }
+        }
+    }, [isAreaCardOpen, avoidZoneIndex, state.avoid_zones]);
 
     const toggleIndications = () => {
         setIsIndicationsVisible(!isIndicationsVisible);
@@ -469,42 +496,46 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
     }
 
     const startEditingZone = (index) => {
-        const zone = state.avoid_zones[index];
+        const zones = [...state.avoid_zones];
+        const zone = zones[index];
 
-        // Establecer el índice de la zona que se está editando
+        if (!zone) return;
+
         setAvoidZoneIndex(index);
         setState(prevState => ({ ...prevState, edit_avoid_zone: index }));
+        
+        if (zone.icons && zone.icons.length > 0) {
+            map.removeObjects(zone.icons);
+            zone.icons = [];
+        } else {
+            zone.icons = [];
+        }
 
-        // Abrir el card de edición
+        zone.points.forEach((point, pointIndex) => {
+            const icono = new H.map.Marker(
+                { lat: point[0], lng: point[1] },
+                {
+                    volatility: true,
+                    icon: new H.map.Icon(`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path d="M 2 2 H 18 V 18 H 2 L 2 2" style="fill:white;stroke:black;stroke-width:2"/></svg>`, { size: { w: 15, h: 15 } })
+                }
+            );
+
+            icono.draggable = true;
+            icono.pointIndex = pointIndex; 
+
+            icono.addEventListener('tap', function (evt) {
+                evt.stopPropagation();
+                removePointFromZone(index, pointIndex); 
+            });
+
+            map.addObject(icono);
+            zone.icons.push(icono);
+        });
+
+        zones[index] = zone;
+        setState(prevState => ({ ...prevState, avoid_zones: zones }));
+
         setIsAreaCardOpen(true);
-
-        // Rellenar los campos con los datos actuales de la zona
-        if (avoidZoneNameRef.current) {
-            avoidZoneNameRef.current.value = zone.name;
-        }
-
-        // Convertir color rgba a hex para el input color
-        const rgbaToHex = (rgba) => {
-            // Extraer valores RGB del string rgba
-            const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-            if (!match) return "#FF0000";
-
-            const r = parseInt(match[1]);
-            const g = parseInt(match[2]);
-            const b = parseInt(match[3]);
-
-            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-        };
-
-        const hexColor = rgbaToHex(zone.color);
-        setColor(hexColor);
-
-        if (avoidZoneColorInputRef.current) {
-            avoidZoneColorInputRef.current.value = hexColor;
-        }
-        if (avoidZoneColorPRef.current) {
-            avoidZoneColorPRef.current.innerText = zone.color;
-        }
     };
 
     const removePointFromZone = (zoneIndex, pointIndex) => {
@@ -717,10 +748,10 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
                         </div>
                     </div>
                     <button onClick={handleEdit} className="btn m-0 p-0 custom-btn" style={{ marginRight: '2px' }}>
-                        <img 
-                            src="/crear ruta/icono editar ruta.svg" 
-                            alt="Editar" 
-                            style={{ width: '15px', height: '15px' }} 
+                        <img
+                            src="/crear ruta/icono editar ruta.svg"
+                            alt="Editar"
+                            style={{ width: '15px', height: '15px' }}
                         />
                     </button>
                     <button onClick={handleClick} className="btn m-0 p-0 custom-btn"><i className="icon-x"></i></button>

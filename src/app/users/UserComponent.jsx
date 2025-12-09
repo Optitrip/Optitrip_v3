@@ -53,17 +53,11 @@ export default function UserComponent(stateUser) {
         const fetchUsers = async () => {
             try {
                 const { users } = await getUsersService();
-                setDataUsers(users);
+                setDataUsers(users); 
 
                 if (selectedSuperiorAccount) {
-                    // Filtrar usuarios según la cuenta seleccionada
-                    const filtered = users.filter(user => user.superior_account === selectedSuperiorAccount);
-                    setFilteredUsers(filtered);
-
-                    // Filtrar el usuario con la cuenta superior seleccionada
+                    
                     const selectedUser = users.filter(user => user.email === selectedSuperiorAccount);
-
-                    // Establecer los datos del usuario seleccionado
                     setUserSelectedData(selectedUser);
                 }
             } catch (error) {
@@ -74,8 +68,8 @@ export default function UserComponent(stateUser) {
     }, [selectedSuperiorAccount]);
 
     useEffect(() => {
-        applyFilters(); // Aplicar filtros cuando cambien filterName o filterType
-    }, [filterName, filterType]);
+        applyFilters(); 
+    }, [filterName, filterType, selectedSuperiorAccount, dataUsers]);
 
     const applyFilters = () => {
         let filtered = [...dataUsers]; // Usamos dataUsers aquí para aplicar los filtros sobre todos los usuarios

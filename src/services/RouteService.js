@@ -99,12 +99,17 @@ async function getRouteByIdService(routeId) {
 
 async function updateRouteService(routeId, routeData) {
     try {
+        const cleanRouteData = {
+            ...routeData,
+            driverId: typeof routeData.driverId === 'object' ? routeData.driverId._id : routeData.driverId,
+            customerId: typeof routeData.customerId === 'object' ? routeData.customerId._id : routeData.customerId
+        };
         const response = await fetch(`${base_url}/route/${routeId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(routeData)
+            body: JSON.stringify(cleanRouteData)
         });
 
         if (response.status === 200) {

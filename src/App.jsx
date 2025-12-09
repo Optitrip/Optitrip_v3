@@ -172,7 +172,7 @@ export default function App(props) {
                 }
             }
             if (obj instanceof H.map.Group) {
-                 map.removeObject(obj);
+                map.removeObject(obj);
             }
         });
 
@@ -219,11 +219,11 @@ export default function App(props) {
             response: null,
             isEditMode: false,
             editingRouteId: null,
-            activeVehicleButton: null 
+            activeVehicleButton: null
         };
 
         setState(cleanState);
-        
+
         resetRoutesModule(state, setState, map);
 
         setFormKey(prevKey => prevKey + 1);
@@ -539,8 +539,8 @@ export default function App(props) {
     useEffect(() => {
         const handleRouteAssigned = () => {
             console.log('Evento routeAssignedSuccessfully recibido');
-            
-            handleFullReset(); 
+
+            handleFullReset();
 
             // Ocultar el contenedor de rutas y mostrar el de creación
             const divRoutes = document.getElementById('show-routes');
@@ -553,12 +553,12 @@ export default function App(props) {
             if (createRouteCard) {
                 createRouteCard.style.display = 'block';
             }
-            
-             const calculateBtn = document.querySelector('.btn-calculate[type="button"]');
-             if(calculateBtn) {
-                 calculateBtn.style.backgroundColor = '#767676';
-                 calculateBtn.classList.add('disabled');
-             }
+
+            const calculateBtn = document.querySelector('.btn-calculate[type="button"]');
+            if (calculateBtn) {
+                calculateBtn.style.backgroundColor = '#767676';
+                calculateBtn.classList.add('disabled');
+            }
         };
 
         window.addEventListener('routeAssignedSuccessfully', handleRouteAssigned);
@@ -933,6 +933,13 @@ export default function App(props) {
 
                 created: true
             });
+
+            window.dispatchEvent(new CustomEvent('openAssignModal', {
+                detail: {
+                    driverId: routeData.driverId?._id || routeData.driverId,
+                    customerId: routeData.customerId?._id || routeData.customerId
+                }
+            }));
 
             setFormKey(prev => prev + 1);
 

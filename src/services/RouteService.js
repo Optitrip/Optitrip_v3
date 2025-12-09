@@ -11,10 +11,10 @@ async function assignRouteService(route) {
         });
 
         if (response.status === 201) {
-            // Ruta aignada exitosamente
+            // Ruta asignada exitosamente
             const data = await response.json();
 
-            Swal.fire({
+            await Swal.fire({
                 title: '¡La ruta ha sido asignada correctamente al conductor!',
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Aceptar',
@@ -26,9 +26,12 @@ async function assignRouteService(route) {
                 }
             });
 
+            // Retornar éxito
+            return { success: true, data };
+
         } else if (response.status === 500) {
             // Error interno del servidor
-            Swal.fire({
+            await Swal.fire({
                 title: '¡Error interno del servidor! Favor de contactar a soporte',
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Aceptar',
@@ -39,10 +42,11 @@ async function assignRouteService(route) {
                     popup: 'popup-handle'
                 }
             });
+            return { success: false };
 
         } else {
             // Respuesta inesperada del servidor
-            Swal.fire({
+            await Swal.fire({
                 title: '¡Respuesta inesperada del servidor! Favor de contactar a soporte',
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Aceptar',
@@ -53,10 +57,11 @@ async function assignRouteService(route) {
                     popup: 'popup-handle'
                 }
             });
+            return { success: false };
         }
     } catch (error) {
         // Error de red u otro error
-        Swal.fire({
+        await Swal.fire({
             title: '¡Error inesperado! Por favor, inténtelo de nuevo',
             confirmButtonColor: '#d33',
             confirmButtonText: 'Aceptar',
@@ -67,6 +72,7 @@ async function assignRouteService(route) {
                 popup: 'popup-handle'
             }
         });
+        return { success: false };
     }
 }
 
@@ -104,7 +110,7 @@ async function updateRouteService(routeId, routeData) {
         if (response.status === 200) {
             const data = await response.json();
 
-            Swal.fire({
+            await Swal.fire({
                 title: '¡La ruta ha sido actualizada correctamente!',
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Aceptar',
@@ -116,12 +122,12 @@ async function updateRouteService(routeId, routeData) {
                 }
             });
 
-            return data;
+            return { success: true, data };
         } else {
             throw new Error('Error al actualizar la ruta');
         }
     } catch (error) {
-        Swal.fire({
+        await Swal.fire({
             title: '¡Error inesperado! Por favor, inténtelo de nuevo',
             confirmButtonColor: '#d33',
             confirmButtonText: 'Aceptar',
@@ -132,7 +138,7 @@ async function updateRouteService(routeId, routeData) {
                 popup: 'popup-handle'
             }
         });
-        throw error;
+        return { success: false };
     }
 }
 

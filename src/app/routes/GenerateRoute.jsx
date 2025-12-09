@@ -428,3 +428,73 @@ export const here_api_routes = (state, setState, map, colors, index) => {
             })
     }
 }
+
+// Función para reiniciar el módulo de rutas
+export const resetRoutesModule = (state, setState, map) => {
+    console.log('Reiniciando módulo de rutas...');
+    
+    // Limpiar las tarjetas de rutas
+    const cardRoutes = document.getElementById('routes-container');
+    if (cardRoutes) {
+        cardRoutes.innerHTML = '';
+    }
+
+    // Limpiar la tarjeta de datos
+    const cardDataRoutes = document.getElementById('data-routes');
+    if (cardDataRoutes) {
+        cardDataRoutes.innerHTML = '';
+    }
+
+    // Eliminar el botón de asignar si existe
+    const assignButton = document.getElementById('btn-assign-route');
+    if (assignButton) {
+        assignButton.remove();
+    }
+
+    // Limpiar todas las polilíneas del mapa
+    if (state.lines && state.lines.length > 0) {
+        state.lines.forEach(line => {
+            if (line.polyline && map.getObjects().indexOf(line.polyline) !== -1) {
+                map.removeObject(line.polyline);
+            }
+        });
+    }
+
+    // Limpiar markers si existen
+    if (state.markers && Array.isArray(state.markers)) {
+        state.markers.forEach(marker => {
+            if (marker && map.getObjects().indexOf(marker) !== -1) {
+                map.removeObject(marker);
+            }
+        });
+    }
+
+    // Restablecer el estado a sus valores iniciales
+    setState(prevState => ({
+        ...prevState,
+        destinations: [],
+        transportation: "",
+        mode: "",
+        time_type: "Salir ahora",
+        time: null,
+        avoid_parameters: [],
+        avoid_zones: [],
+        avoid_highways: [],
+        traffic: false,
+        lines: [],
+        markers: [],
+        response: null,
+        selectedCardIndex: null,
+        departureTime: null,
+        arrivalTime: null,
+        distance: null,
+        durationTrip: null,
+        tolls_total: null,
+        instructions: [],
+        show_results: false,
+        url: null,
+        isEditMode: false,
+        editingRouteId: null
+    }));
+
+};

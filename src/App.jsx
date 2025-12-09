@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom';
 import { apiKeyHERE } from './config.js';
 import { getUserByIdService, getUsersService } from './services/UserService.js';
-import { here_api_routes } from './app/routes/GenerateRoute.jsx';
+import { here_api_routes, resetRoutesModule } from './app/routes/GenerateRoute.jsx';
 import { getCookie } from './cookies.js';
 import './App.css'
 import './style.css'
@@ -525,6 +525,33 @@ export default function App(props) {
         };
     }, [map, state]);
 
+    // Listener para reiniciar el módulo después de asignar/actualizar una ruta
+    useEffect(() => {
+        const handleRouteAssigned = () => {
+            console.log('Evento routeAssignedSuccessfully recibido');
+            // Llamar a la función de reset
+            resetRoutesModule(state, setState, map);
+
+            // Ocultar el contenedor de rutas y mostrar el de creación
+            const divRoutes = document.getElementById('show-routes');
+            const createRouteCard = document.getElementById('create-route');
+
+            if (divRoutes) {
+                divRoutes.style.display = 'none';
+            }
+
+            if (createRouteCard) {
+                createRouteCard.style.display = 'block';
+            }
+        };
+
+        window.addEventListener('routeAssignedSuccessfully', handleRouteAssigned);
+
+        return () => {
+            window.removeEventListener('routeAssignedSuccessfully', handleRouteAssigned);
+        };
+    }, [state, setState, map]);
+
     const handleContextMenu = (ev) => {
         const menuRoutes = document.getElementById('menuRoutes');
 
@@ -834,7 +861,7 @@ export default function App(props) {
                         const routeLine = new H.map.Polyline(lineString, {
                             style: {
                                 lineWidth: 5,
-                                strokeColor: '#00BD2A' 
+                                strokeColor: '#00BD2A'
                             }
                         });
 

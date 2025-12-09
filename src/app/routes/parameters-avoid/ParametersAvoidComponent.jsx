@@ -503,7 +503,7 @@ export default function ParametersAvoidComponent({ state, setState, map, behavio
 
         setAvoidZoneIndex(index);
         setState(prevState => ({ ...prevState, edit_avoid_zone: index }));
-        
+
         if (zone.icons && zone.icons.length > 0) {
             map.removeObjects(zone.icons);
             zone.icons = [];
@@ -521,11 +521,11 @@ export default function ParametersAvoidComponent({ state, setState, map, behavio
             );
 
             icono.draggable = true;
-            icono.pointIndex = pointIndex; 
+            icono.pointIndex = pointIndex;
 
             icono.addEventListener('tap', function (evt) {
                 evt.stopPropagation();
-                removePointFromZone(index, pointIndex); 
+                removePointFromZone(index, pointIndex);
             });
 
             map.addObject(icono);
@@ -613,7 +613,11 @@ export default function ParametersAvoidComponent({ state, setState, map, behavio
                 pointer.viewportX - targetPosition.x,
                 pointer.viewportY - targetPosition.y
             );
-            behavior.disable();
+            if (behavior) {
+                behavior.disable(); // Esto desactiva el movimiento del mapa para permitir mover el punto
+            } else {
+                console.error("Behavior no está definido, no se puede arrastrar");
+            }
         }
     };
 

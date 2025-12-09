@@ -1114,7 +1114,7 @@ export default function App(props) {
                         <SelectVehiclesComponent state={state} setState={setState} />
                         <TypeTripComponent state={state} setState={setState} />
                         <ScheduleTripComponent state={state} setState={setState} />
-                        <ParametersAvoidComponent state={state} setState={setState} map={map} />
+                        <ParametersAvoidComponent state={state} setState={setState} map={map} behavior={behavior} />
                     </div>,
                     cardDest
                 )

@@ -74,6 +74,8 @@ var default_state = {
     instructions: [],
     isEditMode: false,
     editingRouteId: null,
+    preloadedDriverId: null,
+    preloadedCustomerId: null,
 };
 
 var currentBubble = null;
@@ -153,8 +155,6 @@ export default function App(props) {
     const email = sessionStorageUser.email;
 
     const handleFullReset = () => {
-        console.log("Ejecutando limpieza total...");
-
         map.getObjects().forEach(obj => {
             // Borrar Zonas a evitar (Polígonos)
             if (obj instanceof H.map.Polygon) {
@@ -219,7 +219,9 @@ export default function App(props) {
             response: null,
             isEditMode: false,
             editingRouteId: null,
-            activeVehicleButton: null
+            activeVehicleButton: null,
+            preloadedDriverId: null,
+            preloadedCustomerId: null
         };
 
         setState(cleanState);
@@ -568,6 +570,22 @@ export default function App(props) {
         };
     }, [state, map]);
 
+    useEffect(() => {
+        const handleClearPreloaded = () => {
+            setState(prevState => ({
+                ...prevState,
+                preloadedDriverId: null,
+                preloadedCustomerId: null
+            }));
+        };
+
+        window.addEventListener('clearPreloadedIds', handleClearPreloaded);
+
+        return () => {
+            window.removeEventListener('clearPreloadedIds', handleClearPreloaded);
+        };
+    }, []);
+
     const handleContextMenu = (ev) => {
         const menuRoutes = document.getElementById('menuRoutes');
 
@@ -912,6 +930,9 @@ export default function App(props) {
                 editingRouteId: routeId,
                 destinations: loadedDestinations,
 
+                preloadedDriverId: routeData.driverId?._id || routeData.driverId,
+                preloadedCustomerId: routeData.customerId?._id || routeData.customerId,
+
                 // Datos de Vehículo
                 transportation: transport,
                 activeVehicleButton: activeBtn, // Esto activa el botón azul en el componente
@@ -933,13 +954,6 @@ export default function App(props) {
 
                 created: true
             });
-
-            window.dispatchEvent(new CustomEvent('openAssignModal', {
-                detail: {
-                    driverId: routeData.driverId?._id || routeData.driverId,
-                    customerId: routeData.customerId?._id || routeData.customerId
-                }
-            }));
 
             setFormKey(prev => prev + 1);
 

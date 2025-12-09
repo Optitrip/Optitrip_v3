@@ -36,17 +36,15 @@ export default function AssignRouteComponent(state) {
     }, [users]);
 
     useEffect(() => {
-        const handleOpenEvent = (event) => {
-            const { driverId, customerId } = event.detail || {};
-
-            // Si vienen IDs en el evento, cargarlos
-            if (driverId) {
-                setSelectedDriver(driverId);
-                setOriginalDriverId(driverId);
+        const handleOpenEvent = () => {
+            // Cargar los IDs del estado global si existen
+            if (state.state.preloadedDriverId) {
+                setSelectedDriver(state.state.preloadedDriverId);
+                setOriginalDriverId(state.state.preloadedDriverId);
             }
-            if (customerId) {
-                setSelectedCustomer(customerId);
-                setOriginalCustomerId(customerId);
+            if (state.state.preloadedCustomerId) {
+                setSelectedCustomer(state.state.preloadedCustomerId);
+                setOriginalCustomerId(state.state.preloadedCustomerId);
             }
 
             handleModalShow();
@@ -57,7 +55,7 @@ export default function AssignRouteComponent(state) {
         return () => {
             window.removeEventListener('openAssignModal', handleOpenEvent);
         };
-    }, []);
+    }, [state.state.preloadedDriverId, state.state.preloadedCustomerId]);
 
     // Actualiza los usuarios cada vez que se muestre el modal
     const handleModalShow = async () => {
@@ -235,6 +233,7 @@ export default function AssignRouteComponent(state) {
                 handleModalClose();
                 // Disparar evento de limpieza después del éxito
                 window.dispatchEvent(new CustomEvent('routeAssignedSuccessfully'));
+                window.dispatchEvent(new CustomEvent('clearPreloadedIds'));
             }
 
         } catch (error) {

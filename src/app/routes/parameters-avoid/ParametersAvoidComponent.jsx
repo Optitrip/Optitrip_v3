@@ -717,7 +717,11 @@ export default function ParametersAvoidComponent({ state, setState, map }) {
                         </div>
                     </div>
                     <button onClick={handleEdit} className="btn m-0 p-0 custom-btn" style={{ marginRight: '2px' }}>
-                        <i className="icon-editar-rutas"></i>
+                        <img 
+                            src="/crear ruta/icono editar ruta.svg" 
+                            alt="Editar" 
+                            style={{ width: '15px', height: '15px' }} 
+                        />
                     </button>
                     <button onClick={handleClick} className="btn m-0 p-0 custom-btn"><i className="icon-x"></i></button>
                 </div>

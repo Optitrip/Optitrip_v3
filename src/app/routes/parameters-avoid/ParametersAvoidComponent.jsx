@@ -744,21 +744,64 @@ export default function ParametersAvoidComponent({ state, setState, map, behavio
             };
 
             return (
-                <div key={index} className="btn-group mb-2 px-2" role="group" aria-label="Button group with nested dropdown" style={{ width: "100%" }}>
-                    <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", alignContent: "space-around", width: "90%" }} className="d-flex shadow">
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                            <div style={{ width: 20, height: 20, backgroundColor: zone.color }}></div>
-                            <p className="avoid-title pl-3" style={{ minHeight: "100%", height: 20, overflow: "hidden", margin: 0, textAlign: "center" }}>{zone.name}</p>
-                        </div>
+                <div key={index} className="mb-2 px-2" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div className="d-flex shadow align-items-center" style={{ 
+                        flex: 1,                 
+                        overflow: "hidden",      
+                        marginRight: "8px",      
+                        backgroundColor: "white", 
+                        borderRadius: "5px", 
+                        padding: "5px" 
+                    }}>
+                        {/* Indicador de color */}
+                        <div style={{ width: 20, height: 20, backgroundColor: zone.color, flexShrink: 0, borderRadius: "2px" }}></div>
+                        
+                        <p className="avoid-title pl-2" style={{ 
+                            margin: 0, 
+                            whiteSpace: "nowrap",      
+                            overflow: "hidden",       
+                            textOverflow: "ellipsis", 
+                            textAlign: "left",
+                            fontSize: "12px"
+                        }} title={zone.name}>
+                            {zone.name}
+                        </p>
                     </div>
-                    <button onClick={handleEdit} className="btn m-0 p-0 custom-btn" style={{ marginRight: '2px' }}>
-                        <img
-                            src="/crear ruta/icono editar ruta.svg"
-                            alt="Editar"
-                            style={{ width: '15px', height: '15px' }}
-                        />
-                    </button>
-                    <button onClick={handleClick} className="btn m-0 p-0 custom-btn"><i className="icon-x"></i></button>
+
+                    <div style={{ display: "flex", flexShrink: 0, gap: "5px" }}>
+                        {/* Botón Editar - Estandarizado */}
+                        <button onClick={handleEdit} className="btn custom-btn shadow" style={{ 
+                            margin: 0, 
+                            padding: 0, 
+                            width: "30px",       // Ancho fijo igual al de eliminar
+                            height: "30px",      // Alto fijo igual al de eliminar
+                            display: "flex", 
+                            alignItems: "center", 
+                            justifyContent: "center",
+                            borderRadius: "5px",
+                            backgroundColor: "white"
+                        }}>
+                            <img
+                                src="/crear ruta/icono editar ruta.svg"
+                                alt="Editar"
+                                style={{ width: '16px', height: '16px' }} 
+                            />
+                        </button>
+
+                        <button onClick={handleClick} className="btn custom-btn shadow" style={{ 
+                            margin: 0, 
+                            padding: 0, 
+                            width: "30px", 
+                            height: "30px", 
+                            display: "flex", 
+                            alignItems: "center", 
+                            justifyContent: "center",
+                            borderRadius: "5px",
+                            backgroundColor: "white"
+                        }}>
+                            <i className="icon-x" style={{ fontSize: '16px', color: '#dc3545' }}></i> 
+                        </button>
+                    </div>
                 </div>
             );
         });

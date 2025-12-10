@@ -1,3 +1,4 @@
+// userService.js
 import { base_url } from "../config";
 
 async function getUserByIdService(userId) {
@@ -28,7 +29,12 @@ async function getUserByIdService(userId) {
 
 async function getUsersService() {
     try {
-        const response = await fetch(`${base_url}/users`, {
+        const sessionUser = JSON.parse(sessionStorage.getItem('data_user'));
+        if (!sessionUser || !sessionUser._id) {
+            throw new Error('Sesión no válida');
+        }
+
+        const response = await fetch(`${base_url}/users?requestingUserId=${sessionUser._id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -37,16 +43,13 @@ async function getUsersService() {
 
         if (response.ok) {
             const data = await response.json();
-            return {
-                users: data,
-            };
-
+            return { users: data };
         } else {
-            throw new Error('An error occurred while fetching the user');
+            throw new Error('An error occurred while fetching users');
         }
     } catch (error) {
-        console.error('Error fetching user:', error.message);
-        throw error; // Propaga el error para que sea manejado por el código que llame a esta función
+        console.error('Error fetching users:', error.message);
+        throw error;
     }
 }
 
@@ -103,12 +106,22 @@ async function getUsersDriverService(email) {
 
 async function createUserService(user) {
     try {
+        const sessionUser = JSON.parse(sessionStorage.getItem('data_user'));
+        if (!sessionUser || !sessionUser._id) {
+            throw new Error('Sesión no válida');
+        }
+
+        const payload = {
+            ...user,
+            created_by_id: sessionUser._id
+        };
+
         const response = await fetch(`${base_url}/users`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(user)
+            body: JSON.stringify(payload) 
         });
 
         if (response.status === 201) {
@@ -124,11 +137,15 @@ async function createUserService(user) {
                 }
             });
             window.dispatchEvent(new CustomEvent('userListUpdated'));
-            return { success: true }; // Indicar éxito
+            return { success: true };
 
-        } else if (response.status === 400) {
+        } else if (response.status === 403) {
+            // NUEVO: Manejo de permisos
+            const errorData = await response.json();
             Swal.fire({
-                title: '¡No se pudo crear la cuenta porque ya hay un registro con el correo ingresado!',
+                title: 'Permiso denegado',
+                html: `<p>${errorData.message}</p>
+                       <p><strong>Roles permitidos:</strong> ${errorData.allowed?.join(', ') || 'Ninguno'}</p>`,
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Aceptar',
                 width: '400px',
@@ -138,11 +155,26 @@ async function createUserService(user) {
                     popup: 'popup-handle'
                 }
             });
-            throw new Error('Email already exists'); // Lanzar error
+            throw new Error(errorData.message);
+
+        } else if (response.status === 400) {
+            const errorData = await response.json();
+            Swal.fire({
+                title: errorData.message || 'Error en la solicitud',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Aceptar',
+                width: '400px',
+                padding: '2rem',
+                customClass: {
+                    title: 'title-handle',
+                    popup: 'popup-handle'
+                }
+            });
+            throw new Error(errorData.message);
 
         } else {
             Swal.fire({
-                title: '¡Respuesta inesperada del servidor! Favor de contactar a soporte',
+                title: '¡Respuesta inesperada del servidor!',
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Aceptar',
                 width: '400px',
@@ -152,11 +184,12 @@ async function createUserService(user) {
                     popup: 'popup-handle'
                 }
             });
-            throw new Error('Unexpected server response'); // Lanzar error
+            throw new Error('Unexpected server response');
         }
     } catch (error) {
-        // Si es un error de red u otro error no manejado
-        if (error.message !== 'Email already exists' && error.message !== 'Unexpected server response') {
+        if (error.message !== 'Email already exists' && 
+            error.message !== 'Unexpected server response' &&
+            !error.message.includes('no puede crear')) {
             Swal.fire({
                 title: '¡Error inesperado! Por favor, inténtelo de nuevo',
                 confirmButtonColor: '#d33',
@@ -169,7 +202,7 @@ async function createUserService(user) {
                 }
             });
         }
-        throw error; // Re-lanzar el error para que sea capturado en el componente
+        throw error;
     }
 }
 

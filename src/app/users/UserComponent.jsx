@@ -1,4 +1,4 @@
-
+// UserComponent.jsx
 import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { getUsersService, createUserService, updateUserService, deleteUserService, resetPasswordService, moveAccountService } from '../../services/UserService.js';
@@ -22,6 +22,7 @@ export default function UserComponent(stateUser) {
     const [showMoveAccountModal, setShowMoveAccountModal] = useState(false);
     const [selectedAccountToMove, setSelectedAccountToMove] = useState('');
     const [fieldErrors, setFieldErrors] = useState({});
+    const [allowedRoles, setAllowedRoles] = useState([]);
     const [newUser, setNewUser] = useState({
         superior_account: '',
         type_user: '',
@@ -53,10 +54,10 @@ export default function UserComponent(stateUser) {
         const fetchUsers = async () => {
             try {
                 const { users } = await getUsersService();
-                setDataUsers(users); 
+                setDataUsers(users);
 
                 if (selectedSuperiorAccount) {
-                    
+
                     const selectedUser = users.filter(user => user.email === selectedSuperiorAccount);
                     setUserSelectedData(selectedUser);
                 }
@@ -68,8 +69,29 @@ export default function UserComponent(stateUser) {
     }, [selectedSuperiorAccount]);
 
     useEffect(() => {
-        applyFilters(); 
+        applyFilters();
     }, [filterName, filterType, selectedSuperiorAccount, dataUsers]);
+
+    useEffect(() => {
+        const fetchAllowedRoles = async () => {
+            const storedUserData = sessionStorage.getItem('data_user');
+            if (storedUserData) {
+                const currentUser = JSON.parse(storedUserData);
+                const userRole = currentUser.role; // "Super Administrador", "Distribuidor", etc.
+
+                // Mapeo de roles permitidos según jerarquía
+                const rolePermissions = {
+                    'Super Administrador': ['Distribuidor', 'Administrador', 'Cliente', 'Conductor'],
+                    'Distribuidor': ['Administrador', 'Cliente', 'Conductor'],
+                    'Administrador': ['Cliente', 'Conductor']
+                };
+
+                setAllowedRoles(rolePermissions[userRole] || []);
+            }
+        };
+
+        fetchAllowedRoles();
+    }, []);
 
     const applyFilters = () => {
         let filtered = [...dataUsers]; // Usamos dataUsers aquí para aplicar los filtros sobre todos los usuarios
@@ -894,13 +916,20 @@ export default function UserComponent(stateUser) {
                                         name="type_user"
                                         value={newUser.type_user}
                                         onChange={handleInputChange}
-                                        style={{ borderColor: fieldErrors.type_user ? 'red' : '', borderWidth: fieldErrors.type_user ? '2px' : '' }}
+                                        style={{
+                                            borderColor: fieldErrors.type_user ? 'red' : '',
+                                            borderWidth: fieldErrors.type_user ? '2px' : ''
+                                        }}
                                     >
-                                        <option>Seleccionar opción</option>
-                                        <option value="Administrador">Administrador</option>
-                                        <option value="Cliente">Cliente</option>
-                                        <option value="Conductor">Conductor</option>
+                                        <option value="">Seleccionar opción</option>
+                                        {allowedRoles.map(role => (
+                                            <option key={role} value={role}>{role}</option>
+                                        ))}
                                     </select>
+
+                                    {allowedRoles.length === 0 && (
+                                        <small className="text-danger">No tienes permisos para crear usuarios</small>
+                                    )}
                                 </div>
                                 <div className="col-12 mt-2">
                                     <span className='custom-text'>Nombre del usuario</span>

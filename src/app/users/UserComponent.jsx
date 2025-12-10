@@ -792,6 +792,7 @@ export default function UserComponent(stateUser) {
                                             <select className="form-control p-0" style={{ height: 20 }} onChange={handleFilterTypeChange}>
                                                 <option value="all">Todas</option>
                                                 <option value="Administrador">Administrador</option>
+                                                <option value="Distribuidor">Distribuidor</option>
                                                 <option value="Cliente">Cliente</option>
                                                 <option value="Conductor">Conductor</option>
                                             </select>

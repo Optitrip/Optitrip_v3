@@ -48,8 +48,8 @@ async function handleLogin(event) {
         if (data) {
             const user = data.user;
 
-            // Check if the user role is either "Administrador" or "Cliente"
-            if (user.role === 'Super administrador' || user.role === 'Administrador' || user.role === 'Cliente') {
+            // Check if the user role is either "Administrador", "Cliente" o "Disitribuidor"
+            if (user.role === 'Super administrador' || user.role === 'Administrador' || user.role === 'Cliente' || user.role === 'Distribuidor') {
                 sessionStorage.setItem('token', data.token); // Guardar token en sessionStorage
                 sessionStorage.setItem('data_user', JSON.stringify(data.user)); // Guardar datos del usuario en sessionStorage
                 showAuthenticatedView();
@@ -57,7 +57,7 @@ async function handleLogin(event) {
             } else {
                 showLoginForm();
                 Swal.fire({
-                    title: '¡Acceso denegado! Solo usuarios con roles de Administrador o Cliente pueden ingresar',
+                    title: '¡Acceso denegado! Solo usuarios con roles de Super Administrador, Administrador, Cliente o Distribuidor pueden ingresar',
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'Aceptar',
                     width: '400px',
@@ -130,7 +130,7 @@ function showAuthenticatedView() {
         document.getElementById('user-count').textContent = user.name;
     }
 
-    if (user.role === 'Super administrador' || user.role === 'Administrador' || user.role === 'Cliente') {
+    if (user.role === 'Super administrador' || user.role === 'Administrador' || user.role === 'Cliente' || user.role === 'Distribuidor') {
         menuMap.style.display = 'block';
     }
 
@@ -138,7 +138,7 @@ function showAuthenticatedView() {
         menuUsers.style.display = 'block';
         menuReports.style.display = 'block';
 
-    } else if (user.role === 'Administrador') {
+    } else if (user.role === 'Administrador' || user.role === 'Distribuidor') {
         menuUsers.style.display = 'block';
         menuReports.style.display = 'block';
 

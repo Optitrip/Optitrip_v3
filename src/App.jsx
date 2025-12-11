@@ -147,6 +147,7 @@ export default function App(props) {
     const [isMenuRoutesPrimary, setIsMenuRoutesPrimary] = useState(false);
     const [formKey, setFormKey] = useState(0);
     const [notifications, setNotifications] = useState([]);
+    const [showNotificationsModal, setShowNotificationsModal] = useState(false);
 
     const appContainerRef = useRef(null);
     const menuRoutesRef = useRef(null);
@@ -612,7 +613,7 @@ export default function App(props) {
         return () => clearInterval(intervalId);
     }, []);
 
-    
+
     useEffect(() => {
         const btn = document.getElementById('notificationsButton');
         if (btn) {
@@ -630,7 +631,6 @@ export default function App(props) {
 
     const handleContextMenu = (ev) => {
         const menuRoutes = document.getElementById('menuRoutes');
-
         // Verifica si el elemento tiene la clase btn-primary
         if (menuRoutes && menuRoutes.classList.contains('btn-primary')) {
             Swal.fire({

@@ -354,31 +354,6 @@
       showRoutes.style.display = showRoutes.style.display === 'none' ? 'block' : 'none';
     }
   </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const modal = document.getElementById('notifications-modal');
-      const notificationsButton = document.getElementById('notificationsButton');
-      const closeButton = document.getElementById('close-notifications');
-
-      // Abrir modal
-      notificationsButton.addEventListener('click', function (e) {
-        e.stopPropagation();
-        modal.style.display = 'flex';
-      });
-
-      // Cerrar modal con el botón X
-      closeButton.addEventListener('click', function () {
-        modal.style.display = 'none';
-      });
-
-      // Cerrar modal al hacer click fuera de él
-      modal.addEventListener('click', function (e) {
-        if (e.target === modal) {
-          modal.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 
 </html>

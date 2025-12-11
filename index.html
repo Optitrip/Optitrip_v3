@@ -97,9 +97,7 @@
         <div class="navbar-user text-white d-flex align-items-center">
           <!-- Botón de notificaciones -->
           <button class="btn text-white mr-2" type="button" id="notificationsButton" style="position: relative;">
-            <i class="icon-icono_notificaciones"></i>
-            <span
-              style="position: absolute; top: 5px; right: 5px; background: #ff4444; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: bold;">2</span>
+            <i class="icon-icono-notificaciones"></i>
           </button>
           <!-- Dropdown de usuario -->
           <div class="dropdown">
@@ -298,18 +296,18 @@
     <div id="notifications-modal"
       style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center;">
       <div
-        style="position: absolute; top: 60px; right: 20px; width: 320px; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+        style="position: absolute; top: 50px; right: 10px; width: 250px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); overflow: hidden;">
         <!-- Header -->
         <div
-          style="background: linear-gradient(#c6c6c6, #767676); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="color: white; font-weight: bold; font-size: 16px;">Menú alertas</span>
+          style="background: linear-gradient(#c6c6c6, #767676); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: white; font-weight: bold; font-size: 14px;">Menú alertas</span>
           <button id="close-notifications"
-            style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; line-height: 1;">
+            style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; line-height: 1;">
             ×
           </button>
         </div>
         <!-- Content -->
-        <div style="max-height: calc(100vh - 160px); overflow-y: auto;">
+        <div style="max-height: 300px; overflow-y: auto;">
           <!-- Notificación 1 -->
           <div class="notification-item"
             style="padding: 16px; border-bottom: 1px solid #e0e0e0; background: white; cursor: pointer; transition: background 0.2s;">
@@ -333,32 +331,7 @@
               Ver más
             </button>
           </div>
-
           <!-- Notificación 2 -->
-          <div class="notification-item"
-            style="padding: 16px; border-bottom: 1px solid #e0e0e0; background: white; cursor: pointer; transition: background 0.2s;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <div
-                  style="width: 32px; height: 32px; background: #e0e0e0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                  <i class="icon-icono-usuarios" style="font-size: 16px; color: #666;"></i>
-                </div>
-                <div>
-                  <div style="font-weight: bold; font-size: 14px; color: #333;">MARIA GARCÍA</div>
-                  <div style="font-size: 11px; color: #888;">2025-12-08 09:15:42</div>
-                </div>
-              </div>
-              <div style="width: 8px; height: 8px; background: #ff4444; border-radius: 50%; margin-top: 4px;"></div>
-            </div>
-            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">ADMINISTRADOR</div>
-            <div style="font-size: 12px; color: #999; margin-bottom: 12px;">2023-12-07 18:45:15</div>
-            <button class="ver-mas-btn"
-              style="width: 100%; padding: 8px; background: white; border: 1px solid #ddd; border-radius: 4px; color: #666; font-size: 13px; cursor: pointer; transition: all 0.2s;">
-              Ver más
-            </button>
-          </div>
-
-          <!-- Notificación 3 -->
           <div class="notification-item"
             style="padding: 16px; border-bottom: 1px solid #e0e0e0; background: white; cursor: pointer; transition: background 0.2s;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
@@ -375,29 +348,6 @@
             </div>
             <div style="font-size: 13px; color: #666; margin-bottom: 8px;">CONDUCTOR</div>
             <div style="font-size: 12px; color: #999; margin-bottom: 12px;">2023-12-07 14:10:52</div>
-            <button class="ver-mas-btn"
-              style="width: 100%; padding: 8px; background: white; border: 1px solid #ddd; border-radius: 4px; color: #666; font-size: 13px; cursor: pointer; transition: all 0.2s;">
-              Ver más
-            </button>
-          </div>
-
-          <!-- Notificación 4 -->
-          <div class="notification-item"
-            style="padding: 16px; background: white; cursor: pointer; transition: background 0.2s;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <div
-                  style="width: 32px; height: 32px; background: #e0e0e0; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                  <i class="icon-icono-usuarios" style="font-size: 16px; color: #666;"></i>
-                </div>
-                <div>
-                  <div style="font-weight: bold; font-size: 14px; color: #333;">ANA MARTÍNEZ</div>
-                  <div style="font-size: 11px; color: #888;">2025-12-07 12:05:33</div>
-                </div>
-              </div>
-            </div>
-            <div style="font-size: 13px; color: #666; margin-bottom: 8px;">SUPERVISOR</div>
-            <div style="font-size: 12px; color: #999; margin-bottom: 12px;">2023-12-06 22:18:07</div>
             <button class="ver-mas-btn"
               style="width: 100%; padding: 8px; background: white; border: 1px solid #ddd; border-radius: 4px; color: #666; font-size: 13px; cursor: pointer; transition: all 0.2s;">
               Ver más

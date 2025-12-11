@@ -1,7 +1,7 @@
 // app.jsx
 import { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom';
-import { apiKeyHERE } from './config.js';
+import { apiKeyHERE, base_url } from './config.js';
 import { getUserByIdService, getUsersService } from './services/UserService.js';
 import { here_api_routes, resetRoutesModule } from './app/routes/GenerateRoute.jsx';
 import { getCookie } from './cookies.js';
@@ -146,12 +146,13 @@ export default function App(props) {
     const [initialized, setInitialized] = useState(false);
     const [isMenuRoutesPrimary, setIsMenuRoutesPrimary] = useState(false);
     const [formKey, setFormKey] = useState(0);
+    const [notifications, setNotifications] = useState([]);
 
     const appContainerRef = useRef(null);
     const menuRoutesRef = useRef(null);
     const userSectionRef = useRef(null);
     const reportSectionRef = useRef(null);
-    const mapRef = useRef(null); // Referencia al mapa
+    const mapRef = useRef(null);
     const sessionStorageUser = JSON.parse(sessionStorage.getItem('data_user')) || "";
     const email = sessionStorageUser.email;
 
@@ -585,6 +586,46 @@ export default function App(props) {
         return () => {
             window.removeEventListener('clearPreloadedIds', handleClearPreloaded);
         };
+    }, []);
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const response = await fetch(`${base_url}/reports/deviations/pending`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.length > 0) {
+                        setNotifications(data);
+                        const notifBtn = document.getElementById('notificationsButton');
+                        if (notifBtn) notifBtn.style.border = "2px solid #ff4444";
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching notifications", error);
+            }
+        };
+
+        fetchNotifications();
+        const intervalId = setInterval(fetchNotifications, 30000); // Polling cada 30s
+
+        return () => clearInterval(intervalId);
+    }, []);
+
+    
+    useEffect(() => {
+        const btn = document.getElementById('notificationsButton');
+        if (btn) {
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            newBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowNotificationsModal(true); 
+                newBtn.style.border = "none";
+            });
+        }
     }, []);
 
     const handleContextMenu = (ev) => {
@@ -1086,6 +1127,95 @@ export default function App(props) {
 
     return (
         <div>
+            {showNotificationsModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0, 0, 0, 0.5)', zIndex: 9999, display: 'flex',
+                    justifyContent: 'center', alignItems: 'center'
+                }} onClick={() => setShowNotificationsModal(false)}>
+                    
+                    <div style={{
+                        position: 'absolute', top: '50px', right: '10px', width: '350px',
+                        background: 'white', borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)', overflow: 'hidden'
+                    }} onClick={(e) => e.stopPropagation()}>
+                        
+                        {/* Header del Modal */}
+                        <div style={{
+                            background: 'linear-gradient(#c6c6c6, #767676)', padding: '8px 12px',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}>
+                            <span style={{ color: 'white', fontWeight: 'bold', fontSize: '14px' }}>
+                                Alertas de Desviación ({notifications.length})
+                            </span>
+                            <button onClick={() => setShowNotificationsModal(false)} style={{
+                                background: 'none', border: 'none', color: 'white', fontSize: '20px',
+                                cursor: 'pointer', padding: 0, lineHeight: 1
+                            }}>×</button>
+                        </div>
+
+                        {/* Lista de Alertas */}
+                        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                            {notifications.length === 0 ? (
+                                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                                    No hay alertas pendientes.
+                                </div>
+                            ) : (
+                                notifications.map((notif, index) => (
+                                    <div key={index} style={{
+                                        padding: '16px', borderBottom: '1px solid #e0e0e0',
+                                        background: 'white', transition: 'background 0.2s'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div style={{
+                                                    width: '32px', height: '32px', background: '#e0e0e0',
+                                                    borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                }}>
+                                                    <i className="icon-icono-rutas" style={{ fontSize: '16px', color: '#666' }}></i>
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 'bold', fontSize: '14px', color: '#333' }}>
+                                                        {notif.driverName || "Conductor"}
+                                                    </div>
+                                                    <div style={{ fontSize: '11px', color: '#888' }}>
+                                                        {new Date(notif.timestamp).toLocaleString()}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div style={{ width: '10px', height: '10px', background: '#ff4444', borderRadius: '50%' }}></div>
+                                        </div>
+
+                                        <div style={{ fontSize: '13px', color: '#D32F2F', fontWeight: 'bold', marginBottom: '4px' }}>
+                                            ⚠️ DESVIACIÓN DETECTADA
+                                        </div>
+                                        <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                                            Decisión: <strong>{notif.type === "ORIGINAL_ROUTE" ? "Regresar a ruta" : "Recalcular destino"}</strong>
+                                        </div>
+
+                                        <button 
+                                            onClick={() => {
+                                                if(map) {
+                                                    moveMapToPlace(map, notif.lat, notif.lng);
+                                                    map.setZoom(16);
+                                                }
+                                                setShowNotificationsModal(false);
+                                            }}
+                                            style={{
+                                                width: '100%', padding: '8px', background: 'white',
+                                                border: '1px solid #ddd', borderRadius: '4px',
+                                                color: '#007BFF', fontSize: '13px', cursor: 'pointer', fontWeight: 'bold'
+                                            }}
+                                        >
+                                            📍 Ver ubicación
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="container clearfix" style={{ zIndex: 1, position: "absolute", top: 50, right: 30, margin: "10px", width: "350px" }}>
                 <div style={{ position: 'relative' }}>
                     {showSearch && (

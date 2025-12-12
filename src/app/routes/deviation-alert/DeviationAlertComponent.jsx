@@ -1,30 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../../App.css';
 
 export default function DeviationAlertComponent({ state, setState }) {
     const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
     const [alertEnabled, setAlertEnabled] = useState(state.deviationAlertEnabled || false);
-    const [alertDistance, setAlertDistance] = useState(state.deviationAlertDistance || 50);
+
+    // Estado local para el valor del input (permite string vacío mientras se escribe)
+    const [inputValue, setInputValue] = useState(state.deviationAlertDistance || 50);
+
+    // Sincronizar el estado local si viene un valor nuevo desde las props (ej. al cargar ruta)
+    useEffect(() => {
+        if (state.deviationAlertDistance) {
+            setInputValue(state.deviationAlertDistance);
+            setAlertEnabled(state.deviationAlertEnabled);
+        }
+    }, [state.deviationAlertDistance, state.deviationAlertEnabled]);
 
     const handleToggleAlert = (enabled) => {
         setAlertEnabled(enabled);
         setState(prevState => ({
             ...prevState,
             deviationAlertEnabled: enabled,
-            // Si se desactiva, resetear a valor por defecto
-            deviationAlertDistance: enabled ? prevState.deviationAlertDistance : 50
+            // Mantenemos el valor actual en el estado global
+            deviationAlertDistance: enabled ? (parseInt(inputValue) || 50) : 50
         }));
     };
 
-    const handleDistanceChange = (e) => {
-        const value = parseInt(e.target.value) || 50;
-        // Validar rango
-        const validValue = Math.max(10, Math.min(1000, value));
+    // Maneja la escritura: solo permite números
+    const handleInputChange = (e) => {
+        const val = e.target.value;
 
-        setAlertDistance(validValue);
+        // Si está vacío, permitimos borrar todo temporalmente
+        if (val === '') {
+            setInputValue('');
+            return;
+        }
+
+        // Expresión regular: solo permite dígitos (0-9)
+        if (/^\d*$/.test(val)) {
+            setInputValue(val);
+        }
+    };
+
+    // Maneja la validación final cuando el usuario sale del input
+    const handleBlur = () => {
+        let finalValue = parseInt(inputValue);
+
+        if (isNaN(finalValue)) {
+            finalValue = 50; // Valor por defecto si estaba vacío
+        } else if (finalValue < 10) {
+            finalValue = 10; // Mínimo
+        } else if (finalValue > 10000) {
+            finalValue = 10000; // Máximo
+        }
+
+        setInputValue(finalValue);
+
         setState(prevState => ({
             ...prevState,
-            deviationAlertDistance: validValue
+            deviationAlertDistance: finalValue
         }));
     };
 
@@ -50,98 +84,77 @@ export default function DeviationAlertComponent({ state, setState }) {
             </div>
 
             {isCardBodyOpen && (
-                <div className="card-body" style={{ background: '#E4E4E4', padding: '10px' }}>
-                    {/* Toggle Sí/No */}
-                    <div className="row align-items-center mb-3">
-                        <div className="col-6">
-                            <span style={{ fontSize: '12px', fontWeight: '500' }}>
+                <div className="card-body" style={{ background: '#E4E4E4', padding: '8px 15px' }}>
+                    <div className="d-flex align-items-center justify-content-between">
+                        {/* Lado Izquierdo: Switch y Texto */}
+                        <div className="d-flex align-items-center">
+                            <div style={{ display: 'flex', marginRight: '10px' }}>
+                                <button
+                                    style={{
+                                        height: 18,
+                                        borderRadius: "10px 0 0 10px",
+                                        minWidth: 25,
+                                        fontSize: 10,
+                                        padding: 0,
+                                        border: 'none',
+                                        backgroundColor: !alertEnabled ? '#DC3545' : '#767676',
+                                        color: 'white',
+                                        fontWeight: 'bold'
+                                    }}
+                                    onClick={() => handleToggleAlert(false)}
+                                >
+                                    No
+                                </button>
+                                <button
+                                    style={{
+                                        height: 18,
+                                        borderRadius: "0px 10px 10px 0px",
+                                        minWidth: 25,
+                                        fontSize: 10,
+                                        padding: 0,
+                                        border: 'none',
+                                        backgroundColor: alertEnabled ? '#28a745' : '#767676',
+                                        color: 'white',
+                                        fontWeight: 'bold'
+                                    }}
+                                    onClick={() => handleToggleAlert(true)}
+                                >
+                                    Si
+                                </button>
+                            </div>
+                            <span style={{ fontSize: '12px', fontWeight: '500', color: '#333' }}>
                                 Activar alerta
                             </span>
                         </div>
-                        <div className="col-6 text-right">
-                            <button
-                                style={{
-                                    height: 18,
-                                    borderRadius: "10px 0 0 10px",
-                                    minWidth: 20,
-                                    fontSize: 9
-                                }}
-                                className={`btn m-0 p-0 ${!alertEnabled ? "btn-danger" : "btn-secondary"}`}
-                                onClick={() => handleToggleAlert(false)}
-                            >
-                                No
-                            </button>
-                            <button
-                                style={{
-                                    height: 18,
-                                    borderRadius: "0px 10px 10px 0px",
-                                    minWidth: 20,
-                                    fontSize: 9
-                                }}
-                                className={`btn m-0 p-0 ${alertEnabled ? "btn-success" : "btn-secondary"}`}
-                                onClick={() => handleToggleAlert(true)}
-                            >
-                                Sí
-                            </button>
-                        </div>
-                    </div>
 
-                    {/* Campo de distancia (solo visible cuando está activado) */}
-                    {alertEnabled && (
-                        <div className="row align-items-center">
-                            <div className="col-7">
-                                <label
-                                    htmlFor="deviationDistance"
-                                    style={{ fontSize: '11px', margin: 0 }}
-                                >
-                                    Distancia de alerta
-                                </label>
-                            </div>
-                            <div className="col-5">
-                                <div className="d-flex align-items-center">
-                                    <input
-                                        type="number"
-                                        id="deviationDistance"
-                                        className="form-control"
-                                        value={alertDistance}
-                                        onChange={handleDistanceChange}
-                                        min="10"
-                                        max="1000"
-                                        style={{
-                                            fontSize: '10px',
-                                            height: '22px',
-                                            padding: '2px 5px',
-                                            marginRight: '5px'
-                                        }}
-                                    />
-                                    <span style={{ fontSize: '10px', whiteSpace: 'nowrap' }}>
-                                        metros
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Mensaje informativo */}
-                    {alertEnabled && (
-                        <div className="row mt-2">
-                            <div className="col-12">
-                                <div
+                        {/* Lado Derecho: Input y Metros (Visible solo si está activado) */}
+                        {alertEnabled && (
+                            <div className="d-flex align-items-center">
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={inputValue}
+                                    onChange={handleInputChange}
+                                    onBlur={handleBlur}
+                                    className="form-control"
                                     style={{
-                                        background: '#FFF3CD',
-                                        border: '1px solid #FFE69C',
+                                        fontSize: '11px',
+                                        height: '22px',
+                                        width: '60px',
+                                        padding: '2px 5px',
+                                        textAlign: 'center',
+                                        marginRight: '5px',
+                                        border: '1px solid #ced4da',
                                         borderRadius: '4px',
-                                        padding: '8px',
-                                        fontSize: '10px',
-                                        color: '#856404'
+                                        backgroundColor: '#fff'
                                     }}
-                                >
-                                    <i className="icon-info-circle" style={{ marginRight: '5px' }}></i>
-                                    El conductor recibirá una alerta cuando se desvíe más de {alertDistance} metros de la ruta.
-                                </div>
+                                />
+                                <span style={{ fontSize: '11px', color: '#333' }}>
+                                    metros
+                                </span>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             )}
         </div>

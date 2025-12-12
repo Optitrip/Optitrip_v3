@@ -769,12 +769,11 @@ export default function ParametersAvoidComponent({ state, setState, map, behavio
                     </div>
 
                     <div style={{ display: "flex", flexShrink: 0, gap: "5px" }}>
-                        {/* Botón Editar - Estandarizado */}
                         <button onClick={handleEdit} className="btn custom-btn shadow" style={{ 
                             margin: 0, 
                             padding: 0, 
-                            width: "30px",       // Ancho fijo igual al de eliminar
-                            height: "30px",      // Alto fijo igual al de eliminar
+                            width: "30px",       
+                            height: "30px",      
                             display: "flex", 
                             alignItems: "center", 
                             justifyContent: "center",
@@ -782,9 +781,9 @@ export default function ParametersAvoidComponent({ state, setState, map, behavio
                             backgroundColor: "white"
                         }}>
                             <img
-                                src="/crear ruta/icono editar ruta.svg"
+                                src="/iconos principales/edit zone.svg"
                                 alt="Editar"
-                                style={{ width: '16px', height: '16px' }} 
+                                style={{ width: '20px', height: '20px' }} 
                             />
                         </button>
 
@@ -799,7 +798,11 @@ export default function ParametersAvoidComponent({ state, setState, map, behavio
                             borderRadius: "5px",
                             backgroundColor: "white"
                         }}>
-                            <i className="icon-x" style={{ fontSize: '16px', color: '#dc3545' }}></i> 
+                            <img 
+                                src="/iconos principales/delete zone.svg" 
+                                alt="Eliminar" 
+                                style={{ width: '20px', height: '20px' }} 
+                            />
                         </button>
                     </div>
                 </div>

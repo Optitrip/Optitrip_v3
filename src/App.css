@@ -729,3 +729,13 @@
   background-color: rgba(164, 208, 255); 
   color: #000; 
 }
+
+@keyframes blink-red {
+  0% { filter: invert(16%) sepia(96%) saturate(7463%) hue-rotate(357deg) brightness(92%) contrast(124%); opacity: 1; }
+  50% { filter: invert(16%) sepia(96%) saturate(7463%) hue-rotate(357deg) brightness(92%) contrast(124%); opacity: 0.5; }
+  100% { filter: invert(16%) sepia(96%) saturate(7463%) hue-rotate(357deg) brightness(92%) contrast(124%); opacity: 1; }
+}
+
+.blinking-icon {
+  animation: blink-red 1s infinite;
+}

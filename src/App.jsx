@@ -593,13 +593,20 @@ export default function App(props) {
         const fetchNotifications = async () => {
             try {
                 const response = await fetch(`${base_url}/reports/deviations/pending`);
-                
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.length > 0) {
-                        setNotifications(data);
-                        const notifBtn = document.getElementById('notificationsButton');
-                        if (notifBtn) notifBtn.style.border = "2px solid #ff4444";
+                    setNotifications(data);
+
+                    const notifBtn = document.getElementById('notificationsButton');
+                    if (notifBtn) {
+                        const img = notifBtn.querySelector('img');
+                        if (img) {
+                            if (data.length > 0) {
+                                img.classList.add('blinking-icon');
+                            } else {
+                                img.classList.remove('blinking-icon');
+                            }
+                        }
                     }
                 }
             } catch (error) {
@@ -608,7 +615,7 @@ export default function App(props) {
         };
 
         fetchNotifications();
-        const intervalId = setInterval(fetchNotifications, 30000); // Polling cada 30s
+        const intervalId = setInterval(fetchNotifications, 30000);
 
         return () => clearInterval(intervalId);
     }, []);
@@ -619,11 +626,11 @@ export default function App(props) {
         if (btn) {
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
-            
+
             newBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setShowNotificationsModal(true); 
+                setShowNotificationsModal(true);
                 newBtn.style.border = "none";
             });
         }
@@ -831,6 +838,31 @@ export default function App(props) {
         moveMapToPlace(map, lat, lng);
         return marker;
     }
+
+    const handleMarkAsSeen = async (routeId, deviationId) => {
+        try {
+            const response = await fetch(`${base_url}/report/deviation/seen`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ routeId, deviationId })
+            });
+
+            if (response.ok) {
+                // Filtrar la notificación de la lista local
+                const updatedNotifications = notifications.filter(n => n.deviationId !== deviationId);
+                setNotifications(updatedNotifications);
+
+                // Si ya no hay notificaciones, apagar el parpadeo inmediatamente
+                const notifBtn = document.getElementById('notificationsButton');
+                if (notifBtn && updatedNotifications.length === 0) {
+                    const img = notifBtn.querySelector('img');
+                    if (img) img.classList.remove('blinking-icon');
+                }
+            }
+        } catch (error) {
+            console.error("Error marking as seen", error);
+        }
+    };
 
     const loadRouteForEditing = async (routeId) => {
         try {
@@ -1133,13 +1165,13 @@ export default function App(props) {
                     background: 'rgba(0, 0, 0, 0.5)', zIndex: 9999, display: 'flex',
                     justifyContent: 'center', alignItems: 'center'
                 }} onClick={() => setShowNotificationsModal(false)}>
-                    
+
                     <div style={{
                         position: 'absolute', top: '50px', right: '10px', width: '350px',
                         background: 'white', borderRadius: '8px',
                         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)', overflow: 'hidden'
                     }} onClick={(e) => e.stopPropagation()}>
-                        
+
                         {/* Header del Modal */}
                         <div style={{
                             background: 'linear-gradient(#c6c6c6, #767676)', padding: '8px 12px',
@@ -1193,22 +1225,38 @@ export default function App(props) {
                                             Decisión: <strong>{notif.type === "ORIGINAL_ROUTE" ? "Regresar a ruta" : "Recalcular destino"}</strong>
                                         </div>
 
-                                        <button 
-                                            onClick={() => {
-                                                if(map) {
-                                                    moveMapToPlace(map, notif.lat, notif.lng);
-                                                    map.setZoom(16);
-                                                }
-                                                setShowNotificationsModal(false);
-                                            }}
-                                            style={{
-                                                width: '100%', padding: '8px', background: 'white',
-                                                border: '1px solid #ddd', borderRadius: '4px',
-                                                color: '#007BFF', fontSize: '13px', cursor: 'pointer', fontWeight: 'bold'
-                                            }}
-                                        >
-                                            📍 Ver ubicación
-                                        </button>
+                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                            <button
+                                                onClick={() => {
+                                                    if (map) {
+                                                        moveMapToPlace(map, notif.lat, notif.lng);
+                                                        map.setZoom(16);
+                                                    }
+                                                    setShowNotificationsModal(false);
+                                                }}
+                                                style={{
+                                                    flex: 1, padding: '6px', background: 'white',
+                                                    border: '1px solid #007BFF', borderRadius: '4px',
+                                                    color: '#007BFF', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold'
+                                                }}
+                                            >
+                                                📍 Ver
+                                            </button>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); 
+                                                    handleMarkAsSeen(notif.routeId, notif.deviationId);
+                                                }}
+                                                style={{
+                                                    flex: 1, padding: '6px', background: '#28a745',
+                                                    border: 'none', borderRadius: '4px',
+                                                    color: 'white', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold'
+                                                }}
+                                            >
+                                                ✓ Visto
+                                            </button>
+                                        </div>
                                     </div>
                                 ))
                             )}

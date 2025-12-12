@@ -14,6 +14,7 @@ import SelectVehiclesComponent from './app/routes/select-vehicles/SelectVehicles
 import TypeTripComponent from './app/routes/type-trip/TypeTripComponent.jsx';
 import ScheduleTripComponent from './app/routes/schedule-trip/ScheduleTripComponent.jsx';
 import ParametersAvoidComponent from './app/routes/parameters-avoid/ParametersAvoidComponent.jsx';
+import DeviationAlertComponent from './app/routes/deviation-alert/DeviationAlertComponent.jsx';
 import UserComponent from './app/users/UserComponent.jsx';
 import AssignRouteComponent from './app/routes/AssignRouteComponent.jsx';
 import ReportComponent from './app/reports/ReportComponent.jsx';
@@ -77,6 +78,8 @@ var default_state = {
     editingRouteId: null,
     preloadedDriverId: null,
     preloadedCustomerId: null,
+    deviationAlertEnabled: false,
+    deviationAlertDistance: 50
 };
 
 var currentBubble = null;
@@ -224,7 +227,9 @@ export default function App(props) {
             editingRouteId: null,
             activeVehicleButton: null,
             preloadedDriverId: null,
-            preloadedCustomerId: null
+            preloadedCustomerId: null,
+            deviationAlertEnabled: false,
+            deviationAlertDistance: 50
         };
 
         setState(cleanState);
@@ -1025,7 +1030,8 @@ export default function App(props) {
                 avoid_highways: routeData.avoidHighways || [],
                 avoid_zones: loadedAvoidZones,
                 lines: loadedLines,
-
+                deviationAlertEnabled: routeData.deviationAlertEnabled || false,
+                deviationAlertDistance: routeData.deviationAlertDistance || 50,
                 created: true
             });
 
@@ -1245,7 +1251,7 @@ export default function App(props) {
 
                                             <button
                                                 onClick={(e) => {
-                                                    e.stopPropagation(); 
+                                                    e.stopPropagation();
                                                     handleMarkAsSeen(notif.routeId, notif.deviationId);
                                                 }}
                                                 style={{
@@ -1294,6 +1300,7 @@ export default function App(props) {
                         <TypeTripComponent state={state} setState={setState} />
                         <ScheduleTripComponent state={state} setState={setState} />
                         <ParametersAvoidComponent state={state} setState={setState} map={map} behavior={behavior} />
+                        <DeviationAlertComponent state={state} setState={setState} />
                     </div>,
                     cardDest
                 )

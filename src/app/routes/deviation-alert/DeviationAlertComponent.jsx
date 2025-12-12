@@ -3,64 +3,68 @@ import '../../../App.css';
 
 export default function DeviationAlertComponent({ state, setState }) {
     const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
-    const [alertEnabled, setAlertEnabled] = useState(state.deviationAlertEnabled || false);
-
-    // Estado local para el valor del input (permite string vacío mientras se escribe)
+    
     const [inputValue, setInputValue] = useState(state.deviationAlertDistance || 50);
 
-    // Sincronizar el estado local si viene un valor nuevo desde las props (ej. al cargar ruta)
     useEffect(() => {
-        if (state.deviationAlertDistance) {
+        if (state.deviationAlertDistance !== undefined) {
             setInputValue(state.deviationAlertDistance);
-            setAlertEnabled(state.deviationAlertEnabled);
         }
-    }, [state.deviationAlertDistance, state.deviationAlertEnabled]);
+    }, [state.deviationAlertDistance]);
 
     const handleToggleAlert = (enabled) => {
-        setAlertEnabled(enabled);
         setState(prevState => ({
             ...prevState,
             deviationAlertEnabled: enabled,
-            // Mantenemos el valor actual en el estado global
             deviationAlertDistance: enabled ? (parseInt(inputValue) || 50) : 50
         }));
     };
 
-    // Maneja la escritura: solo permite números
     const handleInputChange = (e) => {
         const val = e.target.value;
 
-        // Si está vacío, permitimos borrar todo temporalmente
+        // Permitir borrar el campo temporalmente
         if (val === '') {
             setInputValue('');
             return;
         }
 
-        // Expresión regular: solo permite dígitos (0-9)
+        // Solo permitir números
         if (/^\d*$/.test(val)) {
             setInputValue(val);
+            const numVal = parseInt(val);
+            if (!isNaN(numVal)) {
+                 setState(prevState => ({
+                    ...prevState,
+                    deviationAlertDistance: numVal
+                }));
+            }
         }
     };
 
-    // Maneja la validación final cuando el usuario sale del input
     const handleBlur = () => {
         let finalValue = parseInt(inputValue);
 
+        // Validar rangos al perder el foco
         if (isNaN(finalValue)) {
-            finalValue = 50; // Valor por defecto si estaba vacío
+            finalValue = 50; 
         } else if (finalValue < 10) {
-            finalValue = 10; // Mínimo
+            finalValue = 10;
         } else if (finalValue > 10000) {
-            finalValue = 10000; // Máximo
+            finalValue = 10000;
         }
 
         setInputValue(finalValue);
-
+        
+        // Asegurar consistencia final
         setState(prevState => ({
             ...prevState,
             deviationAlertDistance: finalValue
         }));
     };
+
+    // Usamos directamente el valor del estado global para saber si está activo
+    const isAlertEnabled = state.deviationAlertEnabled === true;
 
     return (
         <div className="card mt-2">
@@ -97,7 +101,8 @@ export default function DeviationAlertComponent({ state, setState }) {
                                         fontSize: 10,
                                         padding: 0,
                                         border: 'none',
-                                        backgroundColor: !alertEnabled ? '#DC3545' : '#767676',
+                                        // Usamos isAlertEnabled directo del estado global
+                                        backgroundColor: !isAlertEnabled ? '#DC3545' : '#767676',
                                         color: 'white',
                                         fontWeight: 'bold'
                                     }}
@@ -113,7 +118,8 @@ export default function DeviationAlertComponent({ state, setState }) {
                                         fontSize: 10,
                                         padding: 0,
                                         border: 'none',
-                                        backgroundColor: alertEnabled ? '#28a745' : '#767676',
+                                        // Usamos isAlertEnabled directo del estado global
+                                        backgroundColor: isAlertEnabled ? '#28a745' : '#767676',
                                         color: 'white',
                                         fontWeight: 'bold'
                                     }}
@@ -127,12 +133,12 @@ export default function DeviationAlertComponent({ state, setState }) {
                             </span>
                         </div>
 
-                        {/* Lado Derecho: Input y Metros (Visible solo si está activado) */}
-                        {alertEnabled && (
+                        {/* Lado Derecho: Input y Metros (Visible solo si está activado globalmente) */}
+                        {isAlertEnabled && (
                             <div className="d-flex align-items-center">
                                 <input
-                                    type="text"
-                                    inputMode="numeric"
+                                    type="text" 
+                                    inputMode="numeric" 
                                     value={inputValue}
                                     onChange={handleInputChange}
                                     onBlur={handleBlur}

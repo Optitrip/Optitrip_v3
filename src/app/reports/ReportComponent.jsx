@@ -809,7 +809,7 @@ export default function ReportComponent() {
                                         <input
                                             id="start-time"
                                             className="form-control"
-                                            type="datetime-local"
+                                            type="date"
                                             value={startDate}
                                             onChange={(e) => {
                                                 const newStartDate = e.target.value;
@@ -830,7 +830,7 @@ export default function ReportComponent() {
                                         <input
                                             id="end-time"
                                             className="form-control"
-                                            type="datetime-local"
+                                            type="date"
                                             value={endDate}
                                             min={startDate}
                                             onChange={(e) => {
@@ -983,7 +983,7 @@ export default function ReportComponent() {
                                         <input
                                             id="start-time"
                                             className="form-control"
-                                            type="datetime-local"
+                                            type="date"
                                             value={startDate}
                                             onChange={(e) => {
                                                 const newStartDate = e.target.value;
@@ -1004,7 +1004,7 @@ export default function ReportComponent() {
                                         <input
                                             id="end-time"
                                             className="form-control"
-                                            type="datetime-local"
+                                            type="date"
                                             value={endDate}
                                             min={startDate}
                                             onChange={(e) => {
@@ -1172,7 +1172,7 @@ export default function ReportComponent() {
                                         <input
                                             id="start-time"
                                             className="form-control"
-                                            type="datetime-local"
+                                            type="date"
                                             value={startDate}
                                             onChange={(e) => {
                                                 const newStartDate = e.target.value;
@@ -1193,7 +1193,7 @@ export default function ReportComponent() {
                                         <input
                                             id="end-time"
                                             className="form-control"
-                                            type="datetime-local"
+                                            type="date"
                                             value={endDate}
                                             min={startDate}
                                             onChange={(e) => {

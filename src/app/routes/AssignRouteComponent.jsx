@@ -227,7 +227,9 @@ export default function AssignRouteComponent(state) {
                 })(),
                 timeType: state.state.time_type,
                 scheduledTime: state.state.time,
-                routeSections: sectionsToSave
+                routeSections: sectionsToSave,
+                deviationAlertEnabled: state.state.deviationAlertEnabled || false,  
+                deviationAlertDistance: state.state.deviationAlertDistance || 50
             };
 
             let result;

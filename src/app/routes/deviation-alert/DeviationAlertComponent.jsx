@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '../../../App.css';
 
 export default function DeviationAlertComponent({ state, setState }) {
     const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
@@ -17,7 +18,7 @@ export default function DeviationAlertComponent({ state, setState }) {
 
     const handleToggleAlert = (enabled) => {
         setAlertEnabled(enabled);
-
+        
         if (enabled) {
             // Al activar, usa el valor actual del input (parseado)
             const currentValue = parseInt(inputValue) || 50;
@@ -73,37 +74,31 @@ export default function DeviationAlertComponent({ state, setState }) {
     };
 
     return (
-        <div style={{ marginTop: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}>
-            <div style={{
-                padding: '8px 15px',
+        <div className="card mt-2">
+            <div className="card-header card-module" style={{
+                padding: 0,
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                background: 'linear-gradient(#c6c6c6, #767676)',
-                borderRadius: '4px 4px 0 0'
+                position: 'relative'
             }}>
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '14px' }}>
+                <span style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
                     Alertas de desviación
                 </span>
                 <button
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'white',
-                        cursor: 'pointer',
-                        fontSize: '18px'
-                    }}
+                    className="btn ml-auto mr-2 custom-btn"
+                    style={{ padding: 0 }}
                     onClick={() => setIsCardBodyOpen(!isCardBodyOpen)}
                 >
-                    {isCardBodyOpen ? '▲' : '▼'}
+                    {isCardBodyOpen ? <i className="icon-circle-up"></i> : <i className="icon-circle-down"></i>}
                 </button>
             </div>
 
             {isCardBodyOpen && (
-                <div style={{ background: '#E4E4E4', padding: '8px 15px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div className="card-body" style={{ background: '#E4E4E4', padding: '8px 15px' }}>
+                    <div className="d-flex align-items-center justify-content-between">
                         {/* Lado Izquierdo: Switch y Texto */}
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div className="d-flex align-items-center">
                             <div style={{ display: 'flex', marginRight: '10px' }}>
                                 <button
                                     style={{
@@ -115,8 +110,7 @@ export default function DeviationAlertComponent({ state, setState }) {
                                         border: 'none',
                                         backgroundColor: !alertEnabled ? '#DC3545' : '#767676',
                                         color: 'white',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer'
+                                        fontWeight: 'bold'
                                     }}
                                     onClick={() => handleToggleAlert(false)}
                                 >
@@ -132,12 +126,11 @@ export default function DeviationAlertComponent({ state, setState }) {
                                         border: 'none',
                                         backgroundColor: alertEnabled ? '#28a745' : '#767676',
                                         color: 'white',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer'
+                                        fontWeight: 'bold'
                                     }}
                                     onClick={() => handleToggleAlert(true)}
                                 >
-                                    Sí
+                                    Si
                                 </button>
                             </div>
                             <span style={{ fontSize: '12px', fontWeight: '500', color: '#333' }}>
@@ -145,15 +138,16 @@ export default function DeviationAlertComponent({ state, setState }) {
                             </span>
                         </div>
 
-                        {/* Lado Derecho: Input y Metros */}
+                        {/* Lado Derecho: Input y Metros (Visible solo si está activado) */}
                         {alertEnabled && (
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <div className="d-flex align-items-center">
                                 <input
                                     type="text"
                                     inputMode="numeric"
                                     value={inputValue}
                                     onChange={handleInputChange}
                                     onBlur={handleBlur}
+                                    className="form-control"
                                     style={{
                                         fontSize: '11px',
                                         height: '22px',

@@ -744,64 +744,63 @@ export default function ParametersAvoidComponent({ state, setState, map, behavio
             };
 
             return (
-                <div key={index} className="mb-2 px-2" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div className="d-flex shadow align-items-center" style={{ 
+                <div key={index} className="d-flex align-items-center justify-content-between px-3" style={{ 
+                    width: "100%", 
+                    marginBottom: "10px" 
+                }}>
+                    
+                    <div className="d-flex align-items-center" style={{ 
                         flex: 1,                 
                         overflow: "hidden",      
-                        marginRight: "8px",      
-                        backgroundColor: "white", 
-                        borderRadius: "5px", 
-                        padding: "5px" 
+                        marginRight: "15px",
+                        borderBottom: "1px solid #000",
+                        paddingBottom: "2px" 
                     }}>
                         {/* Indicador de color */}
-                        <div style={{ width: 20, height: 20, backgroundColor: zone.color, flexShrink: 0, borderRadius: "2px" }}></div>
+                        <div style={{ width: 15, height: 15, backgroundColor: zone.color, flexShrink: 0 }}></div>
                         
-                        <p className="avoid-title pl-2" style={{ 
-                            margin: 0, 
+                        {/* Nombre de la zona */}
+                        <p className="avoid-title pl-2 m-0" style={{ 
                             whiteSpace: "nowrap",      
                             overflow: "hidden",       
                             textOverflow: "ellipsis", 
                             textAlign: "left",
-                            fontSize: "12px"
+                            fontSize: "12px",
+                            color: "#555"
                         }} title={zone.name}>
                             {zone.name}
                         </p>
                     </div>
 
                     <div style={{ display: "flex", flexShrink: 0, gap: "5px" }}>
-                        <button onClick={handleEdit} className="btn custom-btn shadow" style={{ 
-                            margin: 0, 
-                            padding: 0, 
-                            width: "30px",       
-                            height: "30px",      
+                        
+                        {/* Botón Editar */}
+                        <button onClick={handleEdit} className="btn custom-btn p-0" style={{ 
                             display: "flex", 
                             alignItems: "center", 
                             justifyContent: "center",
-                            borderRadius: "5px",
-                            backgroundColor: "white"
+                            backgroundColor: "transparent",
+                            border: "none"
                         }}>
                             <img
                                 src="/iconos principales/edit zone.svg"
                                 alt="Editar"
-                                style={{ width: '20px', height: '20px' }} 
+                                style={{ width: '12px', height: '12px' }} 
                             />
                         </button>
 
-                        <button onClick={handleClick} className="btn custom-btn shadow" style={{ 
-                            margin: 0, 
-                            padding: 0, 
-                            width: "30px", 
-                            height: "30px", 
+                        {/* Botón Eliminar */}
+                        <button onClick={handleClick} className="btn custom-btn p-0" style={{ 
                             display: "flex", 
                             alignItems: "center", 
                             justifyContent: "center",
-                            borderRadius: "5px",
-                            backgroundColor: "white"
+                            backgroundColor: "transparent",
+                            border: "none"
                         }}>
                             <img 
                                 src="/iconos principales/delete zone.svg" 
                                 alt="Eliminar" 
-                                style={{ width: '20px', height: '20px' }} 
+                                style={{ width: '12px', height: '12px' }} 
                             />
                         </button>
                     </div>

@@ -445,7 +445,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                         </div>
                     </div>
                     <div className="pl-3 pr-3 mb-3">
-                        <div className="card mt-2" style={{ borderColor: "#007bff", height: '25vh', overflowY: 'auto', overflowX: 'hidden' }}>
+                        <div className="card mt-2" style={{ borderColor: "#007bff", height: '30vh', overflowY: 'auto', overflowX: 'hidden' }}>
                             {nestedSuperiorAccounts &&
                                 Object.keys(nestedSuperiorAccounts).map((account) => (
                                     <div key={account} className="mb-2">
@@ -455,7 +455,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                         </div>
                     </div>
                     <div className="pl-3 pr-3 mb-3">
-                        <div className="card mt-2" style={{ borderColor: "#007bff", height: '25vh', overflowY: 'auto', overflowX: 'hidden' }}>
+                        <div className="card mt-2" style={{ borderColor: "#007bff", height: '30vh', overflowY: 'auto', overflowX: 'hidden' }}>
                             {filteredDrivers.length > 0 ? (
                                 <>
                                     <div className="row text-center">

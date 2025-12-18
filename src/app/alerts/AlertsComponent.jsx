@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 
 export default function AlertsComponent({ isOpen, toggleOpen }) {
+    // Simulamos los datos exactos de la imagen
     const alerts = [
         {
             id: 1,

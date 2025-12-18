@@ -139,12 +139,12 @@ export default function App(props) {
     const [state, setState] = useState(default_state);
     const [showSearch, setShowSearch] = useState(false);
     const [showBtnSearch, setShowBtnSearch] = useState(false);
-    const cardTracing = document.getElementById('tracing-container');
-    const cardDest = document.getElementById('react-container');
-    const cardUserInfo = document.getElementById('card-users-info');
-    const cardReportsInfo = document.getElementById('card-reports-info');
-    const divPrintRoute = document.getElementById('print-route');
-    const divAssignRoute = document.getElementById('assign-route');
+    const cardTracingRef = useRef(null);
+    const cardDestRef = useRef(null);
+    const cardUserInfoRef = useRef(null);
+    const cardReportsInfoRef = useRef(null);
+    const divPrintRouteRef = useRef(null);
+    const divAssignRouteRef = useRef(null);
     const [stateUser, setUser] = useState([]);
     const [error, setError] = useState('');
     const [initialized, setInitialized] = useState(false);
@@ -692,6 +692,15 @@ export default function App(props) {
         window.addEventListener('click', closeMenu);
 
         return () => window.removeEventListener('click', closeMenu);
+    }, []);
+
+    useEffect(() => {
+        cardTracingRef.current = document.getElementById('tracing-container');
+        cardDestRef.current = document.getElementById('react-container');
+        cardUserInfoRef.current = document.getElementById('card-users-info');
+        cardReportsInfoRef.current = document.getElementById('card-reports-info');
+        divPrintRouteRef.current = document.getElementById('print-route');
+        divAssignRouteRef.current = document.getElementById('assign-route');
     }, []);
 
     const handleContextMenu = (ev) => {
@@ -1291,7 +1300,7 @@ export default function App(props) {
                 </div>
             </div>
             {
-                ReactDOM.createPortal(
+                cardTracingRef.current && ReactDOM.createPortal(
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <TrackingComponent
                             email={email}
@@ -1307,11 +1316,11 @@ export default function App(props) {
                             toggleOpen={handleAlertsToggle}
                         />
                     </div>,
-                    cardTracing
+                    cardTracingRef.current
                 )
             }
             {
-                ReactDOM.createPortal(
+                cardDestRef.current && ReactDOM.createPortal(
                     <div key={formKey}>
                         <SelectDestinationsComponent state={state} setState={setState} changeDestination={changeDestination} addToDestinations={addToDestinations} createMarker={createMarker} map={map} moveMapToPlace={moveMapToPlace} />
                         <SelectVehiclesComponent state={state} setState={setState} />
@@ -1320,39 +1329,39 @@ export default function App(props) {
                         <ParametersAvoidComponent state={state} setState={setState} map={map} behavior={behavior} />
                         <DeviationAlertComponent state={state} setState={setState} />
                     </div>,
-                    cardDest
+                    cardDestRef.current
                 )
             }
             {
-                ReactDOM.createPortal(
+                divPrintRouteRef.current && ReactDOM.createPortal(
                     <div>
                         <PrintRouteComponent state={state} />
                     </div>,
-                    divPrintRoute
+                    divPrintRouteRef.current
                 )
             }
             {
-                ReactDOM.createPortal(
+                divAssignRouteRef.current && ReactDOM.createPortal(
                     <div>
                         <AssignRouteComponent state={state} />
                     </div>,
-                    divAssignRoute
+                    divAssignRouteRef.current
                 )
             }
             {
-                ReactDOM.createPortal(
+                cardUserInfoRef.current && ReactDOM.createPortal(
                     <div>
                         <UserComponent stateUser={stateUser} />
                     </div>,
-                    cardUserInfo
+                    cardUserInfoRef.current
                 )
             }
             {
-                ReactDOM.createPortal(
+                cardReportsInfoRef.current && ReactDOM.createPortal(
                     <div>
                         <ReportComponent />
                     </div>,
-                    cardReportsInfo
+                    cardReportsInfoRef.current
                 )
             }
         </div>

@@ -19,8 +19,8 @@ import UserComponent from './app/users/UserComponent.jsx';
 import AssignRouteComponent from './app/routes/AssignRouteComponent.jsx';
 import ReportComponent from './app/reports/ReportComponent.jsx';
 import TrackingComponent from './app/tracking/TrackingComponent.jsx';
-import PrintRouteComponent from './app/routes/PrintRouteComponent.jsx';
 import AlertsComponent from './app/alerts/AlertsComponent.jsx';
+import PrintRouteComponent from './app/routes/PrintRouteComponent.jsx';
 
 // Comenzamos con la creación de las variables globales para el uso de los mapas de HERE:
 var platformHERE = null;
@@ -152,8 +152,8 @@ export default function App(props) {
     const [formKey, setFormKey] = useState(0);
     const [notifications, setNotifications] = useState([]);
     const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
-    const [activePanel, setActivePanel] = useState('tracking');
-    const [isMapActive, setIsMapActive] = useState(true);
+    const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+    const [isTrackingOpen, setIsTrackingOpen] = useState(true);
 
     const appContainerRef = useRef(null);
     const menuRoutesRef = useRef(null);
@@ -162,6 +162,20 @@ export default function App(props) {
     const mapRef = useRef(null);
     const sessionStorageUser = JSON.parse(sessionStorage.getItem('data_user')) || "";
     const email = sessionStorageUser.email;
+
+    const handleTrackingToggle = () => {
+        if (!isTrackingOpen) {
+            setIsAlertsOpen(false);
+        }
+        setIsTrackingOpen(!isTrackingOpen);
+    };
+
+    const handleAlertsToggle = () => {
+        if (!isAlertsOpen) {
+            setIsTrackingOpen(false);
+        }
+        setIsAlertsOpen(!isAlertsOpen);
+    };
 
     const handleFullReset = () => {
         map.getObjects().forEach(obj => {
@@ -287,69 +301,6 @@ export default function App(props) {
     }, []);
 
     useEffect(() => {
-        // Chequeo inicial simple
-        const menuMapBtn = document.querySelector('#menuMap a');
-        if (menuMapBtn && menuMapBtn.classList.contains('btn-primary')) {
-            setIsMapActive(true);
-        } else {
-            setIsMapActive(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        const bodyTracing = document.getElementById('body-tracing');
-        const btnMinTracing = document.getElementById('btn-minimize-tracing');
-        const btnMaxTracing = document.getElementById('btn-maximize-tracing');
-        const headerTracing = document.getElementById('header-tracing');
-
-        const openTracking = () => {
-            setActivePanel('tracking');
-        };
-
-        const closeTracking = () => {
-        };
-
-        // Event listeners para la cabecera del tracking existente
-        if (headerTracing) {
-            headerTracing.onclick = () => {
-                if (activePanel === 'alerts') {
-                    setActivePanel('tracking');
-                } else {
-                    setActivePanel('alerts');
-                }
-            };
-        }
-    }, [activePanel]);
-
-    useEffect(() => {
-        const bodyTracing = document.getElementById('body-tracing');
-        const btnMinTracing = document.getElementById('btn-minimize-tracing');
-        const btnMaxTracing = document.getElementById('btn-maximize-tracing');
-
-        if (bodyTracing && btnMinTracing && btnMaxTracing) {
-            if (activePanel === 'tracking') {
-                // Mostrar Diagrama
-                bodyTracing.style.display = 'block';
-                btnMinTracing.style.display = 'block';
-                btnMaxTracing.style.display = 'none';
-            } else {
-                // Ocultar Diagrama
-                bodyTracing.style.display = 'none';
-                btnMinTracing.style.display = 'none';
-                btnMaxTracing.style.display = 'block';
-            }
-        }
-    }, [activePanel]);
-
-    useEffect(() => {
-        const leftPanel = document.getElementById('left-panel-container');
-        if (leftPanel) {
-            // Solo mostrar si isMapActive es true
-            leftPanel.style.display = isMapActive ? 'block' : 'none';
-        }
-    }, [isMapActive]);
-
-    useEffect(() => {
         // Function to toggle visibility based on menuRoutes class
         const toggleMapVisibility = () => {
             const menuRoutes = document.getElementById('menuRoutes');
@@ -428,6 +379,30 @@ export default function App(props) {
                 observerReports.disconnect();
             }
         };
+    }, []);
+
+    useEffect(() => {
+        const tracingDiv = document.getElementById('tracing-driver');
+        const menuMap = document.getElementById('menuMap');
+
+        const checkVisibility = () => {
+            if (tracingDiv && menuMap) {
+                if (menuMap.classList.contains('btn-primary')) {
+                    tracingDiv.style.display = 'block';
+                } else {
+                    tracingDiv.style.display = 'none';
+                }
+            }
+        };
+
+        checkVisibility();
+
+        if (menuMap) {
+            const observer = new MutationObserver(checkVisibility);
+            observer.observe(menuMap, { attributes: true, attributeFilter: ['class'] });
+
+            return () => observer.disconnect();
+        }
     }, []);
 
     useEffect(() => {
@@ -1317,8 +1292,20 @@ export default function App(props) {
             </div>
             {
                 ReactDOM.createPortal(
-                    <div>
-                        <TrackingComponent email={email} mapDrivers={mapDrivers} state={state} addMarkerToMap={addMarkerToMap} zoomLocation={zoomLocation} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <TrackingComponent
+                            email={email}
+                            mapDrivers={mapDrivers}
+                            state={state}
+                            addMarkerToMap={addMarkerToMap}
+                            zoomLocation={zoomLocation}
+                            isOpen={isTrackingOpen}
+                            toggleOpen={handleTrackingToggle}
+                        />
+                        <AlertsComponent
+                            isOpen={isAlertsOpen}
+                            toggleOpen={handleAlertsToggle}
+                        />
                     </div>,
                     cardTracing
                 )
@@ -1366,15 +1353,6 @@ export default function App(props) {
                         <ReportComponent />
                     </div>,
                     cardReportsInfo
-                )
-            }
-            {
-                ReactDOM.createPortal(
-                    <AlertsComponent
-                        isOpen={activePanel === 'alerts'}
-                        toggleOpen={() => setActivePanel(prev => prev === 'alerts' ? 'tracking' : 'alerts')}
-                    />,
-                    document.getElementById('alerts-wrapper')
                 )
             }
         </div>

@@ -8,8 +8,7 @@ const statusColors = {
     'Inactivo': '#FB8800'      // Naranja
 };
 
-export default function TrackingComponent(props) {
-    const userAuthenticatedEmail = props.email;
+export default function TrackingComponent({ email, mapDrivers, state, addMarkerToMap, zoomLocation, isOpen, toggleOpen }) {
     const [dataUsers, setDataUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [filteredDrivers, setFilteredDrivers] = useState([])
@@ -29,10 +28,10 @@ export default function TrackingComponent(props) {
 
     // useEffect para establecer selectedSuperiorAccount una vez que userAuthenticatedEmail esté disponible
     useEffect(() => {
-        if (userAuthenticatedEmail) {
-            setSelectedSuperiorAccount(userAuthenticatedEmail);
+        if (email) {
+            setSelectedSuperiorAccount(email);
         }
-    }, [userAuthenticatedEmail]);
+    }, [email]);
 
     useEffect(() => {
         applyFilters(); // Aplicar filtros cuando cambien filterName o filterType
@@ -160,9 +159,8 @@ export default function TrackingComponent(props) {
     // Llamar a la función para obtener la estructura anidada
     const nestedSuperiorAccounts = nestAccounts(
         superiorAccounts,
-        userAuthenticatedEmail
+        email
     );
-
     // Función para determinar el color del ícono basado en el rol
     const getIconColor = (email) => {
         const user = dataUsers.find((user) => user.email === email);
@@ -280,8 +278,8 @@ export default function TrackingComponent(props) {
         if (filterStatus === 'all') {
             setFilteredDriversStatus(filteredDrivers);
         }
-        if (props.mapDrivers) {
-            props.mapDrivers.removeObjects(props.mapDrivers.getObjects());
+        if (mapDrivers) {
+            mapDrivers.removeObjects(mapDrivers.getObjects());
 
             filteredDriversStatus.forEach((driver) => {
                 // Verificar que el driver tenga tracking y location antes de acceder
@@ -293,7 +291,7 @@ export default function TrackingComponent(props) {
 
                 // Solo agregar marcadores si la latitud y longitud no son 0
                 if (latitude !== 0 && longitude !== 0) {
-                    props.addMarkerToMap(props.mapDrivers, driver._id, latitude, longitude, driver.tracking.status, driver.name);
+                    addMarkerToMap(mapDrivers, driver._id, latitude, longitude, driver.tracking.status, driver.name);
                 }
             });
         }
@@ -308,7 +306,7 @@ export default function TrackingComponent(props) {
         setDriversOnline(onlineCount);
         setDriversOffline(offlineCount);
 
-    }, [filteredDrivers, filteredDriversStatus, filterStatus, props.mapDrivers]);
+    }, [filteredDrivers, filteredDriversStatus, filterStatus, mapDrivers]);
 
     const handleFilterStatusChange = (status) => {
         setFilterStatus(status);
@@ -333,7 +331,7 @@ export default function TrackingComponent(props) {
     };
 
     const handleZoomLocation = (latitude, longitude) => {
-        props.zoomLocation(props.mapDrivers, latitude, longitude);
+        zoomLocation(mapDrivers, latitude, longitude);
     }
 
     const convertToUpperCase = (str) => {
@@ -343,182 +341,212 @@ export default function TrackingComponent(props) {
     };
 
     return (
-        <div className="card-body p-0">
-            <div className="row">
-                <div className="col-12">
-                    <div className="input-group p-3" style={{ position: "relative" }}>
-                        <input
-                            type="text"
-                            className="form-control"
-                            style={{ height: "23px", paddingRight: "30px" }}
-                            placeholder="Ingresar nombre"
-                            value={searchInput}
-                            onChange={handleFilterName}
-                        />
-                        <i
-                            className="icon-search-2"
-                            style={{
-                                position: "absolute",
-                                right: "15px",
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                            }}
-                        ></i>
+        <div className="card" style={{
+            borderRadius: '10px',
+            overflow: 'hidden',
+            border: 'none',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}>
+            {/* Header Naranja */}
+            <div
+                onClick={toggleOpen}
+                style={{
+                    background: '#FB8800',
+                    color: 'white',
+                    padding: '8px 15px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    height: '40px'
+                }}
+            >
+                <span style={{ fontWeight: 'bold', fontSize: '15px' }}>Diagrama de cuentas</span>
+
+                <div style={{ position: 'absolute', right: '15px' }}>
+                    <i className={`fas ${isOpen ? "fa-chevron-up" : "fa-chevron-down"}`} style={{ fontSize: '12px' }}></i>
+                </div>
+            </div>
+
+            {isOpen && (
+                <div className="card-body p-0">
+                    <div className="row">
+                        <div className="col-12">
+                            <div className="input-group p-3" style={{ position: "relative" }}>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    style={{ height: "23px", paddingRight: "30px" }}
+                                    placeholder="Ingresar nombre"
+                                    value={searchInput}
+                                    onChange={handleFilterName}
+                                />
+                                <i
+                                    className="icon-search-2"
+                                    style={{
+                                        position: "absolute",
+                                        right: "15px",
+                                        top: "50%",
+                                        transform: "translateY(-50%)",
+                                    }}
+                                ></i>
+                            </div>
+
+                            {suggestions.length > 0 && (
+                                <ul
+                                    className="list-group pl-3"
+                                    style={{
+                                        position: "absolute",
+                                        zIndex: 1000,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        width: "100%",
+                                    }}
+                                >
+                                    <div className="row">
+                                        <div className="col-md-5">
+                                            {suggestions
+                                                .slice(0, Math.ceil(suggestions.length / 2))
+                                                .map((suggestion) => (
+                                                    <li
+                                                        key={suggestion.email}
+                                                        className="list-group-item list-group-item-action count-option mb-2 p-2"
+                                                        onClick={() => handleSuggestionClick(suggestion.email)}
+                                                        style={{ cursor: "pointer", background: "#007BFF" }}
+                                                    >
+                                                        {suggestion.name}
+                                                    </li>
+                                                ))}
+                                        </div>
+                                        <div className="col-md-5">
+                                            {suggestions
+                                                .slice(Math.ceil(suggestions.length / 2))
+                                                .map((suggestion) => (
+                                                    <li
+                                                        key={suggestion.email}
+                                                        className="list-group-item list-group-item-action count-option mb-2 p-2"
+                                                        onClick={() => handleSuggestionClick(suggestion.email)}
+                                                        style={{ cursor: "pointer", background: "#007BFF" }}
+                                                    >
+                                                        {suggestion.name}
+                                                    </li>
+                                                ))}
+                                        </div>
+                                    </div>
+                                </ul>
+                            )}
+                        </div>
                     </div>
-
-                    {suggestions.length > 0 && (
-                        <ul
-                            className="list-group pl-3"
-                            style={{
-                                position: "absolute",
-                                zIndex: 1000,
-                                display: "flex",
-                                flexDirection: "column",
-                                width: "100%",
-                            }}
-                        >
-                            <div className="row">
-                                <div className="col-md-5">
-                                    {suggestions
-                                        .slice(0, Math.ceil(suggestions.length / 2))
-                                        .map((suggestion) => (
-                                            <li
-                                                key={suggestion.email}
-                                                className="list-group-item list-group-item-action count-option mb-2 p-2"
-                                                onClick={() => handleSuggestionClick(suggestion.email)}
-                                                style={{ cursor: "pointer", background: "#007BFF" }}
+                    <div className="pl-3 pr-3 mb-3">
+                        <div className="card mt-2" style={{ borderColor: "#007bff", height: '35vh', overflowY: 'auto', overflowX: 'hidden' }}>
+                            {nestedSuperiorAccounts &&
+                                Object.keys(nestedSuperiorAccounts).map((account) => (
+                                    <div key={account} className="mb-2">
+                                        {renderNestedAccounts(nestedSuperiorAccounts)}
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+                    <div className="pl-3 pr-3 mb-3">
+                        <div className="card mt-2" style={{ borderColor: "#007bff", height: '35vh', overflowY: 'auto', overflowX: 'hidden' }}>
+                            {filteredDrivers.length > 0 ? (
+                                <>
+                                    <div className="row text-center">
+                                        <div className="col-4 pt-2 pb-2 pr-0 pl-3">
+                                            <button
+                                                onClick={() => handleFilterStatusChange('all')}
+                                                type="button"
+                                                className={`btn btn-light btn-sm ${filterStatus === 'all' ? 'btn-status-active' : ''}`}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 9 }}
                                             >
-                                                {suggestion.name}
-                                            </li>
-                                        ))}
-                                </div>
-                                <div className="col-md-5">
-                                    {suggestions
-                                        .slice(Math.ceil(suggestions.length / 2))
-                                        .map((suggestion) => (
-                                            <li
-                                                key={suggestion.email}
-                                                className="list-group-item list-group-item-action count-option mb-2 p-2"
-                                                onClick={() => handleSuggestionClick(suggestion.email)}
-                                                style={{ cursor: "pointer", background: "#007BFF" }}
-                                            >
-                                                {suggestion.name}
-                                            </li>
-                                        ))}
-                                </div>
-                            </div>
-                        </ul>
-                    )}
-                </div>
-            </div>
-            <div className="pl-3 pr-3 mb-3">
-                <div className="card mt-2" style={{ borderColor: "#007bff", height: '35vh', overflowY: 'auto', overflowX: 'hidden' }}>
-                    {nestedSuperiorAccounts &&
-                        Object.keys(nestedSuperiorAccounts).map((account) => (
-                            <div key={account} className="mb-2">
-                                {renderNestedAccounts(nestedSuperiorAccounts)}
-                            </div>
-                        ))}
-                </div>
-            </div>
-            <div className="pl-3 pr-3 mb-3">
-                <div className="card mt-2" style={{ borderColor: "#007bff", height: '35vh', overflowY: 'auto', overflowX: 'hidden' }}>
-                    {filteredDrivers.length > 0 ? (
-                        <>
-                            <div className="row text-center">
-                                <div className="col-4 pt-2 pb-2 pr-0 pl-3">
-                                    <button
-                                        onClick={() => handleFilterStatusChange('all')}
-                                        type="button"
-                                        className={`btn btn-light btn-sm ${filterStatus === 'all' ? 'btn-status-active' : ''}`}
-                                        style={{ borderColor: "#000000", borderRadius: 15, fontSize: 9 }}
-                                    >
-                                        TODOS ({filteredDrivers.length})
-                                    </button>
-                                </div>
-                                <div className="col-3 pt-2 pb-2 pr-0 pl-0">
-                                    <button
-                                        onClick={() => handleFilterStatusChange('online')}
-                                        type="button"
-                                        className={`btn btn-light btn-sm ${filterStatus === 'online' ? 'btn-status-active' : ''}`}
-                                        style={{ borderColor: "#000000", borderRadius: 15, fontSize: 9 }}
-                                    >
-                                        EN LÍNEA ({driversOnline})
-                                    </button>
-                                </div>
-                                <div className="col-5 pt-2 pb-2 pl-0">
-                                    <button
-                                        onClick={() => handleFilterStatusChange('offline')}
-                                        type="button"
-                                        className={`btn btn-light btn-sm ${filterStatus === 'offline' ? 'btn-status-active' : ''}`}
-                                        style={{ borderColor: "#000000", borderRadius: 15, fontSize: 9 }}
-                                    >
-                                        FUERA DE LÍNEA ({driversOffline})
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="row text-center mt-2">
-                                <div className="col-12 pt-2 pb-2">
-                                    <select
-                                        id="updateInterval"
-                                        className="form-select form-select-sm"
-                                        value={updateInterval}
-                                        onChange={(e) => setUpdateInterval(Number(e.target.value))}
-                                        style={{ border: "noneS", color: "#000000", borderRadius: 15, fontSize: 10, backgroundColor: "rgb(206, 206, 206)" }}
-                                    >
-                                        <option value={30000}>Actualizar cada: 30 s</option>
-                                        <option value={60000}>Actualizar cada: 1 min</option>
-                                        <option value={90000}>Actualizar cada: 1:30 min</option>
-                                        <option value={120000}>Actualizar cada: 2 min</option>
-                                        <option value={150000}>Actualizar cada: 2:30 min</option>
-                                        <option value={180000}>Actualizar cada: 3 min</option>
-                                        <option value={210000}>Actualizar cada: 3:30 min</option>
-                                        <option value={240000}>Actualizar cada: 4 min</option>
-                                        <option value={270000}>Actualizar cada: 4:30 min</option>
-                                        <option value={300000}>Actualizar cada: 5 min</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="pt-2 pb-4">
-                                {filteredDriversStatus.map((driver, index) => {
-                                    // Verificar que tenga tracking antes de acceder al status
-                                    const driverStatus = driver.tracking?.status || 'Fuera de línea';
-                                    const backgroundColor = statusColors[driverStatus] || '#535353';
-
-                                    return (
-                                        <div key={index} className="col-12 pt-2" style={{ paddingLeft: 8, paddingRight: 8 }}>
-                                            <button id={`btnReportsDriver${index}`} type="button" className={'btn btn-lg btn-light'} onClick={() => {
-                                                if (driver.tracking?.location?.latitude && driver.tracking?.location?.longitude) {
-                                                    handleZoomLocation(driver.tracking.location.latitude, driver.tracking.location.longitude);
-                                                }
-                                            }} style={{ width: '100%', height: 40, padding: 0, paddingLeft: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'left', borderRadius: 10 }}>
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5.0 -10.0 110.0 135.0" className={'icon-active-report'} style={{ width: '30px', height: '30px', paddingTop: 2, background: backgroundColor, borderRadius: 6 }}>
-                                                    <path d="m57.711 64.23c-1.0234-1.0234-2.418-1.6055-3.8672-1.6055l-22.645 0.003906-4.0938-20.16h22.109c3.0195 0 5.4727-2.4453 5.4727-5.4727 0-3.0195-2.4492-5.4727-5.4727-5.4727l-28.801 0.003906c-1.6445 0-3.1953 0.73438-4.2344 2.0078-1.0391 1.2695-1.4531 2.9414-1.125 4.5547l6.3125 31.105c0.51953 2.5469 2.7617 4.3828 5.3633 4.3828h24.852l18.414 18.414c1.0664 1.0703 2.4688 1.6055 3.8672 1.6055 1.3984 0 2.8008-0.53125 3.8672-1.6055 2.1367-2.1367 2.1367-5.6016 0-7.7344zm23.77-32.703h-13.332v-6.5781c0-3.0195-2.4492-5.4727-5.4727-5.4727-3.0195 0-5.4727 2.4492-5.4727 5.4727v21.98c0 3.0195 2.4492 5.4727 5.4727 5.4727 3.0234 0 5.4727-2.4492 5.4727-5.4727v-4.4609h13.332c3.0195 0 5.4727-2.4453 5.4727-5.4727-0.003906-3.0195-2.4531-5.4688-5.4727-5.4688zm-57.785-25.117c5.8828 0 10.648 4.7695 10.648 10.648 0 5.8828-4.7695 10.648-10.648 10.648-5.8789 0-10.648-4.7656-10.648-10.648 0-5.8789 4.7695-10.648 10.648-10.648z" />
-                                                </svg>
-                                                <div className="mr-3" style={{ marginLeft: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                                    <span className={'text-driver-name'} style={{ fontWeight: 'bold' }}>{driver.name}</span>
-                                                    <span className={'text-driver-date'}>
-                                                        {driver.tracking?.location?.timestamp
-                                                            ? getCurrentLocalDateTime(driver.tracking.location.timestamp)
-                                                            : '--/--/----, --:--:--'}
-                                                    </span>
-                                                </div>
-                                                <span className={'text-driver-date pl-2 pr-2 ml-1'} style={{ border: '2px solid', borderColor: backgroundColor, borderRadius: 10, fontSize: 10, color: backgroundColor, fontWeight: 'bold' }}>
-                                                    {convertToUpperCase(driverStatus)}
-                                                </span>
+                                                TODOS ({filteredDrivers.length})
                                             </button>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        </>
-                    ) : (
-                        <div className="col-12 mt-2">
-                            <span className={'text-driver-date text-center'} style={{ fontSize: 10 }}>NO HAY CONDUCTORES ASOCIADOS A ESTA CUENTA</span>
+                                        <div className="col-3 pt-2 pb-2 pr-0 pl-0">
+                                            <button
+                                                onClick={() => handleFilterStatusChange('online')}
+                                                type="button"
+                                                className={`btn btn-light btn-sm ${filterStatus === 'online' ? 'btn-status-active' : ''}`}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 9 }}
+                                            >
+                                                EN LÍNEA ({driversOnline})
+                                            </button>
+                                        </div>
+                                        <div className="col-5 pt-2 pb-2 pl-0">
+                                            <button
+                                                onClick={() => handleFilterStatusChange('offline')}
+                                                type="button"
+                                                className={`btn btn-light btn-sm ${filterStatus === 'offline' ? 'btn-status-active' : ''}`}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 9 }}
+                                            >
+                                                FUERA DE LÍNEA ({driversOffline})
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="row text-center mt-2">
+                                        <div className="col-12 pt-2 pb-2">
+                                            <select
+                                                id="updateInterval"
+                                                className="form-select form-select-sm"
+                                                value={updateInterval}
+                                                onChange={(e) => setUpdateInterval(Number(e.target.value))}
+                                                style={{ border: "noneS", color: "#000000", borderRadius: 15, fontSize: 10, backgroundColor: "rgb(206, 206, 206)" }}
+                                            >
+                                                <option value={30000}>Actualizar cada: 30 s</option>
+                                                <option value={60000}>Actualizar cada: 1 min</option>
+                                                <option value={90000}>Actualizar cada: 1:30 min</option>
+                                                <option value={120000}>Actualizar cada: 2 min</option>
+                                                <option value={150000}>Actualizar cada: 2:30 min</option>
+                                                <option value={180000}>Actualizar cada: 3 min</option>
+                                                <option value={210000}>Actualizar cada: 3:30 min</option>
+                                                <option value={240000}>Actualizar cada: 4 min</option>
+                                                <option value={270000}>Actualizar cada: 4:30 min</option>
+                                                <option value={300000}>Actualizar cada: 5 min</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="pt-2 pb-4">
+                                        {filteredDriversStatus.map((driver, index) => {
+                                            const driverStatus = driver.tracking?.status || 'Fuera de línea';
+                                            const backgroundColor = statusColors[driverStatus] || '#535353';
+
+                                            return (
+                                                <div key={index} className="col-12 pt-2" style={{ paddingLeft: 8, paddingRight: 8 }}>
+                                                    <button id={`btnReportsDriver${index}`} type="button" className={'btn btn-lg btn-light'} onClick={() => {
+                                                        if (driver.tracking?.location?.latitude && driver.tracking?.location?.longitude) {
+                                                            handleZoomLocation(driver.tracking.location.latitude, driver.tracking.location.longitude);
+                                                        }
+                                                    }} style={{ width: '100%', height: 40, padding: 0, paddingLeft: 5, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'left', borderRadius: 10 }}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5.0 -10.0 110.0 135.0" className={'icon-active-report'} style={{ width: '30px', height: '30px', paddingTop: 2, background: backgroundColor, borderRadius: 6 }}>
+                                                            <path d="m57.711 64.23c-1.0234-1.0234-2.418-1.6055-3.8672-1.6055l-22.645 0.003906-4.0938-20.16h22.109c3.0195 0 5.4727-2.4453 5.4727-5.4727 0-3.0195-2.4492-5.4727-5.4727-5.4727l-28.801 0.003906c-1.6445 0-3.1953 0.73438-4.2344 2.0078-1.0391 1.2695-1.4531 2.9414-1.125 4.5547l6.3125 31.105c0.51953 2.5469 2.7617 4.3828 5.3633 4.3828h24.852l18.414 18.414c1.0664 1.0703 2.4688 1.6055 3.8672 1.6055 1.3984 0 2.8008-0.53125 3.8672-1.6055 2.1367-2.1367 2.1367-5.6016 0-7.7344zm23.77-32.703h-13.332v-6.5781c0-3.0195-2.4492-5.4727-5.4727-5.4727-3.0195 0-5.4727 2.4492-5.4727 5.4727v21.98c0 3.0195 2.4492 5.4727 5.4727 5.4727 3.0234 0 5.4727-2.4492 5.4727-5.4727v-4.4609h13.332c3.0195 0 5.4727-2.4453 5.4727-5.4727-0.003906-3.0195-2.4531-5.4688-5.4727-5.4688zm-57.785-25.117c5.8828 0 10.648 4.7695 10.648 10.648 0 5.8828-4.7695 10.648-10.648 10.648-5.8789 0-10.648-4.7656-10.648-10.648 0-5.8789 4.7695-10.648 10.648-10.648z" />
+                                                        </svg>
+                                                        <div className="mr-3" style={{ marginLeft: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                                            <span className={'text-driver-name'} style={{ fontWeight: 'bold' }}>{driver.name}</span>
+                                                            <span className={'text-driver-date'}>
+                                                                {driver.tracking?.location?.timestamp
+                                                                    ? getCurrentLocalDateTime(driver.tracking.location.timestamp)
+                                                                    : '--/--/----, --:--:--'}
+                                                            </span>
+                                                        </div>
+                                                        <span className={'text-driver-date pl-2 pr-2 ml-1'} style={{ border: '2px solid', borderColor: backgroundColor, borderRadius: 10, fontSize: 10, color: backgroundColor, fontWeight: 'bold' }}>
+                                                            {convertToUpperCase(driverStatus)}
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="col-12 mt-2">
+                                    <span className={'text-driver-date text-center'} style={{ fontSize: 10 }}>NO HAY CONDUCTORES ASOCIADOS A ESTA CUENTA</span>
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

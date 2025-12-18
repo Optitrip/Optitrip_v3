@@ -388,7 +388,11 @@ export default function App(props) {
 
         const checkVisibility = () => {
             if (tracingDiv && menuMap) {
-                if (menuMap.classList.contains('btn-primary')) {
+        
+                const isPrimary = menuMap.classList.contains('btn-primary') || 
+                                  (menuMap.querySelector('a') && menuMap.querySelector('a').classList.contains('btn-primary'));
+
+                if (isPrimary) {
                     tracingDiv.style.display = 'block';
                 } else {
                     tracingDiv.style.display = 'none';
@@ -400,7 +404,7 @@ export default function App(props) {
 
         if (menuMap) {
             const observer = new MutationObserver(checkVisibility);
-            observer.observe(menuMap, { attributes: true, attributeFilter: ['class'] });
+            observer.observe(menuMap, { attributes: true, attributeFilter: ['class'], subtree: true });
 
             return () => observer.disconnect();
         }

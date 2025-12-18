@@ -150,7 +150,7 @@ export default function App(props) {
     const [isMenuRoutesPrimary, setIsMenuRoutesPrimary] = useState(false);
     const [formKey, setFormKey] = useState(0);
     const [notifications, setNotifications] = useState([]);
-    const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+    const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
 
     const appContainerRef = useRef(null);
     const menuRoutesRef = useRef(null);
@@ -635,10 +635,22 @@ export default function App(props) {
             newBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setShowNotificationsModal(true);
+
+                setShowNotificationsMenu(prev => !prev);
+
+                const img = newBtn.querySelector('img');
+                if (img) {
+                    img.classList.remove('blinking-icon')
+                }
+
                 newBtn.style.border = "none";
             });
         }
+
+        const closeMenu = () => setShowNotificationsMenu(false);
+        window.addEventListener('click', closeMenu);
+
+        return () => window.removeEventListener('click', closeMenu);
     }, []);
 
     const handleContextMenu = (ev) => {
@@ -844,26 +856,22 @@ export default function App(props) {
         return marker;
     }
 
-    const handleMarkAsSeen = async (routeId, deviationId) => {
+    const handleMarkAsSeen = async (notif) => {
         try {
-            const response = await fetch(`${base_url}/report/deviation/seen`, {
+            await fetch(`${base_url}/report/deviation/seen`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ routeId, deviationId })
+                body: JSON.stringify({ routeId: notif.routeId, deviationId: notif.deviationId })
             });
+            const updatedNotifications = notifications.filter(n => n.deviationId !== notif.deviationId);
+            setNotifications(updatedNotifications);
 
-            if (response.ok) {
-                // Filtrar la notificación de la lista local
-                const updatedNotifications = notifications.filter(n => n.deviationId !== deviationId);
-                setNotifications(updatedNotifications);
-
-                // Si ya no hay notificaciones, apagar el parpadeo inmediatamente
+            if (updatedNotifications.length === 0) {
                 const notifBtn = document.getElementById('notificationsButton');
-                if (notifBtn && updatedNotifications.length === 0) {
-                    const img = notifBtn.querySelector('img');
-                    if (img) img.classList.remove('blinking-icon');
-                }
+                const img = notifBtn?.querySelector('img');
+                if (img) img.classList.remove('blinking-icon');
             }
+
         } catch (error) {
             console.error("Error marking as seen", error);
         }
@@ -1165,108 +1173,49 @@ export default function App(props) {
 
     return (
         <div>
-            {showNotificationsModal && (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    background: 'rgba(0, 0, 0, 0.5)', zIndex: 9999, display: 'flex',
-                    justifyContent: 'center', alignItems: 'center'
-                }} onClick={() => setShowNotificationsModal(false)}>
+            {showNotificationsMenu && (
+                <div className="notification-dropdown" onClick={(e) => e.stopPropagation()}>
+                    <div className="notif-header">
+                        Menú alerta
+                    </div>
 
-                    <div style={{
-                        position: 'absolute', top: '50px', right: '10px', width: '350px',
-                        background: 'white', borderRadius: '8px',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)', overflow: 'hidden'
-                    }} onClick={(e) => e.stopPropagation()}>
-
-                        {/* Header del Modal */}
-                        <div style={{
-                            background: 'linear-gradient(#c6c6c6, #767676)', padding: '8px 12px',
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                        }}>
-                            <span style={{ color: 'white', fontWeight: 'bold', fontSize: '14px' }}>
-                                Alertas de Desviación ({notifications.length})
-                            </span>
-                            <button onClick={() => setShowNotificationsModal(false)} style={{
-                                background: 'none', border: 'none', color: 'white', fontSize: '20px',
-                                cursor: 'pointer', padding: 0, lineHeight: 1
-                            }}>×</button>
-                        </div>
-
-                        {/* Lista de Alertas */}
-                        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                            {notifications.length === 0 ? (
-                                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
-                                    No hay alertas pendientes.
-                                </div>
-                            ) : (
-                                notifications.map((notif, index) => (
-                                    <div key={index} style={{
-                                        padding: '16px', borderBottom: '1px solid #e0e0e0',
-                                        background: 'white', transition: 'background 0.2s'
-                                    }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <div style={{
-                                                    width: '32px', height: '32px', background: '#e0e0e0',
-                                                    borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }}>
-                                                    <i className="icon-icono-rutas" style={{ fontSize: '16px', color: '#666' }}></i>
-                                                </div>
-                                                <div>
-                                                    <div style={{ fontWeight: 'bold', fontSize: '14px', color: '#333' }}>
-                                                        {notif.driverName || "Conductor"}
-                                                    </div>
-                                                    <div style={{ fontSize: '11px', color: '#888' }}>
-                                                        {new Date(notif.timestamp).toLocaleString()}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div style={{ width: '10px', height: '10px', background: '#ff4444', borderRadius: '50%' }}></div>
+                    <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                        {notifications.length === 0 ? (
+                            <div style={{ padding: '20px', textAlign: 'center', color: '#999', fontSize: '13px' }}>
+                                No hay alertas nuevas
+                            </div>
+                        ) : (
+                            notifications
+                                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                                .slice(0, 5)
+                                .map((notif, index) => (
+                                    <div
+                                        key={index}
+                                        className="notif-card"
+                                        onClick={() => handleMarkAsSeen(notif)}
+                                    >
+                                        <div className="notif-title">
+                                            {notif.type === "ORIGINAL_ROUTE" ? "Alerta de ruta recalculada" : "Alerta de desviacion de ruta"}
                                         </div>
 
-                                        <div style={{ fontSize: '13px', color: '#D32F2F', fontWeight: 'bold', marginBottom: '4px' }}>
-                                            ⚠️ DESVIACIÓN DETECTADA
-                                        </div>
-                                        <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
-                                            Decisión: <strong>{notif.type === "ORIGINAL_ROUTE" ? "Regresar a ruta" : "Recalcular destino"}</strong>
+                                        <div className="notif-subtitle">
+                                            {notif.driverName || "CONDUCTOR DESCONOCIDO"}
                                         </div>
 
-                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                            <button
-                                                onClick={() => {
-                                                    if (map) {
-                                                        moveMapToPlace(map, notif.lat, notif.lng);
-                                                        map.setZoom(16);
-                                                    }
-                                                    setShowNotificationsModal(false);
-                                                }}
-                                                style={{
-                                                    flex: 1, padding: '6px', background: 'white',
-                                                    border: '1px solid #007BFF', borderRadius: '4px',
-                                                    color: '#007BFF', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold'
-                                                }}
-                                            >
-                                                📍 Ver
-                                            </button>
-
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleMarkAsSeen(notif.routeId, notif.deviationId);
-                                                }}
-                                                style={{
-                                                    flex: 1, padding: '6px', background: '#28a745',
-                                                    border: 'none', borderRadius: '4px',
-                                                    color: 'white', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold'
-                                                }}
-                                            >
-                                                ✓ Visto
-                                            </button>
+                                        <div className="notif-time">
+                                            {notif.timestamp ? notif.timestamp.replace('T', ' ').substring(0, 19) : ""}
                                         </div>
+
+                                        <div className="unread-dot"></div>
                                     </div>
                                 ))
-                            )}
-                        </div>
+                        )}
+                    </div>
+                    {/* Botón Ver Más */}
+                    <div className="notif-footer">
+                        <button className="btn-see-more">
+                            Ver más
+                        </button>
                     </div>
                 </div>
             )}

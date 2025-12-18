@@ -20,6 +20,7 @@ import AssignRouteComponent from './app/routes/AssignRouteComponent.jsx';
 import ReportComponent from './app/reports/ReportComponent.jsx';
 import TrackingComponent from './app/tracking/TrackingComponent.jsx';
 import PrintRouteComponent from './app/routes/PrintRouteComponent.jsx';
+import AlertsComponent from './app/alerts/AlertsComponent.jsx';
 
 // Comenzamos con la creación de las variables globales para el uso de los mapas de HERE:
 var platformHERE = null;
@@ -151,6 +152,7 @@ export default function App(props) {
     const [formKey, setFormKey] = useState(0);
     const [notifications, setNotifications] = useState([]);
     const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
+    const [activePanel, setActivePanel] = useState('tracking');
 
     const appContainerRef = useRef(null);
     const menuRoutesRef = useRef(null);
@@ -282,6 +284,51 @@ export default function App(props) {
             observer.disconnect();
         };
     }, []);
+
+    useEffect(() => {
+        const bodyTracing = document.getElementById('body-tracing');
+        const btnMinTracing = document.getElementById('btn-minimize-tracing');
+        const btnMaxTracing = document.getElementById('btn-maximize-tracing');
+        const headerTracing = document.getElementById('header-tracing');
+
+        const openTracking = () => {
+            setActivePanel('tracking');
+        };
+
+        const closeTracking = () => {
+        };
+
+        // Event listeners para la cabecera del tracking existente
+        if (headerTracing) {
+            headerTracing.onclick = () => {
+                if (activePanel === 'alerts') {
+                    setActivePanel('tracking');
+                } else {
+                    setActivePanel('alerts'); 
+                }
+            };
+        }
+    }, [activePanel]);
+
+    useEffect(() => {
+        const bodyTracing = document.getElementById('body-tracing');
+        const btnMinTracing = document.getElementById('btn-minimize-tracing');
+        const btnMaxTracing = document.getElementById('btn-maximize-tracing');
+
+        if (bodyTracing && btnMinTracing && btnMaxTracing) {
+            if (activePanel === 'tracking') {
+                // Mostrar Diagrama
+                bodyTracing.style.display = 'block';
+                btnMinTracing.style.display = 'block';
+                btnMaxTracing.style.display = 'none';
+            } else {
+                // Ocultar Diagrama
+                bodyTracing.style.display = 'none';
+                btnMinTracing.style.display = 'none';
+                btnMaxTracing.style.display = 'block';
+            }
+        }
+    }, [activePanel]);
 
     useEffect(() => {
         // Function to toggle visibility based on menuRoutes class
@@ -1300,6 +1347,15 @@ export default function App(props) {
                         <ReportComponent />
                     </div>,
                     cardReportsInfo
+                )
+            }
+            {
+                ReactDOM.createPortal(
+                    <AlertsComponent 
+                        isOpen={activePanel === 'alerts'} 
+                        toggleOpen={() => setActivePanel(prev => prev === 'alerts' ? 'tracking' : 'alerts')}
+                    />,
+                    document.getElementById('alerts-wrapper')
                 )
             }
         </div>

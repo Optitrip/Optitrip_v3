@@ -98,7 +98,8 @@
           <!-- Botón de notificaciones -->
           <button class="btn text-white mr-2" type="button" id="notificationsButton"
             style="position: relative; padding: 8px;">
-            <img src="/public/iconos superiores/icono notificaciones.svg" alt="Notificaciones" style="width: 18px; height: 18px; filter: brightness(0) invert(1);">
+            <img src="/public/iconos superiores/icono notificaciones.svg" alt="Notificaciones"
+              style="width: 18px; height: 18px; filter: brightness(0) invert(1);">
           </button>
           <!-- Dropdown de usuario -->
           <div class="dropdown">
@@ -168,27 +169,36 @@
       </div>
     </div>
 
-    <div id="tracing-driver" style="width: 320px; position: absolute; top: 60px; left: 10px; display: block;">
-      <div class="card"
-        style="height: fit-content; max-height: calc(100vh - 55px - 20px); overflow: hidden; border-radius: 10px;">
-        <div class="card-header" id="card-create-route"
-          style="display: flex; justify-content: space-between; align-items: center; position: relative; padding: 3px;">
-          <span style="position: absolute; left: 50%; transform: translateX(-50%);">Diagrama de cuentas</span>
-          <div style="display: flex; align-items: center; margin-left: auto;">
-            <button id="btn-minimize-tracing"
-              style="border: none; background: none; margin-right: 8px; margin-top: 3px;">
-              <i class="icon-circle-up"></i>
-            </button>
-            <button id="btn-maximize-tracing"
-              style="border: none; background: none; margin-right: 8px; margin-top: 3px; display: none;">
-              <i class="icon-circle-down"></i>
-            </button>
+    <div id="left-sidebar-container"
+      style="width: 320px; position: absolute; top: 60px; left: 10px; display: block; z-index: 1000;">
+
+      <div id="tracing-driver" style="width: 100%; margin-bottom: 10px;">
+        <div class="card"
+          style="height: fit-content; max-height: calc(100vh - 55px - 20px); overflow: hidden; border-radius: 10px;">
+          <div class="card-header" id="header-tracing"
+            style="display: flex; justify-content: space-between; align-items: center; position: relative; padding: 3px; background-color: #FB8800; color: white; cursor: pointer;">
+            <span style="position: absolute; left: 50%; transform: translateX(-50%); font-weight: bold;">Diagrama de
+              cuentas</span>
+            <div style="display: flex; align-items: center; margin-left: auto;">
+              <button id="btn-minimize-tracing"
+                style="border: none; background: none; margin-right: 8px; color: white;">
+                <i class="icon-circle-up"></i>
+              </button>
+              <button id="btn-maximize-tracing"
+                style="border: none; background: none; margin-right: 8px; color: white; display: none;">
+                <i class="icon-circle-down"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body p-0" id="body-tracing">
+            <div id="tracing-container"></div>
           </div>
         </div>
-        <div class="card-body p-0">
-          <div id="tracing-container"></div>
-        </div>
       </div>
+
+      <div id="alerts-wrapper"></div>
+
     </div>
 
     <div id="create-route" style="width: 320px; position: absolute; top: 60px; left: 10px; display: none;">

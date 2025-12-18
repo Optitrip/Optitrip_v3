@@ -34,15 +34,29 @@ export default function AlertsComponent({ isOpen, toggleOpen }) {
             <div className="card-header" onClick={toggleOpen} style={{
                 background: 'linear-gradient(to right, #FB8800, #FB8800)',
                 color: 'white',
-                padding: '10px',
+                padding: '3px', // Padding delgado estilo GenerateRoute
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                position: 'relative',
                 borderRadius: '10px 10px 0 0'
             }}>
-                <span style={{ fontWeight: 'bold', fontSize: '14px' }}>Alertas</span>
-                <i className={`fas ${isOpen ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
+                {/* Título centrado absolutamente */}
+                <span style={{ 
+                    position: 'absolute', 
+                    left: '50%', 
+                    transform: 'translateX(-50%)', 
+                    fontWeight: 'bold', 
+                    fontSize: '14px' 
+                }}>
+                    Alertas
+                </span>
+                
+                {/* Icono a la derecha */}
+                <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto', marginRight: '8px', marginTop: '3px' }}>
+                    <i className={isOpen ? "icon-circle-up" : "icon-circle-down"}></i>
+                </div>
             </div>
 
             {isOpen && (

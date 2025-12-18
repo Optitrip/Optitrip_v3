@@ -168,34 +168,28 @@
       </div>
     </div>
 
-    <div id="panels-stack" style="width: 320px; position: absolute; top: 60px; left: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 10px;">
-
-    <div id="tracing-driver" style="width: 100%; display: block;">
-      <div class="card" style="height: fit-content; max-height: calc(100vh - 55px - 20px); overflow: hidden; border-radius: 10px;">
-        <div class="card-header" id="header-tracing" 
-             style="display: flex; justify-content: center; align-items: center; position: relative; padding: 3px; background-color: #FB8800; color: white; cursor: pointer; height: 35px;">
-          
-          <span style="font-weight: bold; font-size: 14px;">Diagrama de cuentas</span>
-          
-          <div style="position: absolute; right: 10px; display: flex; align-items: center;">
-             <button id="btn-minimize-tracing" style="border: none; background: none; color: white; padding: 0;">
-                <i class="icon-circle-up"></i>
-             </button>
-             <button id="btn-maximize-tracing" style="border: none; background: none; color: white; padding: 0; display: none;">
-                <i class="icon-circle-down"></i>
-             </button>
+    <div id="tracing-driver" style="width: 320px; position: absolute; top: 60px; left: 10px; display: block;">
+      <div class="card"
+        style="height: fit-content; max-height: calc(100vh - 55px - 20px); overflow: hidden; border-radius: 10px;">
+        <div class="card-header" id="card-create-route"
+          style="display: flex; justify-content: space-between; align-items: center; position: relative; padding: 3px;">
+          <span style="position: absolute; left: 50%; transform: translateX(-50%);">Diagrama de cuentas</span>
+          <div style="display: flex; align-items: center; margin-left: auto;">
+            <button id="btn-minimize-tracing"
+              style="border: none; background: none; margin-right: 8px; margin-top: 3px;">
+              <i class="icon-circle-up"></i>
+            </button>
+            <button id="btn-maximize-tracing"
+              style="border: none; background: none; margin-right: 8px; margin-top: 3px; display: none;">
+              <i class="icon-circle-down"></i>
+            </button>
           </div>
         </div>
-        
-        <div class="card-body p-0" id="body-tracing">
+        <div class="card-body p-0">
           <div id="tracing-container"></div>
         </div>
       </div>
     </div>
-
-    <div id="alerts-wrapper" style="width: 100%;"></div>
-
-</div>
 
     <div id="create-route" style="width: 320px; position: absolute; top: 60px; left: 10px; display: none;">
       <div class="card"

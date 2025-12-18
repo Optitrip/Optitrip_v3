@@ -1175,10 +1175,6 @@ export default function App(props) {
         <div>
             {showNotificationsMenu && (
                 <div className="notification-dropdown" onClick={(e) => e.stopPropagation()}>
-                    <div className="notif-header">
-                        Menú alerta
-                    </div>
-
                     {/* Lista de alertas */}
                     <div className="notif-list">
                         {notifications.length === 0 ? (
@@ -1199,7 +1195,7 @@ export default function App(props) {
                                             {notif.type === "ORIGINAL_ROUTE" ? "Alerta de ruta recalculada" : "Alerta de desviación"}
                                         </div>
 
-                                        <div className="notif-subtitle" style={{ color: '#6c757d' }}> {/* Color grisáceo para el nombre */}
+                                        <div className="notif-subtitle" style={{ color: '#6c757d' }}>
                                             {notif.driverName || "CONDUCTOR"}
                                         </div>
 

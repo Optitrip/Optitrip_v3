@@ -778,7 +778,13 @@
 }
 
 .notif-card:hover {
-    background-color: #f9f9f9;
+    background-color: #007bff; 
+}
+
+.notif-card:hover .notif-title,
+.notif-card:hover .notif-subtitle,
+.notif-card:hover .notif-time {
+    color: #ffffff !important;
 }
 
 /* Título de la alerta */

@@ -1195,7 +1195,7 @@ export default function App(props) {
                                             {notif.type === "ORIGINAL_ROUTE" ? "Alerta de ruta recalculada" : "Alerta de desviación"}
                                         </div>
 
-                                        <div className="notif-subtitle" style={{ color: '#6c757d' }}>
+                                        <div className="notif-subtitle">
                                             {notif.driverName || "CONDUCTOR"}
                                         </div>
 

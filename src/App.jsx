@@ -1179,10 +1179,11 @@ export default function App(props) {
                         Menú alerta
                     </div>
 
-                    <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                    {/* Lista de alertas */}
+                    <div className="notif-list">
                         {notifications.length === 0 ? (
-                            <div style={{ padding: '20px', textAlign: 'center', color: '#999', fontSize: '13px' }}>
-                                No hay alertas nuevas
+                            <div style={{ padding: '15px', textAlign: 'center', color: '#ccc', fontSize: '11px' }}>
+                                Sin alertas recientes
                             </div>
                         ) : (
                             notifications
@@ -1195,23 +1196,25 @@ export default function App(props) {
                                         onClick={() => handleMarkAsSeen(notif)}
                                     >
                                         <div className="notif-title">
-                                            {notif.type === "ORIGINAL_ROUTE" ? "Alerta de ruta recalculada" : "Alerta de desviacion de ruta"}
+                                            {notif.type === "ORIGINAL_ROUTE" ? "Alerta de ruta recalculada" : "Alerta de desviación"}
                                         </div>
 
-                                        <div className="notif-subtitle">
-                                            {notif.driverName || "CONDUCTOR DESCONOCIDO"}
+                                        <div className="notif-subtitle" style={{ color: '#6c757d' }}> {/* Color grisáceo para el nombre */}
+                                            {notif.driverName || "CONDUCTOR"}
                                         </div>
 
                                         <div className="notif-time">
                                             {notif.timestamp ? notif.timestamp.replace('T', ' ').substring(0, 19) : ""}
                                         </div>
 
+                                        {/* Puntito rojo */}
                                         <div className="unread-dot"></div>
                                     </div>
                                 ))
                         )}
                     </div>
-                    {/* Botón Ver Más */}
+
+                    {/* Footer Ver más */}
                     <div className="notif-footer">
                         <button className="btn-see-more">
                             Ver más

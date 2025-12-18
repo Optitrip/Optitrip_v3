@@ -153,6 +153,7 @@ export default function App(props) {
     const [notifications, setNotifications] = useState([]);
     const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
     const [activePanel, setActivePanel] = useState('tracking');
+    const [isMapActive, setIsMapActive] = useState(true);
 
     const appContainerRef = useRef(null);
     const menuRoutesRef = useRef(null);
@@ -286,6 +287,16 @@ export default function App(props) {
     }, []);
 
     useEffect(() => {
+        // Chequeo inicial simple
+        const menuMapBtn = document.querySelector('#menuMap a');
+        if (menuMapBtn && menuMapBtn.classList.contains('btn-primary')) {
+            setIsMapActive(true);
+        } else {
+            setIsMapActive(false);
+        }
+    }, []);
+
+    useEffect(() => {
         const bodyTracing = document.getElementById('body-tracing');
         const btnMinTracing = document.getElementById('btn-minimize-tracing');
         const btnMaxTracing = document.getElementById('btn-maximize-tracing');
@@ -304,7 +315,7 @@ export default function App(props) {
                 if (activePanel === 'alerts') {
                     setActivePanel('tracking');
                 } else {
-                    setActivePanel('alerts'); 
+                    setActivePanel('alerts');
                 }
             };
         }
@@ -329,6 +340,14 @@ export default function App(props) {
             }
         }
     }, [activePanel]);
+
+    useEffect(() => {
+        const leftPanel = document.getElementById('left-panel-container');
+        if (leftPanel) {
+            // Solo mostrar si isMapActive es true
+            leftPanel.style.display = isMapActive ? 'block' : 'none';
+        }
+    }, [isMapActive]);
 
     useEffect(() => {
         // Function to toggle visibility based on menuRoutes class
@@ -1351,8 +1370,8 @@ export default function App(props) {
             }
             {
                 ReactDOM.createPortal(
-                    <AlertsComponent 
-                        isOpen={activePanel === 'alerts'} 
+                    <AlertsComponent
+                        isOpen={activePanel === 'alerts'}
                         toggleOpen={() => setActivePanel(prev => prev === 'alerts' ? 'tracking' : 'alerts')}
                     />,
                     document.getElementById('alerts-wrapper')

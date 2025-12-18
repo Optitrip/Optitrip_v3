@@ -34,7 +34,7 @@ export default function AlertsComponent({ isOpen, toggleOpen }) {
             <div className="card-header" onClick={toggleOpen} style={{
                 background: 'linear-gradient(to right, #FB8800, #FB8800)',
                 color: 'white',
-                padding: '3px', // Padding delgado estilo GenerateRoute
+                padding: '6px', 
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',

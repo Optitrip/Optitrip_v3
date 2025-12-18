@@ -154,6 +154,7 @@ export default function App(props) {
     const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
     const [isAlertsOpen, setIsAlertsOpen] = useState(false);
     const [isTrackingOpen, setIsTrackingOpen] = useState(true);
+    const [refsReady, setRefsReady] = useState(false);
 
     const appContainerRef = useRef(null);
     const menuRoutesRef = useRef(null);
@@ -701,6 +702,9 @@ export default function App(props) {
         cardReportsInfoRef.current = document.getElementById('card-reports-info');
         divPrintRouteRef.current = document.getElementById('print-route');
         divAssignRouteRef.current = document.getElementById('assign-route');
+
+        // Forzar re-render cuando las referencias estén listas
+        setRefsReady(true);
     }, []);
 
     const handleContextMenu = (ev) => {
@@ -1300,7 +1304,7 @@ export default function App(props) {
                 </div>
             </div>
             {
-                cardTracingRef.current && ReactDOM.createPortal(
+                refsReady && cardTracingRef.current && ReactDOM.createPortal(
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <TrackingComponent
                             email={email}
@@ -1320,7 +1324,7 @@ export default function App(props) {
                 )
             }
             {
-                cardDestRef.current && ReactDOM.createPortal(
+                refsReady && cardDestRef.current && ReactDOM.createPortal(
                     <div key={formKey}>
                         <SelectDestinationsComponent state={state} setState={setState} changeDestination={changeDestination} addToDestinations={addToDestinations} createMarker={createMarker} map={map} moveMapToPlace={moveMapToPlace} />
                         <SelectVehiclesComponent state={state} setState={setState} />
@@ -1333,7 +1337,7 @@ export default function App(props) {
                 )
             }
             {
-                divPrintRouteRef.current && ReactDOM.createPortal(
+                 refsReady && divPrintRouteRef.current && ReactDOM.createPortal(
                     <div>
                         <PrintRouteComponent state={state} />
                     </div>,
@@ -1341,7 +1345,7 @@ export default function App(props) {
                 )
             }
             {
-                divAssignRouteRef.current && ReactDOM.createPortal(
+                refsReady && divAssignRouteRef.current && ReactDOM.createPortal(
                     <div>
                         <AssignRouteComponent state={state} />
                     </div>,
@@ -1349,7 +1353,7 @@ export default function App(props) {
                 )
             }
             {
-                cardUserInfoRef.current && ReactDOM.createPortal(
+                 refsReady && cardUserInfoRef.current && ReactDOM.createPortal(
                     <div>
                         <UserComponent stateUser={stateUser} />
                     </div>,
@@ -1357,7 +1361,7 @@ export default function App(props) {
                 )
             }
             {
-                cardReportsInfoRef.current && ReactDOM.createPortal(
+                refsReady && cardReportsInfoRef.current && ReactDOM.createPortal(
                     <div>
                         <ReportComponent />
                     </div>,

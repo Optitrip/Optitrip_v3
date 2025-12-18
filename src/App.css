@@ -763,8 +763,9 @@
 
 /* Lista contenedora */
 .notif-list {
-    max-height: 300px;
-    overflow-y: auto;
+    height: 300px;       
+    overflow-y: auto;   
+    position: relative; 
 }
 
 /* Tarjeta individual */
@@ -791,7 +792,7 @@
 .notif-title {
     font-size: 11px;
     font-weight: 700;
-    color: #555;
+    color: #747474;
     margin-bottom: 2px;
     line-height: 1.2;
 }
@@ -799,7 +800,7 @@
 /* Subtítulo  */
 .notif-subtitle {
     font-size: 10px; 
-    color: #4386bf;
+    color: #747474;
     margin-bottom: 2px;
     text-transform: uppercase;
     font-weight: 600;

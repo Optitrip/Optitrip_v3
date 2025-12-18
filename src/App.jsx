@@ -1178,8 +1178,17 @@ export default function App(props) {
                     {/* Lista de alertas */}
                     <div className="notif-list">
                         {notifications.length === 0 ? (
-                            <div style={{ padding: '15px', textAlign: 'center', color: '#ccc', fontSize: '11px' }}>
-                                Sin alertas recientes
+                            <div style={{
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexDirection: 'column',
+                                color: '#ccc',
+                                fontSize: '12px'
+                            }}>
+                                <i className="icon-icono-notificacion" style={{ fontSize: '24px', marginBottom: '8px', opacity: 0.5 }}></i>
+                                <span>No hay alertas nuevas</span>
                             </div>
                         ) : (
                             notifications

@@ -1209,7 +1209,15 @@ export default function App(props) {
                                         </div>
 
                                         <div className="notif-time">
-                                            {notif.timestamp ? notif.timestamp.replace('T', ' ').substring(0, 19) : ""}
+                                            {notif.timestamp ? new Date(notif.timestamp).toLocaleString('es-MX', {
+                                                year: 'numeric',
+                                                month: '2-digit',
+                                                day: '2-digit',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                second: '2-digit',
+                                                hour12: false
+                                            }) : ""}
                                         </div>
 
                                         {/* Puntito rojo */}

@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 
 export default function AlertsComponent({ isOpen, toggleOpen }) {
-    // Simulamos los datos exactos de la imagen
     const alerts = [
         {
             id: 1,
@@ -123,7 +122,7 @@ export default function AlertsComponent({ isOpen, toggleOpen }) {
                     </div>
 
                     {/* LISTA DE ALERTAS */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
                         {alerts.map((alert) => {
                             const isDeviation = alert.type === 'deviation';
 

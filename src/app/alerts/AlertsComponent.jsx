@@ -23,47 +23,40 @@ export default function AlertsComponent({ isOpen, toggleOpen }) {
     ];
 
     return (
-        <div className="card" style={{ 
-            borderRadius: '10px', 
-            overflow: 'hidden', 
+        <div className="card" style={{
+            borderRadius: '10px',
+            overflow: 'hidden',
             border: 'none',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             width: '100%',
             fontFamily: 'Arial, sans-serif'
         }}>
-            <div 
-                onClick={toggleOpen}
-                style={{ 
-                    background: '#FB8800', 
-                    color: 'white', 
-                    padding: '8px 15px',
-                    display: 'flex',
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    position: 'relative',
-                    height: '40px'
-                }}
-            >
-                <span style={{ fontWeight: 'bold', fontSize: '15px' }}>Alertas</span>
-                
-                <div style={{ position: 'absolute', right: '15px' }}>
-                    <i className={`fas ${isOpen ? "fa-chevron-up" : "fa-chevron-down"}`} style={{ fontSize: '12px' }}></i>
-                </div>
+            <div className="card-header" onClick={toggleOpen} style={{
+                background: 'linear-gradient(to right, #FB8800, #FB8800)',
+                color: 'white',
+                padding: '10px',
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                borderRadius: '10px 10px 0 0'
+            }}>
+                <span style={{ fontWeight: 'bold', fontSize: '14px' }}>Alertas</span>
+                <i className={`fas ${isOpen ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
             </div>
 
             {isOpen && (
                 <div style={{ background: '#F8F9FA', padding: '10px' }}>
-                    
+
                     {/* FILTROS */}
                     <div style={{ marginBottom: '15px' }}>
                         {/* Fila Fecha */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                             <label style={{ fontSize: '13px', color: '#333', width: '70px', margin: 0 }}>Fecha:</label>
                             <div style={{ position: 'relative', flex: 1 }}>
-                                <input 
-                                    type="text" 
-                                    defaultValue="08/12/2025  -  08/12/2025" 
+                                <input
+                                    type="text"
+                                    defaultValue="08/12/2025  -  08/12/2025"
                                     style={{
                                         width: '100%',
                                         fontSize: '12px',
@@ -119,7 +112,7 @@ export default function AlertsComponent({ isOpen, toggleOpen }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {alerts.map((alert) => {
                             const isDeviation = alert.type === 'deviation';
-                            
+
                             const cardBorder = isDeviation ? '1px solid #3B82F6' : '1px solid #999';
                             const titleColor = isDeviation ? '#3B82F6' : '#000';
                             const headerBg = isDeviation ? '#EBF5FF' : '#F3F3F3';
@@ -133,22 +126,22 @@ export default function AlertsComponent({ isOpen, toggleOpen }) {
                                     overflow: 'hidden'
                                 }}>
                                     {/* Card Header */}
-                                    <div style={{ 
-                                        padding: '8px 10px', 
+                                    <div style={{
+                                        padding: '8px 10px',
                                         background: headerBg,
                                         borderBottom: '1px solid #e0e0e0',
                                         display: 'flex',
                                         justifyContent: 'space-between',
                                         alignItems: 'center'
                                     }}>
-                                        <span style={{ 
-                                            fontSize: '12px', 
-                                            fontWeight: 'bold', 
-                                            color: titleColor 
+                                        <span style={{
+                                            fontSize: '12px',
+                                            fontWeight: 'bold',
+                                            color: titleColor
                                         }}>
                                             {alert.title}
                                         </span>
-                                        
+
                                         {/* Punto Rojo si no leída */}
                                         {!alert.isRead && (
                                             <div style={{
@@ -163,17 +156,17 @@ export default function AlertsComponent({ isOpen, toggleOpen }) {
 
                                     {/* Card Body */}
                                     <div style={{ padding: '8px 10px' }}>
-                                        <div style={{ 
-                                            fontSize: '12px', 
-                                            fontWeight: 'bold', 
+                                        <div style={{
+                                            fontSize: '12px',
+                                            fontWeight: 'bold',
                                             color: nameColor,
                                             textTransform: 'uppercase',
                                             marginBottom: '2px'
                                         }}>
                                             {alert.driver}
                                         </div>
-                                        <div style={{ 
-                                            fontSize: '11px', 
+                                        <div style={{
+                                            fontSize: '11px',
                                             color: '#999'
                                         }}>
                                             {alert.date}

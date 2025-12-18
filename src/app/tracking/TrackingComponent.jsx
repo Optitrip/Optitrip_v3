@@ -348,25 +348,18 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}>
             {/* Header Naranja */}
-            <div
-                onClick={toggleOpen}
-                style={{
-                    background: '#FB8800',
-                    color: 'white',
-                    padding: '8px 15px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    position: 'relative',
-                    height: '40px'
-                }}
-            >
-                <span style={{ fontWeight: 'bold', fontSize: '15px' }}>Diagrama de cuentas</span>
-
-                <div style={{ position: 'absolute', right: '15px' }}>
-                    <i className={`fas ${isOpen ? "fa-chevron-up" : "fa-chevron-down"}`} style={{ fontSize: '12px' }}></i>
-                </div>
+            <div className="card-header" onClick={toggleOpen} style={{
+                background: 'linear-gradient(to right, #FB8800, #FB8800)',
+                color: 'white',
+                padding: '10px',
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                borderRadius: '10px 10px 0 0'
+            }}>
+                <span style={{ fontWeight: 'bold', fontSize: '14px' }}>Diagrama de cuentas</span>
+                <i className={`fas ${isOpen ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
             </div>
 
             {isOpen && (

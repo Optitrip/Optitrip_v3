@@ -884,3 +884,51 @@
 .btn-see-more:hover {
   text-decoration: underline;
 }
+
+/* Estilos para el popup de alertas */
+.H_ib_body {
+  padding: 0 !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.H_ib_tail {
+  display: block !important;
+}
+
+/* Animación para tarjetas de alerta */
+@keyframes pulseAlert {
+
+  0%,
+  100% {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 4px 12px rgba(251, 136, 0, 0.3);
+  }
+}
+
+/* Efecto hover mejorado para tarjetas de alerta no leídas */
+.alert-card-unread:hover {
+  animation: pulseAlert 1s ease-in-out infinite;
+}
+
+/* Scroll personalizado para lista de alertas */
+div[style*="maxHeight: 300px"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+div[style*="maxHeight: 300px"]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+div[style*="maxHeight: 300px"]::-webkit-scrollbar-thumb {
+  background: #FB8800;
+  border-radius: 3px;
+}
+
+div[style*="maxHeight: 300px"]::-webkit-scrollbar-thumb:hover {
+  background: #e07700;
+}

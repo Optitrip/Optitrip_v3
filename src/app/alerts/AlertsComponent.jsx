@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { base_url } from '../../config.js';
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import es from 'date-fns/locale/es';
+registerLocale('es', es);
 
 export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onAlertSelect, map, ui }) {
     const [alerts, setAlerts] = useState([]);
     const [filteredAlerts, setFilteredAlerts] = useState([]);
-    const [dateFilter, setDateFilter] = useState('');
+    const [dateRange, setDateRange] = useState([null, null]);
+    const [startDate, endDate] = dateRange;
     const [driverFilter, setDriverFilter] = useState('');
     const [drivers, setDrivers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -19,7 +24,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     // Aplicar filtros cuando cambian
     useEffect(() => {
         applyFilters();
-    }, [alerts, dateFilter, driverFilter]);
+    }, [alerts, dateRange, driverFilter]);
 
     // Centrar mapa cuando hay una alerta seleccionada
     useEffect(() => {
@@ -52,19 +57,27 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         let filtered = [...alerts];
 
         // Filtro por fecha
-        if (dateFilter) {
-            const [startDate, endDate] = dateFilter.split(' - ');
-            if (startDate && endDate) {
-                filtered = filtered.filter(alert => {
-                    // Ajuste simple de fecha para evitar problemas de zona horaria si es string
-                    const alertDate = new Date(alert.timestamp);
-                    const start = new Date(startDate.split('/').reverse().join('-'));
-                    const end = new Date(endDate.split('/').reverse().join('-'));
-                    // Ajustar end al final del día
-                    end.setHours(23, 59, 59);
+        if (startDate) {
+            filtered = filtered.filter(alert => {
+                if (!alert.timestamp) return false;
+
+                const alertDate = new Date(alert.timestamp);
+                // Quitamos la hora para comparar solo fechas (00:00:00)
+                alertDate.setHours(0, 0, 0, 0);
+
+                const start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+
+                // Si hay fecha de fin, filtramos por rango
+                if (endDate) {
+                    const end = new Date(endDate);
+                    end.setHours(23, 59, 59, 999); // Final del día seleccionado
                     return alertDate >= start && alertDate <= end;
-                });
-            }
+                }
+
+                // Si solo hay fecha de inicio (o es el mismo día), comparamos igualdad exacta
+                return alertDate.getTime() === start.getTime();
+            });
         }
 
         // Filtro por conductor
@@ -102,7 +115,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         );
         existingMarkers.forEach(marker => map.removeObject(marker));
 
-        // Crear nuevo marcador (Codificamos el espacio en la URL)
+        // Crear nuevo marcador
         const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
             size: { w: 60, h: 40 },
             anchor: { x: 30, y: 40 }
@@ -112,7 +125,9 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             { lat: alert.lat, lng: alert.lng },
             {
                 icon: alertIcon,
-                data: { isAlertMarker: true, alert: alert }
+                data: { isAlertMarker: true, alert: alert },
+                volatility: true,
+                zIndex: 100
             }
         );
 
@@ -130,9 +145,9 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             ui.getBubbles().forEach(b => ui.removeBubble(b));
         }
 
-        const typeText = alert.type === "ORIGINAL_ROUTE" 
-        ? "Alerta de ruta recalculada" 
-        : "Alerta de desviación de ruta";
+        const typeText = alert.type === "ORIGINAL_ROUTE"
+            ? "Alerta de ruta recalculada"
+            : "Alerta de desviación de ruta";
 
         const d = new Date(alert.timestamp);
         const dateStr = d.getFullYear() + "-" +
@@ -338,28 +353,48 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                             <label style={{ fontSize: '13px', color: '#333', width: '70px', margin: 0 }}>Fecha:</label>
                             <div style={{ position: 'relative', flex: 1 }}>
-                                <input
-                                    type="text"
-                                    value={dateFilter}
-                                    onChange={handleDateChange}
-                                    placeholder="dd/mm/yyyy - dd/mm/yyyy"
+                                <DatePicker
+                                    selectsRange={true}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    onChange={(update) => setDateRange(update)}
+                                    isClearable={true}
+                                    locale="es"
+                                    dateFormat="dd/MM/yyyy"
+                                    placeholderText="Seleccionar rango"
+                                    className="form-control-sm" 
                                     style={{
                                         width: '100%',
                                         fontSize: '12px',
-                                        padding: '4px 25px 4px 8px',
+                                        padding: '4px 8px',
                                         border: '1px solid #6c757d',
                                         borderRadius: '4px',
                                         height: '28px',
                                         color: '#333'
                                     }}
+                                    customInput={
+                                        <input
+                                            style={{
+                                                width: '100%',
+                                                fontSize: '12px',
+                                                padding: '4px 25px 4px 8px',
+                                                border: '1px solid #6c757d',
+                                                borderRadius: '4px',
+                                                height: '28px',
+                                                color: '#333'
+                                            }}
+                                        />
+                                    }
                                 />
+
                                 <i className="fas fa-calendar-alt" style={{
                                     position: 'absolute',
                                     right: '8px',
                                     top: '50%',
                                     transform: 'translateY(-50%)',
                                     color: '#6c757d',
-                                    fontSize: '12px'
+                                    fontSize: '12px',
+                                    pointerEvents: 'none'
                                 }}></i>
                             </div>
                         </div>
@@ -470,10 +505,10 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                             <div style={{ padding: '5px 8px' }}>
                                                 {/* CONDUCTOR */}
                                                 <div style={{
-                                                    color: primaryColor, 
+                                                    color: primaryColor,
                                                     fontWeight: '600',
                                                     fontSize: '11px',
-                                                    marginBottom: '2px', 
+                                                    marginBottom: '2px',
                                                 }}>
                                                     {alert.driverName || "Conductor"}
                                                 </div>

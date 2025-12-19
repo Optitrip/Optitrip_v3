@@ -143,25 +143,48 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         const content = `
             <div style="
-                width: 230px; 
-                background-color: #F2F4F7; /* Fondo gris muy claro */
-                padding: 12px 10px;
-                font-family: Arial, sans-serif;
-                position: relative;
-                border-radius: 0px; /* Orillas cuadradas */
-                color: #333;
-                /* Eliminamos sombras extras para que se vea plano y limpio */
+                width: 240px; 
+                background-color: #F2F4F7; 
+                padding: 15px; 
+                font-family: Arial, sans-serif; 
+                position: relative; 
+                border-radius: 2px; /* Ligeramente redondeado en esquinas extremas, casi cuadrado */
+                box-sizing: border-box;
+                text-align: left;
             ">
-                <div style="position: absolute; top: 2px; right: 5px; cursor: pointer; z-index: 10;" onclick="window.closeAlertPopup()">
-                    <span style="font-size: 18px; color: #555; font-weight: bold;">&times;</span>
+                <div 
+                    onclick="window.closeAlertPopup()"
+                    style="
+                        position: absolute; 
+                        top: 10px; 
+                        right: 10px; 
+                        cursor: pointer; 
+                        z-index: 10;
+                        width: 20px;
+                        height: 20px;
+                        border: 1.5px solid #000;
+                        border-radius: 50%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        background: transparent;
+                    "
+                >
+                    <span style="
+                        font-size: 14px; 
+                        color: #000; 
+                        font-weight: bold; 
+                        line-height: 0;
+                        margin-top: -1px; /* Ajuste fino vertical */
+                    ">&times;</span>
                 </div>
 
                 <div style="
-                    font-size: 13px; 
-                    font-weight: bold; 
+                    font-size: 14px; 
+                    font-weight: 800; 
                     color: #000000; 
                     margin-bottom: 2px;
-                    padding-right: 15px; /* Espacio para que no choque con la X */
+                    padding-right: 25px; /* Espacio para que no choque con la X */
                     text-transform: uppercase;
                 ">
                     ${alert.driverName || 'CONDUCTOR'}
@@ -169,25 +192,25 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
                 <div style="
                     font-size: 13px; 
-                    font-weight: 600; 
-                    color: #4A4A4A; 
-                    margin-bottom: 6px;
+                    font-weight: 700; 
+                    color: #666666; 
+                    margin-bottom: 5px;
                 ">
                     ${typeText}
                 </div>
 
                 <div style="
-                    font-size: 11px; 
-                    color: #888888; 
-                    margin-bottom: 2px;
+                    font-size: 12px; 
+                    color: #999999; 
+                    margin-bottom: 5px;
                 ">
                     ${dateStr}
                 </div>
 
                 <div style="
-                    font-size: 11px; 
-                    color: #888888; 
-                    line-height: 1.3;
+                    font-size: 12px; 
+                    color: #999999; 
+                    line-height: 1.4;
                 ">
                     ${alert.address || `${alert.lat.toFixed(5)}, ${alert.lng.toFixed(5)}`}
                 </div>

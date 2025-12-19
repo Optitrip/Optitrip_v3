@@ -885,13 +885,26 @@
   text-decoration: underline;
 }
 
-.H_ib_body {
-    padding: 0 !important;
+.H_ib {
+    box-shadow: none !important;
+    filter: none !important; 
+}
+
+.H_ib_body, .H_ib_content {
     background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.H_ib_close {
+    display: none !important;
 }
 
 .H_ib_tail svg path {
     fill: #F2F4F7 !important;
+    stroke: #F2F4F7 !important; 
 }
 
 /* Animación para tarjetas de alerta */

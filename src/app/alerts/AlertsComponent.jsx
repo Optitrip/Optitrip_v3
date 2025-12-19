@@ -105,7 +105,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         // Crear nuevo marcador (Codificamos el espacio en la URL)
         const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
             size: { w: 40, h: 40 },
-            anchor: { x: 20, y: 20 }
+            anchor: { x: 20, y: 40 }
         });
 
         const marker = new H.map.Marker(

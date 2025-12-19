@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base_url } from '../config.js';
+import { base_url } from '../../config.js';
 
 export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onAlertSelect, map }) {
     const [alerts, setAlerts] = useState([]);

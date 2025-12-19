@@ -120,21 +120,29 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     };
 
     const showAlertPopup = (alert) => {
-        
         // Limpiar bubble anterior
         if (ui.getBubbles().length > 0) {
             ui.getBubbles().forEach(b => ui.removeBubble(b));
         }
 
+        const typeText = alert.type === "ORIGINAL_ROUTE"
+            ? "Alerta de ruta recalculada"
+            : "Alerta de desviación de ruta";
+
+        const titleStyle = "font-size: 14px; font-weight: bold; color: #000; margin-bottom: 2px; text-transform: uppercase;";
+        const alertTypeStyle = "font-size: 13px; font-weight: bold; color: #FB8800; margin-bottom: 8px;";
+        const labelStyle = "font-size: 11px; color: #666; font-weight: bold;";
+        const dataStyle = "font-size: 11px; color: #333; margin-bottom: 6px;";
+
         const content = `
             <div style="padding: 15px; min-width: 260px; font-family: Arial, sans-serif; position: relative;">
                 
-                <div style="position: absolute; top: 5px; right: 10px; cursor: pointer;" onclick="window.closeAlertPopup()">
+                <div style="position: absolute; top: 0px; right: 0px; cursor: pointer;" onclick="window.closeAlertPopup()">
                     <span style="font-size: 18px; color: #999;">&times;</span>
                 </div>
 
                 <div style="${titleStyle}">
-                    ${alert.driverName}
+                    ${alert.driverName || 'CONDUCTOR'}
                 </div>
 
                 <div style="${alertTypeStyle}">
@@ -147,7 +155,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 <div style="${dataStyle}">
                     ${new Date(alert.timestamp).toLocaleString('es-MX', {
             day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
         })}
                 </div>
 
@@ -155,7 +163,6 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 <div style="${dataStyle}">
                     ${alert.address || `${alert.lat.toFixed(5)}, ${alert.lng.toFixed(5)}`}
                 </div>
-
             </div>
         `;
 
@@ -165,7 +172,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         );
 
         ui.addBubble(bubble);
-        
+
         // Centrar mapa
         map.setCenter({ lat: alert.lat, lng: alert.lng });
         map.setZoom(16);
@@ -345,13 +352,15 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                             ) : (
                                     filteredAlerts.map((alert) => {
                                         const isRecalc = alert.type === "ORIGINAL_ROUTE";
-                                        const themeColor = isRecalc ? '#DC3545' : '#007BFF'; 
+                                
+                                        const headerBg = '#E9ECEF'; 
+                                        const titleColor = isRecalc ? '#000' : '#007BFF'; 
+                                        const borderColor = isSelected && selectedAlert.deviationId === alert.deviationId
+                                            ? '#FB8800' 
+                                            : (isRecalc ? '#ccc' : '#007BFF'); 
 
                                         const isSelected = selectedAlert && selectedAlert.deviationId === alert.deviationId;
                                         const isRead = alert.seenByAdmin;
-
-                                        const borderColor = isSelected ? '#FB8800' : '#ccc';
-                                        const borderWidth = isSelected ? '2px' : '1px';
 
                                         return (
                                             <div
@@ -359,27 +368,27 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                                 onClick={() => handleAlertCardClick(alert)}
                                                 style={{
                                                     background: 'white',
-                                                    border: `${borderWidth} solid ${borderColor}`,
-                                                    borderRadius: '8px',
-                                                    marginBottom: '8px',
+                                                    border: `1px solid ${borderColor}`,
+                                                    borderRadius: '8px', 
+                                                    marginBottom: '10px',
                                                     cursor: 'pointer',
                                                     overflow: 'hidden',
-                                                    position: 'relative',
-                                                    boxShadow: isSelected ? '0 0 5px rgba(251, 136, 0, 0.5)' : 'none'
+                                                    boxShadow: isSelected ? '0 0 0 2px rgba(251, 136, 0, 0.5)' : '0 1px 3px rgba(0,0,0,0.1)'
                                                 }}
                                             >
+                                                {/* Header de la tarjeta */}
                                                 <div style={{
-                                                    background: '#F2F2F2',
-                                                    padding: '8px 10px',
+                                                    background: headerBg,
+                                                    padding: '8px 12px',
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
                                                     alignItems: 'center',
-                                                    borderBottom: '1px solid #e0e0e0'
+                                                    borderBottom: '1px solid #dee2e6'
                                                 }}>
                                                     <span style={{
-                                                        color: themeColor,
+                                                        color: isRecalc ? '#000' : '#007BFF', 
                                                         fontWeight: 'bold',
-                                                        fontSize: '13px'
+                                                        fontSize: '12px'
                                                     }}>
                                                         {isRecalc ? "Alerta de ruta recalculada" : "Alerta de desviación de ruta"}
                                                     </span>
@@ -389,17 +398,19 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                                             width: '8px',
                                                             height: '8px',
                                                             borderRadius: '50%',
-                                                            backgroundColor: 'red',
-                                                            marginLeft: '5px'
+                                                            backgroundColor: '#DC3545', // Rojo
+                                                            marginLeft: '8px',
+                                                            boxShadow: '0 0 2px rgba(220, 53, 69, 0.5)'
                                                         }}></div>
                                                     )}
                                                 </div>
 
-                                                <div style={{ padding: '8px 10px' }}>
+                                                {/* Cuerpo de la tarjeta */}
+                                                <div style={{ padding: '10px 12px' }}>
                                                     <div style={{
-                                                        color: '#007BFF',
+                                                        color: '#007BFF', 
                                                         fontWeight: 'bold',
-                                                        fontSize: '12px',
+                                                        fontSize: '13px',
                                                         textTransform: 'uppercase',
                                                         marginBottom: '4px'
                                                     }}>

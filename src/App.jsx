@@ -1239,17 +1239,19 @@ export default function App(props) {
 
     const handleAlertClick = async (notif) => {
         await handleMarkAsSeen(notif);
-
         setSelectedAlert(notif);
         setShowNotificationsMenu(false);
-
-        document.getElementById('users').style.display = 'none';
-        document.getElementById('reports').style.display = 'none';
+        
+        if (userSectionRef.current) userSectionRef.current.style.display = 'none';
+        if (reportSectionRef.current) reportSectionRef.current.style.display = 'none';
         
         const divRoutes = document.getElementById('show-routes');
         const createRoute = document.getElementById('create-route');
-        if(divRoutes) divRoutes.style.display = 'none';
-        if(createRoute) createRoute.style.display = 'none';
+        const showIndications = document.getElementById('show-indications');
+        
+        if (divRoutes) divRoutes.style.display = 'none';
+        if (createRoute) createRoute.style.display = 'none';
+        if (showIndications) showIndications.style.display = 'none';
 
         const menuRoutesBtn = document.getElementById('menuRoutes');
         const menuUsersBtn = document.getElementById('menuUsers');
@@ -1265,11 +1267,18 @@ export default function App(props) {
             menuMapBtn.classList.remove('btn-outline-primary');
         }
 
-        document.getElementById('map').style.display = 'none';        
-        document.getElementById('map-drivers').style.display = 'block'; 
+        const mapContainer = document.getElementById('map');
+        const mapDriversContainer = document.getElementById('map-drivers');
+        
+        if (mapContainer) mapContainer.style.display = 'none';
+        if (mapDriversContainer) mapDriversContainer.style.display = 'block';
 
-        setIsTrackingOpen(false); 
-        setIsAlertsOpen(true);   
+        setIsTrackingOpen(false);
+        setIsAlertsOpen(true);  
+        
+        setTimeout(() => {
+            if (mapDrivers) mapDrivers.getViewPort().resize();
+        }, 100);
     };
 
     const handleSeeMoreClick = () => {

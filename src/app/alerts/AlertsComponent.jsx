@@ -153,7 +153,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 box-sizing: border-box;
                 text-align: left;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                transform: translate(-50px, -50px);
+                transform: translate(50px, -50px);
             ">
                 <div 
                     onclick="window.closeAlertPopup()"

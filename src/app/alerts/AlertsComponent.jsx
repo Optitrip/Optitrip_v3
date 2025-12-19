@@ -125,6 +125,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     };
 
     const showAlertPopup = (alert) => {
+        // Limpiar bubble anterior
         if (ui.getBubbles().length > 0) {
             ui.getBubbles().forEach(b => ui.removeBubble(b));
         }
@@ -133,6 +134,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             ? "Ruta recalculada"
             : "Desviación de ruta";
 
+        // Formato de fecha
         const d = new Date(alert.timestamp);
         const dateStr = d.getFullYear() + "-" +
             ("0" + (d.getMonth() + 1)).slice(-2) + "-" +
@@ -143,25 +145,27 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         const content = `
             <div style="
-                width: 240px; 
+                width: 300px;
                 background-color: #F2F4F7; 
-                padding: 15px; 
+                padding: 12px 15px; 
                 font-family: Arial, sans-serif; 
                 position: relative; 
-                border-radius: 2px; /* Ligeramente redondeado en esquinas extremas, casi cuadrado */
+                border-radius: 4px; 
                 box-sizing: border-box;
                 text-align: left;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2); 
+                margin-bottom: 10px; 
             ">
                 <div 
                     onclick="window.closeAlertPopup()"
                     style="
                         position: absolute; 
-                        top: 10px; 
-                        right: 10px; 
+                        top: 8px; 
+                        right: 8px; 
                         cursor: pointer; 
                         z-index: 10;
-                        width: 20px;
-                        height: 20px;
+                        width: 18px;
+                        height: 18px;
                         border: 1.5px solid #000;
                         border-radius: 50%;
                         display: flex;
@@ -171,11 +175,11 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     "
                 >
                     <span style="
-                        font-size: 14px; 
+                        font-size: 12px; 
                         color: #000; 
                         font-weight: bold; 
                         line-height: 0;
-                        margin-top: -1px; /* Ajuste fino vertical */
+                        margin-top: -1px;
                     ">&times;</span>
                 </div>
 
@@ -183,8 +187,8 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     font-size: 14px; 
                     font-weight: 800; 
                     color: #000000; 
-                    margin-bottom: 2px;
-                    padding-right: 25px; /* Espacio para que no choque con la X */
+                    margin-bottom: 4px;
+                    padding-right: 20px;
                     text-transform: uppercase;
                 ">
                     ${alert.driverName || 'CONDUCTOR'}
@@ -192,28 +196,43 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
                 <div style="
                     font-size: 13px; 
-                    font-weight: 700; 
-                    color: #666666; 
-                    margin-bottom: 5px;
+                    font-weight: 600; 
+                    color: #4A4A4A; 
+                    margin-bottom: 6px;
                 ">
                     ${typeText}
                 </div>
 
                 <div style="
-                    font-size: 12px; 
-                    color: #999999; 
-                    margin-bottom: 5px;
+                    font-size: 11px; 
+                    color: #888888; 
+                    margin-bottom: 2px;
                 ">
                     ${dateStr}
                 </div>
 
                 <div style="
-                    font-size: 12px; 
-                    color: #999999; 
-                    line-height: 1.4;
+                    font-size: 11px; 
+                    color: #888888; 
+                    line-height: 1.3;
+                    white-space: nowrap;     
+                    overflow: hidden;         
+                    text-overflow: ellipsis;  
                 ">
                     ${alert.address || `${alert.lat.toFixed(5)}, ${alert.lng.toFixed(5)}`}
                 </div>
+
+                <div style="
+                    position: absolute;
+                    bottom: -8px; 
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 0; 
+                    height: 0; 
+                    border-left: 8px solid transparent;
+                    border-right: 8px solid transparent;
+                    border-top: 8px solid #F2F4F7;
+                "></div>
             </div>
         `;
 

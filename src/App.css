@@ -902,9 +902,8 @@
     display: none !important;
 }
 
-.H_ib_tail svg path {
-    fill: #F2F4F7 !important;
-    stroke: #F2F4F7 !important; 
+.H_ib_tail {
+    visibility: hidden !important; 
 }
 
 /* Animación para tarjetas de alerta */

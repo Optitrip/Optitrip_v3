@@ -31,6 +31,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     const fetchAlerts = async () => {
         setLoading(true);
         try {
+            // Usamos el endpoint que trae TODO el historial
             const response = await fetch(`${base_url}/reports/deviations/pending`);
             if (response.ok) {
                 const data = await response.json();
@@ -53,13 +54,17 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         // Filtro por fecha
         if (dateFilter) {
             const [startDate, endDate] = dateFilter.split(' - ');
-            filtered = filtered.filter(alert => {
-                const alertDate = new Date(alert.timestamp).toLocaleDateString('es-MX');
-                const start = new Date(startDate.split('/').reverse().join('-'));
-                const end = new Date(endDate.split('/').reverse().join('-'));
-                const current = new Date(alert.timestamp);
-                return current >= start && current <= end;
-            });
+            if (startDate && endDate) {
+                filtered = filtered.filter(alert => {
+                    // Ajuste simple de fecha para evitar problemas de zona horaria si es string
+                    const alertDate = new Date(alert.timestamp);
+                    const start = new Date(startDate.split('/').reverse().join('-'));
+                    const end = new Date(endDate.split('/').reverse().join('-'));
+                    // Ajustar end al final del día
+                    end.setHours(23, 59, 59);
+                    return alertDate >= start && alertDate <= end;
+                });
+            }
         }
 
         // Filtro por conductor
@@ -97,10 +102,10 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         );
         existingMarkers.forEach(marker => map.removeObject(marker));
 
-        // Crear nuevo marcador
+        // Crear nuevo marcador (Codificamos el espacio en la URL)
         const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
             size: { w: 40, h: 40 },
-            anchor: { x: 20, y: 20 }
+            anchor: { x: 20, y: 40 }
         });
 
         const marker = new H.map.Marker(
@@ -120,15 +125,16 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     };
 
     const showAlertPopup = (alert) => {
-        // Limpiar bubble anterior
+        // Limpiar bubble anterior usando la prop ui
         if (ui.getBubbles().length > 0) {
             ui.getBubbles().forEach(b => ui.removeBubble(b));
         }
 
         const typeText = alert.type === "ORIGINAL_ROUTE"
-            ? "Alerta de ruta recalculada"
-            : "Alerta de desviación de ruta";
+            ? "Ruta recalculada"
+            : "Desviación de ruta";
 
+        // ESTILOS DENTRO DE LA FUNCIÓN PARA EVITAR REFERENCE ERROR
         const titleStyle = "font-size: 14px; font-weight: bold; color: #000; margin-bottom: 2px; text-transform: uppercase;";
         const alertTypeStyle = "font-size: 13px; font-weight: bold; color: #FB8800; margin-bottom: 8px;";
         const labelStyle = "font-size: 11px; color: #666; font-weight: bold;";
@@ -154,9 +160,9 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 <div style="${labelStyle}">Fecha y Hora:</div>
                 <div style="${dataStyle}">
                     ${new Date(alert.timestamp).toLocaleString('es-MX', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-        })}
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+                    })}
                 </div>
 
                 <div style="${labelStyle}">Ubicación:</div>
@@ -172,22 +178,16 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         );
 
         ui.addBubble(bubble);
-
-        // Centrar mapa
-        map.setCenter({ lat: alert.lat, lng: alert.lng });
-        map.setZoom(16);
     };
 
-    // Función global para cerrar popup
+    // Función global para cerrar popup desde el HTML string
     window.closeAlertPopup = () => {
-        if (window.currentAlertBubble) {
-            window.ui.removeBubble(window.currentAlertBubble);
-            window.currentAlertBubble = null;
+        if (ui && ui.getBubbles().length > 0) {
+            ui.getBubbles().forEach(b => ui.removeBubble(b));
         }
     };
 
     const handleAlertCardClick = async (alert) => {
-        // Marcar como vista si no está vista
         if (!alert.seenByAdmin) {
             await markAlertAsSeen(alert);
         }
@@ -350,91 +350,95 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                     No hay alertas para mostrar
                                 </div>
                             ) : (
-                                    filteredAlerts.map((alert) => {
-                                        const isRecalc = alert.type === "ORIGINAL_ROUTE";
-                                
-                                        const headerBg = '#E9ECEF'; 
-                                        const titleColor = isRecalc ? '#000' : '#007BFF'; 
-                                        const borderColor = isSelected && selectedAlert.deviationId === alert.deviationId
-                                            ? '#FB8800' 
-                                            : (isRecalc ? '#ccc' : '#007BFF'); 
+                                filteredAlerts.map((alert) => {
+                                    const isRecalc = alert.type === "ORIGINAL_ROUTE";
+                                    
+                                    const titleColor = isRecalc ? '#333' : '#007BFF'; 
+                                    const alertTitleColor = isRecalc ? '#DC3545' : '#007BFF'; // Título de la alerta
 
-                                        const isSelected = selectedAlert && selectedAlert.deviationId === alert.deviationId;
-                                        const isRead = alert.seenByAdmin;
+                                    const isSelected = selectedAlert && selectedAlert.deviationId === alert.deviationId;
+                                    const isRead = alert.seenByAdmin;
 
-                                        return (
-                                            <div
-                                                key={alert.deviationId}
-                                                onClick={() => handleAlertCardClick(alert)}
-                                                style={{
-                                                    background: 'white',
-                                                    border: `1px solid ${borderColor}`,
-                                                    borderRadius: '8px', 
-                                                    marginBottom: '10px',
-                                                    cursor: 'pointer',
-                                                    overflow: 'hidden',
-                                                    boxShadow: isSelected ? '0 0 0 2px rgba(251, 136, 0, 0.5)' : '0 1px 3px rgba(0,0,0,0.1)'
-                                                }}
-                                            >
-                                                {/* Header de la tarjeta */}
-                                                <div style={{
-                                                    background: headerBg,
-                                                    padding: '8px 12px',
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center',
-                                                    borderBottom: '1px solid #dee2e6'
+                                    const borderColor = isSelected ? '#FB8800' : '#ccc';
+                                    const borderWidth = isSelected ? '2px' : '1px';
+                                    const backgroundColor = '#F2F2F2'; 
+
+                                    return (
+                                        <div
+                                            key={alert.deviationId}
+                                            onClick={() => handleAlertCardClick(alert)}
+                                            style={{
+                                                background: 'white',
+                                                border: `${borderWidth} solid ${borderColor}`,
+                                                borderRadius: '8px',
+                                                marginBottom: '4px',
+                                                cursor: 'pointer',
+                                                overflow: 'hidden',
+                                                position: 'relative',
+                                                boxShadow: isSelected ? '0 0 5px rgba(251, 136, 0, 0.5)' : 'none'
+                                            }}
+                                        >
+                                            {/* Cabecera de la tarjeta */}
+                                            <div style={{
+                                                background: backgroundColor,
+                                                padding: '8px 10px',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                borderBottom: '1px solid #e0e0e0'
+                                            }}>
+                                                <span style={{
+                                                    color: alertTitleColor, 
+                                                    fontWeight: 'bold',
+                                                    fontSize: '12px'
                                                 }}>
-                                                    <span style={{
-                                                        color: isRecalc ? '#000' : '#007BFF', 
-                                                        fontWeight: 'bold',
-                                                        fontSize: '12px'
-                                                    }}>
-                                                        {isRecalc ? "Alerta de ruta recalculada" : "Alerta de desviación de ruta"}
-                                                    </span>
+                                                    {isRecalc ? "Alerta de ruta recalculada" : "Alerta de desviación de ruta"}
+                                                </span>
 
-                                                    {!isRead && (
-                                                        <div style={{
-                                                            width: '8px',
-                                                            height: '8px',
-                                                            borderRadius: '50%',
-                                                            backgroundColor: '#DC3545', // Rojo
-                                                            marginLeft: '8px',
-                                                            boxShadow: '0 0 2px rgba(220, 53, 69, 0.5)'
-                                                        }}></div>
-                                                    )}
+                                                {/* Punto Rojo solo si NO está leída */}
+                                                {!isRead && (
+                                                    <div style={{
+                                                        width: '8px',
+                                                        height: '8px',
+                                                        borderRadius: '50%',
+                                                        backgroundColor: 'red',
+                                                        marginLeft: '5px',
+                                                        boxShadow: '0 0 2px rgba(255,0,0,0.5)'
+                                                    }}></div>
+                                                )}
+                                            </div>
+
+                                            {/* Cuerpo de la tarjeta */}
+                                            <div style={{ padding: '8px 10px' }}>
+                                                <div style={{
+                                                    color: '#007BFF', 
+                                                    fontWeight: 'bold',
+                                                    fontSize: '12px',
+                                                    textTransform: 'uppercase',
+                                                    marginBottom: '4px'
+                                                }}>
+                                                    {alert.driverName || "CONDUCTOR"}
                                                 </div>
 
-                                                {/* Cuerpo de la tarjeta */}
-                                                <div style={{ padding: '10px 12px' }}>
-                                                    <div style={{
-                                                        color: '#007BFF', 
-                                                        fontWeight: 'bold',
-                                                        fontSize: '13px',
-                                                        textTransform: 'uppercase',
-                                                        marginBottom: '4px'
-                                                    }}>
-                                                        {alert.driverName || "CONDUCTOR"}
-                                                    </div>
-
-                                                    <div style={{
-                                                        color: '#999',
-                                                        fontSize: '11px'
-                                                    }}>
-                                                        {new Date(alert.timestamp).toLocaleString('es-MX', {
-                                                            year: 'numeric',
-                                                            month: '2-digit',
-                                                            day: '2-digit',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit',
-                                                            second: '2-digit',
-                                                            hour12: false
-                                                        }).replace(',', '')}
-                                                    </div>
+                                                {/* Fecha en Gris */}
+                                                <div style={{
+                                                    color: '#999',
+                                                    fontSize: '11px'
+                                                }}>
+                                                    {new Date(alert.timestamp).toLocaleString('es-MX', {
+                                                        year: 'numeric',
+                                                        month: '2-digit',
+                                                        day: '2-digit',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        second: '2-digit',
+                                                        hour12: false
+                                                    }).replace(',', '')}
                                                 </div>
                                             </div>
-                                        );
-                                    })
+                                        </div>
+                                    );
+                                })
                             )}
                         </div>
                     )}

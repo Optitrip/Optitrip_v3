@@ -155,8 +155,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                 /* EL TRUCO: Movemos todo el bloque hacia arriba para no tapar el icono */
                 /* El icono suele medir 40-50px, así que subimos 50px */
-                transform: translate(-50%, -70px);
-
+                transform: translate(40px, -50px);
             ">
                 <div 
                     onclick="window.closeAlertPopup()"

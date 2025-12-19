@@ -105,7 +105,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         // Crear nuevo marcador (Codificamos el espacio en la URL)
         const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
             size: { w: 40, h: 40 },
-            anchor: { x: 20, y: 40 }
+            anchor: { x: 20, y: 20 }
         });
 
         const marker = new H.map.Marker(
@@ -155,7 +155,8 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                 /* EL TRUCO: Movemos todo el bloque hacia arriba para no tapar el icono */
                 /* El icono suele medir 40-50px, así que subimos 50px */
-                transform: translate(0, -50px); 
+                transform: translate(-50%, -70px);
+
             ">
                 <div 
                     onclick="window.closeAlertPopup()"

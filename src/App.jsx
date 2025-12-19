@@ -649,7 +649,7 @@ export default function App(props) {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                const response = await fetch(`${base_url}/reports/deviations/pending`);
+                const response = await fetch(`${base_url}/reports/deviations/unseen`);
                 if (response.ok) {
                     const data = await response.json();
                     setNotifications(data);
@@ -1239,24 +1239,37 @@ export default function App(props) {
 
     const handleAlertClick = async (notif) => {
         await handleMarkAsSeen(notif);
+
         setSelectedAlert(notif);
         setShowNotificationsMenu(false);
 
-        const menuMap = document.getElementById('menuMap'); 
-        const menuRoutes = document.getElementById('menuRoutes');
+        document.getElementById('users').style.display = 'none';
+        document.getElementById('reports').style.display = 'none';
         
-        if (menuRoutes) menuRoutes.classList.remove('btn-primary');
+        const divRoutes = document.getElementById('show-routes');
+        const createRoute = document.getElementById('create-route');
+        if(divRoutes) divRoutes.style.display = 'none';
+        if(createRoute) createRoute.style.display = 'none';
+
+        const menuRoutesBtn = document.getElementById('menuRoutes');
+        const menuUsersBtn = document.getElementById('menuUsers');
+        const menuReportsBtn = document.getElementById('menuReports');
+        const menuMapBtn = document.getElementById('menuMap');
+
+        if (menuRoutesBtn) menuRoutesBtn.classList.remove('btn-primary');
+        if (menuUsersBtn) menuUsersBtn.classList.remove('btn-primary');
+        if (menuReportsBtn) menuReportsBtn.classList.remove('btn-primary');
         
-        if (menuMap) {
-            menuMap.classList.add('btn-primary');
-           
+        if (menuMapBtn) {
+            menuMapBtn.classList.add('btn-primary');
+            menuMapBtn.classList.remove('btn-outline-primary');
         }
 
-        document.getElementById('map').style.display = 'none';
-        document.getElementById('map-drivers').style.display = 'block';
+        document.getElementById('map').style.display = 'none';        
+        document.getElementById('map-drivers').style.display = 'block'; 
 
-        setIsAlertsOpen(true);
-        setIsTrackingOpen(true); 
+        setIsTrackingOpen(false); 
+        setIsAlertsOpen(true);   
     };
 
     const handleSeeMoreClick = () => {
@@ -1363,6 +1376,7 @@ export default function App(props) {
                             selectedAlert={selectedAlert}
                             onAlertSelect={setSelectedAlert}
                            map={mapDrivers}
+                           ui={uiDrivers}
                         />
                     </div>,
                     cardTracingRef.current

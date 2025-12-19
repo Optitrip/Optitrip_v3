@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base_url } from '../../config.js';
 
-export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onAlertSelect, map }) {
+export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onAlertSelect, map, ui }) {
     const [alerts, setAlerts] = useState([]);
     const [filteredAlerts, setFilteredAlerts] = useState([]);
     const [dateFilter, setDateFilter] = useState('');
@@ -100,7 +100,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         // Crear nuevo marcador
         const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
             size: { w: 40, h: 40 },
-            anchor: { x: 20, y: 20 } 
+            anchor: { x: 20, y: 20 }
         });
 
         const marker = new H.map.Marker(
@@ -120,18 +120,11 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     };
 
     const showAlertPopup = (alert) => {
-        if (window.currentAlertBubble) {
-            window.ui.removeBubble(window.currentAlertBubble);
+        
+        // Limpiar bubble anterior
+        if (ui.getBubbles().length > 0) {
+            ui.getBubbles().forEach(b => ui.removeBubble(b));
         }
-
-        const typeText = alert.type === "ORIGINAL_ROUTE"
-            ? "Ruta recalculada"
-            : "Desviación de ruta";
-
-        const titleStyle = "font-size: 14px; font-weight: bold; color: #000; margin-bottom: 2px; text-transform: uppercase;";
-        const alertTypeStyle = "font-size: 13px; font-weight: bold; color: #FB8800; margin-bottom: 8px;";
-        const labelStyle = "font-size: 11px; color: #666; font-weight: bold;";
-        const dataStyle = "font-size: 11px; color: #333; margin-bottom: 6px;";
 
         const content = `
             <div style="padding: 15px; min-width: 260px; font-family: Arial, sans-serif; position: relative;">
@@ -153,9 +146,9 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 <div style="${labelStyle}">Fecha y Hora:</div>
                 <div style="${dataStyle}">
                     ${new Date(alert.timestamp).toLocaleString('es-MX', {
-                        day: '2-digit', month: '2-digit', year: 'numeric',
-                        hour: '2-digit', minute: '2-digit'
-                    })}
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        })}
                 </div>
 
                 <div style="${labelStyle}">Ubicación:</div>
@@ -171,8 +164,11 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             { content: content }
         );
 
-        window.ui.addBubble(bubble);
-        window.currentAlertBubble = bubble;
+        ui.addBubble(bubble);
+        
+        // Centrar mapa
+        map.setCenter({ lat: alert.lat, lng: alert.lng });
+        map.setZoom(16);
     };
 
     // Función global para cerrar popup
@@ -347,93 +343,87 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                     No hay alertas para mostrar
                                 </div>
                             ) : (
-                                filteredAlerts.map((alert) => {
-                                    const isDeviation = alert.type === "DEVIATION" || alert.type !== "ORIGINAL_ROUTE";
-                                    const isSelected = selectedAlert && selectedAlert.deviationId === alert.deviationId;
-                                    const isRead = alert.seenByAdmin;
+                                    filteredAlerts.map((alert) => {
+                                        const isRecalc = alert.type === "ORIGINAL_ROUTE";
+                                        const themeColor = isRecalc ? '#DC3545' : '#007BFF'; 
 
-                                    const cardBorder = isSelected
-                                        ? '2px solid #FB8800'
-                                        : (isDeviation ? '1px solid #3B82F6' : '1px solid #999');
-                                    const titleColor = isDeviation ? '#3B82F6' : '#000';
-                                    const headerBg = isDeviation ? '#EBF5FF' : '#F3F3F3';
-                                    const nameColor = isDeviation ? '#3B82F6' : '#000';
+                                        const isSelected = selectedAlert && selectedAlert.deviationId === alert.deviationId;
+                                        const isRead = alert.seenByAdmin;
 
-                                    return (
-                                        <div
-                                            key={alert.deviationId}
-                                            onClick={() => handleAlertCardClick(alert)}
-                                            style={{
-                                                background: 'white',
-                                                border: cardBorder,
-                                                borderRadius: '8px',
-                                                overflow: 'hidden',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s',
-                                                opacity: isRead ? 0.7 : 1
-                                            }}
-                                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                        >
-                                            {/* Card Header */}
-                                            <div style={{
-                                                padding: '8px 10px',
-                                                background: headerBg,
-                                                borderBottom: '1px solid #e0e0e0',
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center'
-                                            }}>
-                                                <span style={{
-                                                    fontSize: '12px',
-                                                    fontWeight: 'bold',
-                                                    color: titleColor
+                                        const borderColor = isSelected ? '#FB8800' : '#ccc';
+                                        const borderWidth = isSelected ? '2px' : '1px';
+
+                                        return (
+                                            <div
+                                                key={alert.deviationId}
+                                                onClick={() => handleAlertCardClick(alert)}
+                                                style={{
+                                                    background: 'white',
+                                                    border: `${borderWidth} solid ${borderColor}`,
+                                                    borderRadius: '8px',
+                                                    marginBottom: '8px',
+                                                    cursor: 'pointer',
+                                                    overflow: 'hidden',
+                                                    position: 'relative',
+                                                    boxShadow: isSelected ? '0 0 5px rgba(251, 136, 0, 0.5)' : 'none'
+                                                }}
+                                            >
+                                                <div style={{
+                                                    background: '#F2F2F2',
+                                                    padding: '8px 10px',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    borderBottom: '1px solid #e0e0e0'
                                                 }}>
-                                                    {alert.type === "ORIGINAL_ROUTE"
-                                                        ? "Alerta de ruta recalculada"
-                                                        : "Alerta de desviación de ruta"}
-                                                </span>
+                                                    <span style={{
+                                                        color: themeColor,
+                                                        fontWeight: 'bold',
+                                                        fontSize: '13px'
+                                                    }}>
+                                                        {isRecalc ? "Alerta de ruta recalculada" : "Alerta de desviación de ruta"}
+                                                    </span>
 
-                                                {!isRead && (
+                                                    {!isRead && (
+                                                        <div style={{
+                                                            width: '8px',
+                                                            height: '8px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: 'red',
+                                                            marginLeft: '5px'
+                                                        }}></div>
+                                                    )}
+                                                </div>
+
+                                                <div style={{ padding: '8px 10px' }}>
                                                     <div style={{
-                                                        width: '8px',
-                                                        height: '8px',
-                                                        borderRadius: '50%',
-                                                        background: '#FF0000',
-                                                        boxShadow: '0 0 2px rgba(255,0,0,0.5)'
-                                                    }}></div>
-                                                )}
-                                            </div>
+                                                        color: '#007BFF',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '12px',
+                                                        textTransform: 'uppercase',
+                                                        marginBottom: '4px'
+                                                    }}>
+                                                        {alert.driverName || "CONDUCTOR"}
+                                                    </div>
 
-                                            {/* Card Body */}
-                                            <div style={{ padding: '8px 10px' }}>
-                                                <div style={{
-                                                    fontSize: '12px',
-                                                    fontWeight: 'bold',
-                                                    color: nameColor,
-                                                    textTransform: 'uppercase',
-                                                    marginBottom: '2px'
-                                                }}>
-                                                    {alert.driverName}
-                                                </div>
-                                                <div style={{
-                                                    fontSize: '11px',
-                                                    color: '#999'
-                                                }}>
-                                                    {new Date(alert.timestamp).toLocaleString('es-MX', {
-                                                        year: 'numeric',
-                                                        month: '2-digit',
-                                                        day: '2-digit',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit',
-                                                        second: '2-digit',
-                                                        hour12: false
-                                                    })}
+                                                    <div style={{
+                                                        color: '#999',
+                                                        fontSize: '11px'
+                                                    }}>
+                                                        {new Date(alert.timestamp).toLocaleString('es-MX', {
+                                                            year: 'numeric',
+                                                            month: '2-digit',
+                                                            day: '2-digit',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                            second: '2-digit',
+                                                            hour12: false
+                                                        }).replace(',', '')}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    );
-                                })
+                                        );
+                                    })
                             )}
                         </div>
                     )}

@@ -125,7 +125,6 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     };
 
     const showAlertPopup = (alert) => {
-        // Limpiar bubble anterior usando la prop ui
         if (ui.getBubbles().length > 0) {
             ui.getBubbles().forEach(b => ui.removeBubble(b));
         }
@@ -134,39 +133,62 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             ? "Ruta recalculada"
             : "Desviación de ruta";
 
-        // ESTILOS DENTRO DE LA FUNCIÓN PARA EVITAR REFERENCE ERROR
-        const titleStyle = "font-size: 14px; font-weight: bold; color: #000; margin-bottom: 2px; text-transform: uppercase;";
-        const alertTypeStyle = "font-size: 13px; font-weight: bold; color: #FB8800; margin-bottom: 8px;";
-        const labelStyle = "font-size: 11px; color: #666; font-weight: bold;";
-        const dataStyle = "font-size: 11px; color: #333; margin-bottom: 6px;";
+        const d = new Date(alert.timestamp);
+        const dateStr = d.getFullYear() + "-" +
+            ("0" + (d.getMonth() + 1)).slice(-2) + "-" +
+            ("0" + d.getDate()).slice(-2) + " " +
+            ("0" + d.getHours()).slice(-2) + ":" +
+            ("0" + d.getMinutes()).slice(-2) + ":" +
+            ("0" + d.getSeconds()).slice(-2);
 
         const content = `
-            <div style="padding: 15px; min-width: 260px; font-family: Arial, sans-serif; position: relative;">
-                
-                <div style="position: absolute; top: 0px; right: 0px; cursor: pointer;" onclick="window.closeAlertPopup()">
-                    <span style="font-size: 18px; color: #999;">&times;</span>
+            <div style="
+                width: 230px; 
+                background-color: #F2F4F7; /* Fondo gris muy claro */
+                padding: 12px 10px;
+                font-family: Arial, sans-serif;
+                position: relative;
+                border-radius: 0px; /* Orillas cuadradas */
+                color: #333;
+                /* Eliminamos sombras extras para que se vea plano y limpio */
+            ">
+                <div style="position: absolute; top: 2px; right: 5px; cursor: pointer; z-index: 10;" onclick="window.closeAlertPopup()">
+                    <span style="font-size: 18px; color: #555; font-weight: bold;">&times;</span>
                 </div>
 
-                <div style="${titleStyle}">
+                <div style="
+                    font-size: 13px; 
+                    font-weight: bold; 
+                    color: #000000; 
+                    margin-bottom: 2px;
+                    padding-right: 15px; /* Espacio para que no choque con la X */
+                    text-transform: uppercase;
+                ">
                     ${alert.driverName || 'CONDUCTOR'}
                 </div>
 
-                <div style="${alertTypeStyle}">
+                <div style="
+                    font-size: 13px; 
+                    font-weight: 600; 
+                    color: #4A4A4A; 
+                    margin-bottom: 6px;
+                ">
                     ${typeText}
                 </div>
 
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0 10px 0;">
-
-                <div style="${labelStyle}">Fecha y Hora:</div>
-                <div style="${dataStyle}">
-                    ${new Date(alert.timestamp).toLocaleString('es-MX', {
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-        })}
+                <div style="
+                    font-size: 11px; 
+                    color: #888888; 
+                    margin-bottom: 2px;
+                ">
+                    ${dateStr}
                 </div>
 
-                <div style="${labelStyle}">Ubicación:</div>
-                <div style="${dataStyle}">
+                <div style="
+                    font-size: 11px; 
+                    color: #888888; 
+                    line-height: 1.3;
+                ">
                     ${alert.address || `${alert.lat.toFixed(5)}, ${alert.lng.toFixed(5)}`}
                 </div>
             </div>

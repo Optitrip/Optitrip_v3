@@ -885,15 +885,13 @@
   text-decoration: underline;
 }
 
-/* Estilos para el popup de alertas */
 .H_ib_body {
-  padding: 0 !important;
-  border-radius: 8px;
-  overflow: hidden;
+    padding: 0 !important;
+    background: transparent !important;
 }
 
-.H_ib_tail {
-  display: block !important;
+.H_ib_tail svg path {
+    fill: #F2F4F7 !important;
 }
 
 /* Animación para tarjetas de alerta */
@@ -932,3 +930,4 @@ div[style*="maxHeight: 300px"]::-webkit-scrollbar-thumb {
 div[style*="maxHeight: 300px"]::-webkit-scrollbar-thumb:hover {
   background: #e07700;
 }
+

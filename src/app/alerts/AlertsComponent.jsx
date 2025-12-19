@@ -104,8 +104,8 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         // Crear nuevo marcador (Codificamos el espacio en la URL)
         const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
-            size: { w: 40, h: 40 },
-            anchor: { x: 20, y: 40 }
+            size: { w: 60, h: 40 },
+            anchor: { x: 30, y: 40 }
         });
 
         const marker = new H.map.Marker(
@@ -130,9 +130,9 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             ui.getBubbles().forEach(b => ui.removeBubble(b));
         }
 
-        const typeText = alert.type === "ORIGINAL_ROUTE"
-            ? "Ruta recalculada"
-            : "Desviación de ruta";
+        const typeText = alert.type === "ORIGINAL_ROUTE" 
+        ? "Alerta de ruta recalculada" 
+        : "Alerta de desviación de ruta";
 
         const d = new Date(alert.timestamp);
         const dateStr = d.getFullYear() + "-" +
@@ -153,7 +153,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 box-sizing: border-box;
                 text-align: left;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                transform: translate(170px, -50px);
+                transform: translate(160px, -35px);
             ">
                 <div 
                     onclick="window.closeAlertPopup()"
@@ -184,7 +184,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
                 <div style="
                     font-size: 14px; 
-                    font-weight: 800; 
+                    font-weight: 600; 
                     color: #000000; 
                     margin-bottom: 2px;
                     padding-right: 20px;
@@ -196,7 +196,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 <div style="
                     font-size: 13px; 
                     font-weight: 600; 
-                    color: #4A4A4A; 
+                    color: #9c9c9cff; 
                     margin-bottom: 4px;
                 ">
                     ${typeText}

@@ -80,7 +80,9 @@ var default_state = {
     preloadedDriverId: null,
     preloadedCustomerId: null,
     deviationAlertEnabled: false,
-    deviationAlertDistance: 50
+    deviationAlertDistance: 50,
+    selectedAlert: null,
+    isAlertsMaximized: false
 };
 
 var currentBubble = null;
@@ -103,6 +105,8 @@ map = new H.Map(
 // Inicialización del comportamiento y UI del mapa principal
 behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
 ui = H.ui.UI.createDefault(map, layersMapHERE);
+
+window.ui = ui;
 
 // Ajuste del tamaño del mapa cuando se redimensiona la ventana
 window.addEventListener('resize', () => {
@@ -155,6 +159,8 @@ export default function App(props) {
     const [isAlertsOpen, setIsAlertsOpen] = useState(false);
     const [isTrackingOpen, setIsTrackingOpen] = useState(true);
     const [refsReady, setRefsReady] = useState(false);
+    const [selectedAlert, setSelectedAlert] = useState(null);
+
 
     const appContainerRef = useRef(null);
     const menuRoutesRef = useRef(null);
@@ -388,9 +394,9 @@ export default function App(props) {
 
         const checkVisibility = () => {
             if (tracingDiv && menuMap) {
-        
-                const isPrimary = menuMap.classList.contains('btn-primary') || 
-                                  (menuMap.querySelector('a') && menuMap.querySelector('a').classList.contains('btn-primary'));
+
+                const isPrimary = menuMap.classList.contains('btn-primary') ||
+                    (menuMap.querySelector('a') && menuMap.querySelector('a').classList.contains('btn-primary'));
 
                 if (isPrimary) {
                     tracingDiv.style.display = 'block';
@@ -916,20 +922,22 @@ export default function App(props) {
 
     const handleMarkAsSeen = async (notif) => {
         try {
-            await fetch(`${base_url}/report/deviation/seen`, {
+            const response = await fetch(`${base_url}/report/deviation/seen`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ routeId: notif.routeId, deviationId: notif.deviationId })
             });
-            const updatedNotifications = notifications.filter(n => n.deviationId !== notif.deviationId);
-            setNotifications(updatedNotifications);
 
-            if (updatedNotifications.length === 0) {
-                const notifBtn = document.getElementById('notificationsButton');
-                const img = notifBtn?.querySelector('img');
-                if (img) img.classList.remove('blinking-icon');
+            if (response.ok) {
+                const updatedNotifications = notifications.filter(n => n.deviationId !== notif.deviationId);
+                setNotifications(updatedNotifications);
+
+                if (updatedNotifications.length === 0) {
+                    const notifBtn = document.getElementById('notificationsButton');
+                    const img = notifBtn?.querySelector('img');
+                    if (img) img.classList.remove('blinking-icon');
+                }
             }
-
         } catch (error) {
             console.error("Error marking as seen", error);
         }
@@ -1227,13 +1235,42 @@ export default function App(props) {
     const zoomLocation = (mapDrivers, lat, lng) => {
         mapDrivers.setCenter({ lat: lat, lng: lng });
         mapDrivers.setZoom(18);
-    }
+    };
+
+    const handleAlertClick = async (notif) => {
+        await handleMarkAsSeen(notif);
+
+        setSelectedAlert(notif);
+
+        setShowNotificationsMenu(false);
+
+        const menuRoutes = document.getElementById('menuRoutes');
+        if (menuRoutes) {
+            menuRoutes.classList.add('btn-primary');
+        }
+
+        setIsAlertsOpen(true);
+        setIsTrackingOpen(false);
+    };
+
+    const handleSeeMoreClick = () => {
+        setShowNotificationsMenu(false);
+
+        // Cambiar a módulo de mapas
+        const menuRoutes = document.getElementById('menuRoutes');
+        if (menuRoutes) {
+            menuRoutes.classList.add('btn-primary');
+        }
+
+        setSelectedAlert(null);
+        setIsAlertsOpen(true);
+        setIsTrackingOpen(false);
+    };
 
     return (
         <div>
             {showNotificationsMenu && (
                 <div className="notification-dropdown" onClick={(e) => e.stopPropagation()}>
-                    {/* Lista de alertas */}
                     <div className="notif-list">
                         {notifications.length === 0 ? (
                             <div style={{
@@ -1256,16 +1293,14 @@ export default function App(props) {
                                     <div
                                         key={index}
                                         className="notif-card"
-                                        onClick={() => handleMarkAsSeen(notif)}
+                                        onClick={() => handleAlertClick(notif)}
                                     >
                                         <div className="notif-title">
                                             {notif.type === "ORIGINAL_ROUTE" ? "Alerta de ruta recalculada" : "Alerta de desviación"}
                                         </div>
-
                                         <div className="notif-subtitle">
                                             {notif.driverName || "CONDUCTOR"}
                                         </div>
-
                                         <div className="notif-time">
                                             {notif.timestamp ? new Date(notif.timestamp).toLocaleString('es-MX', {
                                                 year: 'numeric',
@@ -1277,17 +1312,14 @@ export default function App(props) {
                                                 hour12: false
                                             }) : ""}
                                         </div>
-
-                                        {/* Puntito rojo */}
                                         <div className="unread-dot"></div>
                                     </div>
                                 ))
                         )}
                     </div>
 
-                    {/* Footer Ver más */}
                     <div className="notif-footer">
-                        <button className="btn-see-more">
+                        <button className="btn-see-more" onClick={handleSeeMoreClick}>
                             Ver más
                         </button>
                     </div>
@@ -1322,6 +1354,9 @@ export default function App(props) {
                         <AlertsComponent
                             isOpen={isAlertsOpen}
                             toggleOpen={handleAlertsToggle}
+                            selectedAlert={selectedAlert}
+                            onAlertSelect={setSelectedAlert}
+                            map={map}
                         />
                     </div>,
                     cardTracingRef.current
@@ -1341,7 +1376,7 @@ export default function App(props) {
                 )
             }
             {
-                 refsReady && divPrintRouteRef.current && ReactDOM.createPortal(
+                refsReady && divPrintRouteRef.current && ReactDOM.createPortal(
                     <div>
                         <PrintRouteComponent state={state} />
                     </div>,
@@ -1357,7 +1392,7 @@ export default function App(props) {
                 )
             }
             {
-                 refsReady && cardUserInfoRef.current && ReactDOM.createPortal(
+                refsReady && cardUserInfoRef.current && ReactDOM.createPortal(
                     <div>
                         <UserComponent stateUser={stateUser} />
                     </div>,

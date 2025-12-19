@@ -14,6 +14,7 @@
   left: 0%;
   top: 0%;
 }
+
 .menu-parameters-icons {
   font-size: 30px;
   margin: 20px;
@@ -27,21 +28,30 @@
   color: rgb(255, 255, 255);
   cursor: pointer;
 }
+
 .menu-parameters-icons:hover {
   width: 55px;
 }
+
 .shift_started_modal {
-  display: flex; /* Hidden by default */
+  display: flex;
+  /* Hidden by default */
   align-items: center;
-  position: fixed; /* Stay in place */
-  z-index: 4; /* Sit on top */
+  position: fixed;
+  /* Stay in place */
+  z-index: 4;
+  /* Sit on top */
   top: 0;
   left: 0;
-  width: 100vw; /* Full width */
-  height: 100vh; /* Full height */
+  width: 100vw;
+  /* Full width */
+  height: 100vh;
+  /* Full height */
   background-color: #30303030;
-  overflow: auto; /* Enable scroll if needed */
+  overflow: auto;
+  /* Enable scroll if needed */
 }
+
 .remove-element {
   box-sizing: content-box;
   width: 1em;
@@ -60,19 +70,23 @@
   right: 3px;
   top: -4px;
 }
+
 @media (max-width: 990px) {
   .left-components {
     margin-top: 40px;
   }
 }
+
 @media (min-width: 990px) {
   .left-components {
     margin-top: 0px;
   }
 }
+
 .transportation-icon {
   font-size: 50px;
 }
+
 .transport-vehicles {
   padding: 5px;
   width: 100px;
@@ -81,10 +95,12 @@
   place-items: center;
   border-radius: 4px;
 }
+
 .transport-vehicles:hover {
   background-color: #3795fa;
 }
-.transport-vehicles > p {
+
+.transport-vehicles>p {
   margin-bottom: 0px;
   font-size: 15px;
 }
@@ -97,7 +113,8 @@
 /* Asegurar que la sección del usuario esté siempre a la derecha */
 .navbar-user {
   margin-left: auto;
-  order: 2; /* Esto asegura que la sección del usuario esté siempre a la derecha */
+  order: 2;
+  /* Esto asegura que la sección del usuario esté siempre a la derecha */
 }
 
 /* Asegurar que el navbar colapsado se superponga sin desplazar */
@@ -164,20 +181,23 @@
   border: 0;
 }
 
-.boton-icono-evitar > i {
+.boton-icono-evitar>i {
   width: 150px;
   font-size: 160px;
 }
+
 .vehicles-buttons {
   display: flex;
   width: 50px;
   justify-content: center;
   flex-direction: column;
 }
-.vehicles-buttons > i {
+
+.vehicles-buttons>i {
   font-size: 35px;
 }
-.vehicles-buttons > p {
+
+.vehicles-buttons>p {
   font-size: 20px;
   width: 100%;
 }
@@ -213,7 +233,7 @@
   background-color: #fb8800;
 }
 
-#card-create-route > span {
+#card-create-route>span {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: bold;
@@ -225,7 +245,7 @@
   background-color: #007bff;
 }
 
-.card-module > span {
+.card-module>span {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: bold;
@@ -237,7 +257,7 @@
   background-color: #fb8800;
 }
 
-#card-show-routes > span {
+#card-show-routes>span {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: bold;
@@ -249,7 +269,7 @@
   background-color: #fb8800;
 }
 
-#card-show-indications > span {
+#card-show-indications>span {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: bold;
@@ -261,7 +281,7 @@
   background-color: #fb8800;
 }
 
-#card-avoid-header > span {
+#card-avoid-header>span {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: bold;
@@ -282,7 +302,7 @@
   height: 30px;
 }
 
-#card-diagrama-header > span {
+#card-diagrama-header>span {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: bold;
@@ -295,7 +315,7 @@
   height: 30px;
 }
 
-#card-report-header > span {
+#card-report-header>span {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: bold;
@@ -726,14 +746,25 @@
 }
 
 .btn-status-active {
-  background-color: rgba(164, 208, 255); 
-  color: #000; 
+  background-color: rgba(164, 208, 255);
+  color: #000;
 }
 
 @keyframes blink-red {
-  0% { filter: invert(16%) sepia(96%) saturate(7463%) hue-rotate(357deg) brightness(92%) contrast(124%); opacity: 1; }
-  50% { filter: invert(16%) sepia(96%) saturate(7463%) hue-rotate(357deg) brightness(92%) contrast(124%); opacity: 0.5; }
-  100% { filter: invert(16%) sepia(96%) saturate(7463%) hue-rotate(357deg) brightness(92%) contrast(124%); opacity: 1; }
+  0% {
+    filter: invert(16%) sepia(96%) saturate(7463%) hue-rotate(357deg) brightness(92%) contrast(124%);
+    opacity: 1;
+  }
+
+  50% {
+    filter: invert(16%) sepia(96%) saturate(7463%) hue-rotate(357deg) brightness(92%) contrast(124%);
+    opacity: 0.5;
+  }
+
+  100% {
+    filter: invert(16%) sepia(96%) saturate(7463%) hue-rotate(357deg) brightness(92%) contrast(124%);
+    opacity: 1;
+  }
 }
 
 .blinking-icon {
@@ -741,108 +772,163 @@
 }
 
 .notification-dropdown {
-    position: fixed;
-    top: 50px;       
-    right: 170px;    
-    width: 200px;    
-    background-color: #fff;
-    border-radius: 0 0 4px 4px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 10000;
-    font-family: 'Arial', sans-serif;
-    border: 1px solid #dcdcdc;
-    border-top: none; 
-    animation: fadeIn 0.2s ease-out;
-    overflow: hidden;
+  position: fixed;
+  top: 50px;
+  right: 170px;
+  width: 200px;
+  background-color: #fff;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  font-family: 'Arial', sans-serif;
+  border: 1px solid #dcdcdc;
+  border-top: none;
+  animation: fadeIn 0.2s ease-out;
+  overflow: hidden;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Lista contenedora */
 .notif-list {
-    height: 300px;       
-    overflow-y: auto;   
-    position: relative; 
+  height: 300px;
+  overflow-y: auto;
+  position: relative;
 }
 
 /* Tarjeta individual */
 .notif-card {
-    padding: 10px 12px;
-    border-bottom: 1px solid #f0f0f0;
-    cursor: pointer;
-    position: relative;
-    background-color: #fff;
-    transition: background-color 0.1s;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  position: relative;
+  background-color: #fff;
+  transition: background-color 0.1s;
 }
 
 .notif-card:hover {
-    background-color: #007bff; 
+  background-color: #007bff;
 }
 
 .notif-card:hover .notif-title,
 .notif-card:hover .notif-subtitle,
 .notif-card:hover .notif-time {
-    color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 /* Título de la alerta */
 .notif-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: #747474;
-    margin-bottom: 2px;
-    line-height: 1.2;
+  font-size: 11px;
+  font-weight: 700;
+  color: #747474;
+  margin-bottom: 2px;
+  line-height: 1.2;
 }
 
 /* Subtítulo  */
 .notif-subtitle {
-    font-size: 10px; 
-    color: #747474;
-    margin-bottom: 2px;
-    text-transform: uppercase;
-    font-weight: 600;
-    white-space: nowrap;      
-    overflow: hidden;         
-    text-overflow: ellipsis; 
+  font-size: 10px;
+  color: #747474;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Fecha */
 .notif-time {
-    font-size: 9px;
-    color: #b0b0b0;
+  font-size: 9px;
+  color: #b0b0b0;
 }
 
 /* Puntito rojo */
 .unread-dot {
-    width: 6px;
-    height: 6px;
-    background-color: #ff0000;
-    border-radius: 50%;
-    position: absolute;
-    top: 12px;
-    right: 8px;
+  width: 6px;
+  height: 6px;
+  background-color: #ff0000;
+  border-radius: 50%;
+  position: absolute;
+  top: 12px;
+  right: 8px;
 }
 
 /* Botón Ver Más */
 .notif-footer {
-    padding: 8px;
-    text-align: center;
-    border-top: 1px solid #e0e0e0;
-    background-color: #fff;
+  padding: 8px;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fff;
 }
 
 .btn-see-more {
-    background: none;
-    border: none;
-    font-weight: 800;
-    color: #000;
-    font-size: 12px;
-    cursor: pointer;
+  background: none;
+  border: none;
+  font-weight: 800;
+  color: #000;
+  font-size: 12px;
+  cursor: pointer;
 }
 
 .btn-see-more:hover {
-    text-decoration: underline;
+  text-decoration: underline;
+}
+
+/* Estilos para el popup de alertas */
+.H_ib_body {
+  padding: 0 !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.H_ib_tail {
+  display: block !important;
+}
+
+/* Animación para tarjetas de alerta */
+@keyframes pulseAlert {
+
+  0%,
+  100% {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 4px 12px rgba(251, 136, 0, 0.3);
+  }
+}
+
+/* Efecto hover mejorado para tarjetas de alerta no leídas */
+.alert-card-unread:hover {
+  animation: pulseAlert 1s ease-in-out infinite;
+}
+
+/* Scroll personalizado para lista de alertas */
+div[style*="maxHeight: 300px"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+div[style*="maxHeight: 300px"]::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+div[style*="maxHeight: 300px"]::-webkit-scrollbar-thumb {
+  background: #FB8800;
+  border-radius: 3px;
+}
+
+div[style*="maxHeight: 300px"]::-webkit-scrollbar-thumb:hover {
+  background: #e07700;
 }

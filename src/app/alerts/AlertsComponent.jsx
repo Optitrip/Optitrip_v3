@@ -354,12 +354,9 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                     const isSelected = selectedAlert && selectedAlert.deviationId === alert.deviationId;
 
                                     const primaryColor = isSelected ? '#007BFF' : '#000000';
-                                    const borderColor = isSelected ? '#007BFF' : '#CCCCCC';
-                                    const cardBackground = isSelected ? '#E6E6E6' : '#F8F9FA';
-                                    const dateColor = '#888888';
-
-                                    // Texto del título
-                                    const typeText = alert.type === "ORIGINAL_ROUTE" ? "Alerta de ruta recalculada" : "Alerta de desviación de ruta";
+                                    const borderColor = isSelected ? '#007BFF' : '#d1d1d1';
+                                    const cardBackground = isSelected ? '#E9ECEF' : '#F8F9FA';
+                                    const typeText = alert.type === "ORIGINAL_ROUTE" ? "Ruta recalculada" : "Desviación de ruta";
 
                                     return (
                                         <div
@@ -369,65 +366,61 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                                 background: cardBackground,
                                                 border: `1px solid ${borderColor}`,
                                                 borderRadius: '8px',
-                                                marginBottom: '8px',
+                                                marginBottom: '4px',
                                                 cursor: 'pointer',
                                                 display: 'flex',
                                                 flexDirection: 'column',
-                                                height: 'auto',
                                                 minHeight: 'fit-content',
-                                                boxShadow: isSelected ? '0 2px 8px rgba(0, 123, 255, 0.2)' : 'none'
+                                                position: 'relative',
+                                                boxShadow: isSelected ? '0 2px 5px rgba(0, 123, 255, 0.2)' : 'none'
                                             }}
                                         >
                                             {/* Cabecera de la tarjeta */}
                                             <div style={{
-                                                padding: '10px 12px',
+                                                padding: '5px 8px',
                                                 display: 'flex',
                                                 justifyContent: 'space-between',
                                                 alignItems: 'center',
-                                                borderBottom: '1px solid #d0d0d0'
+                                                borderBottom: '1px solid #e0e0e0'
                                             }}>
                                                 <span style={{
                                                     color: primaryColor,
                                                     fontWeight: 'bold',
-                                                    fontSize: '13px',
-                                                    textTransform: 'uppercase'
+                                                    fontSize: '12px',
                                                 }}>
                                                     {typeText}
                                                 </span>
 
-                                                {/* Punto Rojo de "No leído" */}
+                                                {/* Indicador de No Leído (Punto rojo) */}
                                                 {!alert.seenByAdmin && (
                                                     <div style={{
-                                                        width: '8px',
-                                                        height: '8px',
+                                                        width: '6px',
+                                                        height: '6px',
                                                         borderRadius: '50%',
                                                         backgroundColor: '#dc3545',
-                                                        marginLeft: '8px',
-                                                        flexShrink: 0
+                                                        marginLeft: '5px',
+                                                        boxShadow: '0 0 2px rgba(220, 53, 69, 0.5)'
                                                     }}></div>
                                                 )}
                                             </div>
 
                                             {/* Cuerpo de la tarjeta */}
-                                            <div style={{ padding: '10px 12px' }}>
+                                            <div style={{ padding: '5px 8px' }}>
                                                 {/* CONDUCTOR */}
                                                 <div style={{
-                                                    color: primaryColor,
-                                                    fontWeight: '600', 
-                                                    fontSize: '13px',
-                                                    marginBottom: '6px',
-                                                    textTransform: 'uppercase'
+                                                    color: primaryColor, 
+                                                    fontWeight: '600',
+                                                    fontSize: '11px',
+                                                    marginBottom: '2px', 
                                                 }}>
-                                                    {alert.driverName || "CONDUCTOR DESCONOCIDO"}
+                                                    {alert.driverName || "Conductor"}
                                                 </div>
 
                                                 {/* FECHA Y HORA */}
                                                 <div style={{
-                                                    color: dateColor,
-                                                    fontSize: '12px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '5px'
+                                                    color: '#6c757d',
+                                                    fontSize: '10px',
+                                                    marginTop: '2px'
                                                 }}>
                                                     {new Date(alert.timestamp).toLocaleString('es-MX', {
                                                         year: 'numeric',
@@ -435,8 +428,8 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                                         day: '2-digit',
                                                         hour: '2-digit',
                                                         minute: '2-digit',
-                                                        hour12: false 
-                                                    })} hrs
+                                                        hour12: false
+                                                    }).replace(',', '') + ' hrs'}
                                                 </div>
                                             </div>
                                         </div>

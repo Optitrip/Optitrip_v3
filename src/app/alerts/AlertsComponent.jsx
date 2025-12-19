@@ -144,18 +144,16 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         const content = `
             <div style="
-                width: 320px; /* Más largo horizontalmente */
+                width: 320px; 
                 background-color: #F2F4F7; 
-                padding: 10px 15px; /* Menos relleno vertical para reducir altura */
+                padding: 10px 15px; 
                 font-family: Arial, sans-serif; 
                 position: relative; 
                 border-radius: 4px; 
                 box-sizing: border-box;
                 text-align: left;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                /* EL TRUCO: Movemos todo el bloque hacia arriba para no tapar el icono */
-                /* El icono suele medir 40-50px, así que subimos 50px */
-                transform: translate(40px, -50px);
+                transform: translate(-50px, -50px);
             ">
                 <div 
                     onclick="window.closeAlertPopup()"
@@ -224,14 +222,14 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
                 <div style="
                     position: absolute;
-                    bottom: -8px; /* Sale por debajo de la tarjeta */
+                    bottom: -8px; 
                     left: 50%;
                     transform: translateX(-50%);
                     width: 0; 
                     height: 0; 
                     border-left: 8px solid transparent;
                     border-right: 8px solid transparent;
-                    border-top: 8px solid #F2F4F7; /* Mismo color que el fondo */
+                    border-top: 8px solid #F2F4F7; 
                 "></div>
             </div>
         `;

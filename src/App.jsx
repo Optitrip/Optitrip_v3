@@ -1239,18 +1239,24 @@ export default function App(props) {
 
     const handleAlertClick = async (notif) => {
         await handleMarkAsSeen(notif);
-
         setSelectedAlert(notif);
-
         setShowNotificationsMenu(false);
 
+        const menuMap = document.getElementById('menuMap'); 
         const menuRoutes = document.getElementById('menuRoutes');
-        if (menuRoutes) {
-            menuRoutes.classList.add('btn-primary');
+        
+        if (menuRoutes) menuRoutes.classList.remove('btn-primary');
+        
+        if (menuMap) {
+            menuMap.classList.add('btn-primary');
+           
         }
 
+        document.getElementById('map').style.display = 'none';
+        document.getElementById('map-drivers').style.display = 'block';
+
         setIsAlertsOpen(true);
-        setIsTrackingOpen(false);
+        setIsTrackingOpen(true); 
     };
 
     const handleSeeMoreClick = () => {
@@ -1356,7 +1362,7 @@ export default function App(props) {
                             toggleOpen={handleAlertsToggle}
                             selectedAlert={selectedAlert}
                             onAlertSelect={setSelectedAlert}
-                            map={map}
+                           map={mapDrivers}
                         />
                     </div>,
                     cardTracingRef.current

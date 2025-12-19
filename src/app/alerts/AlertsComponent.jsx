@@ -98,9 +98,9 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         existingMarkers.forEach(marker => map.removeObject(marker));
 
         // Crear nuevo marcador
-        const alertIcon = new H.map.Icon('/iconos principales/alert.svg', {
+        const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
             size: { w: 40, h: 40 },
-            anchor: { x: 20, y: 40 }
+            anchor: { x: 20, y: 20 } 
         });
 
         const marker = new H.map.Marker(
@@ -120,7 +120,6 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     };
 
     const showAlertPopup = (alert) => {
-        // Remover bubbles existentes
         if (window.currentAlertBubble) {
             window.ui.removeBubble(window.currentAlertBubble);
         }
@@ -129,34 +128,41 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             ? "Ruta recalculada"
             : "Desviación de ruta";
 
+        const titleStyle = "font-size: 14px; font-weight: bold; color: #000; margin-bottom: 2px; text-transform: uppercase;";
+        const alertTypeStyle = "font-size: 13px; font-weight: bold; color: #FB8800; margin-bottom: 8px;";
+        const labelStyle = "font-size: 11px; color: #666; font-weight: bold;";
+        const dataStyle = "font-size: 11px; color: #333; margin-bottom: 6px;";
+
         const content = `
-            <div style="padding: 12px; min-width: 250px; font-family: Arial, sans-serif;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div style="font-weight: bold; color: #FB8800; font-size: 14px;">
-                        ${typeText}
-                    </div>
-                    <button onclick="window.closeAlertPopup()" 
-                            style="background: none; border: none; cursor: pointer; font-size: 18px; color: #999; padding: 0; margin-left: 10px;">
-                        ×
-                    </button>
+            <div style="padding: 15px; min-width: 260px; font-family: Arial, sans-serif; position: relative;">
+                
+                <div style="position: absolute; top: 5px; right: 10px; cursor: pointer;" onclick="window.closeAlertPopup()">
+                    <span style="font-size: 18px; color: #999;">&times;</span>
                 </div>
-                <div style="font-size: 13px; color: #333; margin-bottom: 4px;">
-                    <strong>Conductor:</strong> ${alert.driverName}
+
+                <div style="${titleStyle}">
+                    ${alert.driverName}
                 </div>
-                <div style="font-size: 12px; color: #666; margin-bottom: 4px;">
-                    <strong>Fecha:</strong> ${new Date(alert.timestamp).toLocaleString('es-MX', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        })}
+
+                <div style="${alertTypeStyle}">
+                    ${typeText}
                 </div>
-                <div style="font-size: 12px; color: #666;">
-                    <strong>Ubicación:</strong><br/>
-                    ${alert.address || `${alert.lat.toFixed(6)}, ${alert.lng.toFixed(6)}`}
+
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0 10px 0;">
+
+                <div style="${labelStyle}">Fecha y Hora:</div>
+                <div style="${dataStyle}">
+                    ${new Date(alert.timestamp).toLocaleString('es-MX', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    })}
                 </div>
+
+                <div style="${labelStyle}">Ubicación:</div>
+                <div style="${dataStyle}">
+                    ${alert.address || `${alert.lat.toFixed(5)}, ${alert.lng.toFixed(5)}`}
+                </div>
+
             </div>
         `;
 

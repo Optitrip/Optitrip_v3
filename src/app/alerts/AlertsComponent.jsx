@@ -134,7 +134,6 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             ? "Ruta recalculada"
             : "Desviación de ruta";
 
-        // Formato de fecha
         const d = new Date(alert.timestamp);
         const dateStr = d.getFullYear() + "-" +
             ("0" + (d.getMonth() + 1)).slice(-2) + "-" +
@@ -145,16 +144,18 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         const content = `
             <div style="
-                width: 300px;
+                width: 320px; /* Más largo horizontalmente */
                 background-color: #F2F4F7; 
-                padding: 12px 15px; 
+                padding: 10px 15px; /* Menos relleno vertical para reducir altura */
                 font-family: Arial, sans-serif; 
                 position: relative; 
                 border-radius: 4px; 
                 box-sizing: border-box;
                 text-align: left;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.2); 
-                margin-bottom: 10px; 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                /* EL TRUCO: Movemos todo el bloque hacia arriba para no tapar el icono */
+                /* El icono suele medir 40-50px, así que subimos 50px */
+                transform: translate(0, -50px); 
             ">
                 <div 
                     onclick="window.closeAlertPopup()"
@@ -164,9 +165,9 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                         right: 8px; 
                         cursor: pointer; 
                         z-index: 10;
-                        width: 18px;
-                        height: 18px;
-                        border: 1.5px solid #000;
+                        width: 16px;
+                        height: 16px;
+                        border: 1px solid #000;
                         border-radius: 50%;
                         display: flex;
                         justify-content: center;
@@ -175,11 +176,11 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     "
                 >
                     <span style="
-                        font-size: 12px; 
+                        font-size: 11px; 
                         color: #000; 
                         font-weight: bold; 
                         line-height: 0;
-                        margin-top: -1px;
+                        padding-bottom: 1px;
                     ">&times;</span>
                 </div>
 
@@ -187,7 +188,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     font-size: 14px; 
                     font-weight: 800; 
                     color: #000000; 
-                    margin-bottom: 4px;
+                    margin-bottom: 2px;
                     padding-right: 20px;
                     text-transform: uppercase;
                 ">
@@ -198,7 +199,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     font-size: 13px; 
                     font-weight: 600; 
                     color: #4A4A4A; 
-                    margin-bottom: 6px;
+                    margin-bottom: 4px;
                 ">
                     ${typeText}
                 </div>
@@ -214,24 +215,23 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 <div style="
                     font-size: 11px; 
                     color: #888888; 
-                    line-height: 1.3;
-                    white-space: nowrap;     
-                    overflow: hidden;         
-                    text-overflow: ellipsis;  
+                    white-space: nowrap; 
+                    overflow: hidden; 
+                    text-overflow: ellipsis;
                 ">
                     ${alert.address || `${alert.lat.toFixed(5)}, ${alert.lng.toFixed(5)}`}
                 </div>
 
                 <div style="
                     position: absolute;
-                    bottom: -8px; 
+                    bottom: -8px; /* Sale por debajo de la tarjeta */
                     left: 50%;
                     transform: translateX(-50%);
                     width: 0; 
                     height: 0; 
                     border-left: 8px solid transparent;
                     border-right: 8px solid transparent;
-                    border-top: 8px solid #F2F4F7;
+                    border-top: 8px solid #F2F4F7; /* Mismo color que el fondo */
                 "></div>
             </div>
         `;

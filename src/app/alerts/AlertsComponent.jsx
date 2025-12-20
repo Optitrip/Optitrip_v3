@@ -38,7 +38,14 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     useEffect(() => {
         return () => {
             if (alertMarker && map) {
-                map.removeObject(alertMarker);
+                try {
+                    const markersInMap = map.getObjects();
+                    if (markersInMap.includes(alertMarker)) {
+                        map.removeObject(alertMarker);
+                    }
+                } catch (error) {
+                    console.log('Error al limpiar marcador:', error);
+                }
             }
         };
     }, [alertMarker, map]);
@@ -112,9 +119,16 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     };
 
     const addAlertMarkerToMap = (alert) => {
-        // Remover marcador anterior si existe
+        // Remover marcador anterior si existe Y está en el mapa
         if (alertMarker) {
-            map.removeObject(alertMarker);
+            try {
+                const markersInMap = map.getObjects();
+                if (markersInMap.includes(alertMarker)) {
+                    map.removeObject(alertMarker);
+                }
+            } catch (error) {
+                console.log('Marcador ya fue removido:', error);
+            }
         }
 
         // Crear nuevo marcador

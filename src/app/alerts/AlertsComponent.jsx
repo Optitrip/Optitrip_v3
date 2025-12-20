@@ -13,6 +13,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     const [driverFilter, setDriverFilter] = useState('');
     const [drivers, setDrivers] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [alertMarker, setAlertMarker] = useState(null);
 
     // Cargar alertas al montar el componente o cuando cambie isOpen
     useEffect(() => {
@@ -32,6 +33,15 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             centerMapOnAlert(selectedAlert);
         }
     }, [selectedAlert, map]);
+
+    // Limpiar marcador al cerrar el componente
+    useEffect(() => {
+        return () => {
+            if (alertMarker && map) {
+                map.removeObject(alertMarker);
+            }
+        };
+    }, [alertMarker, map]);
 
     const fetchAlerts = async () => {
         setLoading(true);
@@ -102,11 +112,10 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     };
 
     const addAlertMarkerToMap = (alert) => {
-        // Remover marcadores de alerta anteriores
-        const existingMarkers = map.getObjects().filter(obj =>
-            obj instanceof H.map.Marker && obj.getData() && obj.getData().isAlertMarker
-        );
-        existingMarkers.forEach(marker => map.removeObject(marker));
+        // Remover marcador anterior si existe
+        if (alertMarker) {
+            map.removeObject(alertMarker);
+        }
 
         // Crear nuevo marcador
         const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
@@ -126,10 +135,11 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         map.addObject(marker);
 
-        // Agregar evento de clic
         marker.addEventListener('tap', () => {
             showAlertPopup(alert);
         });
+
+        setAlertMarker(marker);
     };
 
     const showAlertPopup = (alert) => {
@@ -342,10 +352,8 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 <div style={{ background: '#F8F9FA', padding: '10px' }}>
                     {/* FILTROS */}
                     <div style={{ marginBottom: '15px' }}>
-                        {/* Fila Fecha */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                             <label style={{ fontSize: '13px', color: '#333', width: '70px', margin: 0 }}>Fecha:</label>
-
                             <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
 
                                 <DatePicker
@@ -353,19 +361,18 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                     startDate={startDate}
                                     endDate={endDate}
                                     onChange={(update) => setDateRange(update)}
-                                    isClearable={true}
+                                    isClearable={false}
                                     locale="es"
                                     dateFormat="dd/MM/yyyy"
                                     placeholderText="Seleccionar rango"
                                     wrapperClassName="w-100"
                                     wrapperStyle={{ width: '100%' }}
-
                                     customInput={
                                         <input
                                             style={{
                                                 width: '100%',
                                                 fontSize: '12px',
-                                                padding: '4px 30px 4px 8px',
+                                                padding: '4px 50px 4px 8px',
                                                 border: '1px solid #6c757d',
                                                 borderRadius: '4px',
                                                 height: '28px',
@@ -377,14 +384,35 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
                                 <i className="fas fa-calendar-alt" style={{
                                     position: 'absolute',
-                                    right: '10px', 
+                                    right: '10px',
                                     top: '50%',
                                     transform: 'translateY(-50%)',
                                     color: '#6c757d',
-                                    fontSize: '14px', 
-                                    pointerEvents: 'none', 
-                                    zIndex: 1 
+                                    fontSize: '14px',
+                                    pointerEvents: 'none',
+                                    zIndex: 1
                                 }}></i>
+
+                                {(startDate || endDate) && (
+                                    <i
+                                        className="fas fa-times"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setDateRange([null, null]);
+                                        }}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '32px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            color: '#999',
+                                            fontSize: '14px',
+                                            cursor: 'pointer',
+                                            zIndex: 2
+                                        }}
+                                        title="Limpiar fechas"
+                                    ></i>
+                                )}
                             </div>
                         </div>
 

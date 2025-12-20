@@ -1287,15 +1287,46 @@ export default function App(props) {
     const handleSeeMoreClick = () => {
         setShowNotificationsMenu(false);
 
-        // Cambiar a módulo de mapas
-        const menuRoutes = document.getElementById('menuRoutes');
-        if (menuRoutes) {
-            menuRoutes.classList.add('btn-primary');
-        }
+        if (userSectionRef.current) userSectionRef.current.style.display = 'none';
+        if (reportSectionRef.current) reportSectionRef.current.style.display = 'none';
 
-        setSelectedAlert(null);
-        setIsAlertsOpen(true);
-        setIsTrackingOpen(false);
+        const divRoutes = document.getElementById('show-routes');
+        const createRoute = document.getElementById('create-route');
+        const showIndications = document.getElementById('show-indications');
+
+        if (divRoutes) divRoutes.style.display = 'none';
+        if (createRoute) createRoute.style.display = 'none';
+        if (showIndications) showIndications.style.display = 'none';
+
+        const menuRoutesBtn = document.getElementById('menuRoutes');
+        const menuUsersBtn = document.getElementById('menuUsers');
+        const menuReportsBtn = document.getElementById('menuReports');
+        const menuMapBtn = document.getElementById('menuMap');
+
+        if (menuRoutesBtn) {
+            menuRoutesBtn.classList.remove('btn-primary');
+            menuRoutesBtn.classList.add('btn-outline-primary');
+        }
+        if (menuUsersBtn) menuUsersBtn.classList.remove('btn-primary');
+        if (menuReportsBtn) menuReportsBtn.classList.remove('btn-primary');
+
+        if (menuMapBtn) {
+            menuMapBtn.classList.add('btn-primary');
+            menuMapBtn.classList.remove('btn-outline-primary');
+        }
+        const mapContainer = document.getElementById('map');
+        const mapDriversContainer = document.getElementById('map-drivers');
+
+        if (mapContainer) mapContainer.style.display = 'none';          
+        if (mapDriversContainer) mapDriversContainer.style.display = 'block'; 
+
+        setSelectedAlert(null);   
+        setIsAlertsOpen(true);   
+        setIsTrackingOpen(false); 
+
+        setTimeout(() => {
+            if (mapDrivers) mapDrivers.getViewPort().resize();
+        }, 100);
     };
 
     return (

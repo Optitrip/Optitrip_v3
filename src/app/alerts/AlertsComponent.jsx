@@ -56,27 +56,20 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     const applyFilters = () => {
         let filtered = [...alerts];
 
-        // Filtro por fecha
-        if (startDate) {
+        if (startDate && endDate) {
             filtered = filtered.filter(alert => {
                 if (!alert.timestamp) return false;
 
                 const alertDate = new Date(alert.timestamp);
-                // Quitamos la hora para comparar solo fechas (00:00:00)
                 alertDate.setHours(0, 0, 0, 0);
 
                 const start = new Date(startDate);
                 start.setHours(0, 0, 0, 0);
 
-                // Si hay fecha de fin, filtramos por rango
-                if (endDate) {
-                    const end = new Date(endDate);
-                    end.setHours(23, 59, 59, 999); // Final del día seleccionado
-                    return alertDate >= start && alertDate <= end;
-                }
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
 
-                // Si solo hay fecha de inicio (o es el mismo día), comparamos igualdad exacta
-                return alertDate.getTime() === start.getTime();
+                return alertDate >= start && alertDate <= end;
             });
         }
 
@@ -117,8 +110,8 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         // Crear nuevo marcador
         const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
-            size: { w: 60, h: 40 },
-            anchor: { x: 30, y: 40 }
+            size: { w: 70, h: 40 },
+            anchor: { x: 35, y: 40 }
         });
 
         const marker = new H.map.Marker(
@@ -126,7 +119,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             {
                 icon: alertIcon,
                 data: { isAlertMarker: true, alert: alert },
-                volatility: true,
+                volatility: false,
                 zIndex: 100
             }
         );
@@ -352,7 +345,9 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                         {/* Fila Fecha */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                             <label style={{ fontSize: '13px', color: '#333', width: '70px', margin: 0 }}>Fecha:</label>
-                            <div style={{ position: 'relative', flex: 1 }}>
+
+                            <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
+
                                 <DatePicker
                                     selectsRange={true}
                                     startDate={startDate}
@@ -362,22 +357,15 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                     locale="es"
                                     dateFormat="dd/MM/yyyy"
                                     placeholderText="Seleccionar rango"
-                                    className="form-control-sm" 
-                                    style={{
-                                        width: '100%',
-                                        fontSize: '12px',
-                                        padding: '4px 8px',
-                                        border: '1px solid #6c757d',
-                                        borderRadius: '4px',
-                                        height: '28px',
-                                        color: '#333'
-                                    }}
+                                    wrapperClassName="w-100"
+                                    wrapperStyle={{ width: '100%' }}
+
                                     customInput={
                                         <input
                                             style={{
                                                 width: '100%',
                                                 fontSize: '12px',
-                                                padding: '4px 25px 4px 8px',
+                                                padding: '4px 30px 4px 8px',
                                                 border: '1px solid #6c757d',
                                                 borderRadius: '4px',
                                                 height: '28px',
@@ -389,12 +377,13 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
                                 <i className="fas fa-calendar-alt" style={{
                                     position: 'absolute',
-                                    right: '8px',
+                                    right: '10px', 
                                     top: '50%',
                                     transform: 'translateY(-50%)',
                                     color: '#6c757d',
-                                    fontSize: '12px',
-                                    pointerEvents: 'none'
+                                    fontSize: '14px', 
+                                    pointerEvents: 'none', 
+                                    zIndex: 1 
                                 }}></i>
                             </div>
                         </div>

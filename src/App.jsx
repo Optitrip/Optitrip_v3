@@ -194,10 +194,13 @@ export default function App(props) {
             if (obj instanceof H.map.Polyline) {
                 map.removeObject(obj);
             }
-            // Borrar Marcadores (excepto mi ubicación actual)
+            // Borrar Marcadores (excepto mi ubicación actual Y alertas)
             if (obj instanceof H.map.Marker) {
                 const isCurrentPosition = state.ephemiral_marker && state.ephemiral_marker.includes(obj);
-                if (!isCurrentPosition) {
+                const data = obj.getData();
+                const isProtectedAlert = data && (data.protected === true || data.persistentAlert === true || data.isAlertMarker === true);
+
+                if (!isCurrentPosition && !isProtectedAlert) {
                     map.removeObject(obj);
                 }
             }
@@ -1241,14 +1244,14 @@ export default function App(props) {
         await handleMarkAsSeen(notif);
         setSelectedAlert(notif);
         setShowNotificationsMenu(false);
-        
+
         if (userSectionRef.current) userSectionRef.current.style.display = 'none';
         if (reportSectionRef.current) reportSectionRef.current.style.display = 'none';
-        
+
         const divRoutes = document.getElementById('show-routes');
         const createRoute = document.getElementById('create-route');
         const showIndications = document.getElementById('show-indications');
-        
+
         if (divRoutes) divRoutes.style.display = 'none';
         if (createRoute) createRoute.style.display = 'none';
         if (showIndications) showIndications.style.display = 'none';
@@ -1261,7 +1264,7 @@ export default function App(props) {
         if (menuRoutesBtn) menuRoutesBtn.classList.remove('btn-primary');
         if (menuUsersBtn) menuUsersBtn.classList.remove('btn-primary');
         if (menuReportsBtn) menuReportsBtn.classList.remove('btn-primary');
-        
+
         if (menuMapBtn) {
             menuMapBtn.classList.add('btn-primary');
             menuMapBtn.classList.remove('btn-outline-primary');
@@ -1269,13 +1272,13 @@ export default function App(props) {
 
         const mapContainer = document.getElementById('map');
         const mapDriversContainer = document.getElementById('map-drivers');
-        
+
         if (mapContainer) mapContainer.style.display = 'none';
         if (mapDriversContainer) mapDriversContainer.style.display = 'block';
 
         setIsTrackingOpen(false);
-        setIsAlertsOpen(true);  
-        
+        setIsAlertsOpen(true);
+
         setTimeout(() => {
             if (mapDrivers) mapDrivers.getViewPort().resize();
         }, 100);
@@ -1384,8 +1387,8 @@ export default function App(props) {
                             toggleOpen={handleAlertsToggle}
                             selectedAlert={selectedAlert}
                             onAlertSelect={setSelectedAlert}
-                           map={mapDrivers}
-                           ui={uiDrivers}
+                            map={mapDrivers}
+                            ui={uiDrivers}
                         />
                     </div>,
                     cardTracingRef.current

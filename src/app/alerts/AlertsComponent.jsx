@@ -119,56 +119,46 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     };
 
     const addAlertMarkerToMap = (alert) => {
-    console.log('🔵 Agregando marcador de alerta');
-    
-    // Remover marcador anterior si existe Y está en el mapa
-    if (alertMarker) {
-        try {
-            const markersInMap = map.getObjects();
-            if (markersInMap.includes(alertMarker)) {
-                map.removeObject(alertMarker);
-                console.log('🟡 Marcador anterior removido');
+        // Remover marcador anterior si existe
+        if (alertMarker) {
+            try {
+                const markersInMap = map.getObjects();
+                if (markersInMap.includes(alertMarker)) {
+                    map.removeObject(alertMarker);
+                }
+            } catch (error) {
+                console.log('Error removiendo marcador:', error);
             }
-        } catch (error) {
-            console.log('❌ Error removiendo marcador:', error);
         }
-    }
 
-    // Crear nuevo marcador
-    const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
-        size: { w: 70, h: 40 },
-        anchor: { x: 35, y: 40 }
-    });
+        const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
+            size: { w: 70, h: 40 },
+            anchor: { x: 35, y: 40 }
+        });
 
-    const marker = new H.map.Marker(
-        { lat: alert.lat, lng: alert.lng },
-        {
-            icon: alertIcon,
-            data: { isAlertMarker: true, alert: alert },
-            volatility: false,
-            zIndex: 100
-        }
-    );
+        const marker = new H.map.Marker(
+            { lat: alert.lat, lng: alert.lng },
+            {
+                icon: alertIcon,
+                data: {
+                    isAlertMarker: true,
+                    alert: alert,
+                    protected: true,
+                    persistentAlert: true
+                },
+                volatility: false,
+                zIndex: 1000
+            }
+        );
 
-    map.addObject(marker);
-    console.log('✅ Marcador agregado al mapa');
+        map.addObject(marker);
 
-    marker.addEventListener('tap', () => {
-        showAlertPopup(alert);
-    });
+        marker.addEventListener('tap', () => {
+            showAlertPopup(alert);
+        });
 
-    setAlertMarker(marker);
-    
-    // Verificar después de 5 segundos si sigue en el mapa
-    setTimeout(() => {
-        const markersInMap = map.getObjects();
-        const stillExists = markersInMap.includes(marker);
-        console.log('🔍 ¿Marcador sigue en el mapa después de 5 segundos?', stillExists);
-        if (!stillExists) {
-            console.log('⚠️ EL MARCADOR FUE REMOVIDO POR ALGO MÁS');
-        }
-    }, 5000);
-};
+        setAlertMarker(marker);
+    };
 
     const showAlertPopup = (alert) => {
         // Limpiar bubble anterior

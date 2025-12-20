@@ -720,6 +720,45 @@ export default function App(props) {
         setRefsReady(true);
     }, []);
 
+    useEffect(() => {
+        const menuMap = document.getElementById('menuMap');
+        const menuUsers = document.getElementById('menuUsers');
+        const menuReports = document.getElementById('menuReports');
+        const menuRoutes = document.getElementById('menuRoutes'); 
+
+        const cleanMapState = () => {
+            if (menuMap) {
+                if (menuMap.classList.contains('btn-primary')) {
+                    menuMap.classList.remove('btn-primary');
+                    menuMap.classList.add('btn-outline-primary');
+                }
+                                const link = menuMap.querySelector('a');
+                if (link) {
+                    link.classList.remove('btn-primary');
+                    link.classList.add('btn-outline-primary');
+                }
+            }
+            const tracingDiv = document.getElementById('tracing-driver');
+            if (tracingDiv) {
+                tracingDiv.style.display = 'none';
+            }
+
+            setIsTrackingOpen(false);
+            setIsAlertsOpen(false);
+        };
+
+        if (menuUsers) menuUsers.addEventListener('click', cleanMapState);
+        if (menuReports) menuReports.addEventListener('click', cleanMapState);
+        if (menuRoutes) menuRoutes.addEventListener('click', cleanMapState);
+
+        return () => {
+            // Limpieza de eventos al desmontar
+            if (menuUsers) menuUsers.removeEventListener('click', cleanMapState);
+            if (menuReports) menuReports.removeEventListener('click', cleanMapState);
+            if (menuRoutes) menuRoutes.removeEventListener('click', cleanMapState);
+        };
+    }, []);
+
     const handleContextMenu = (ev) => {
         const menuRoutes = document.getElementById('menuRoutes');
         // Verifica si el elemento tiene la clase btn-primary

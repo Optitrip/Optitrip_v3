@@ -759,6 +759,26 @@ export default function App(props) {
         };
     }, []);
 
+    useEffect(() => {
+        const menuMapBtn = document.getElementById('menuMap');
+        const handleReturnToMap = () => {
+            const tracingDiv = document.getElementById('tracing-driver');
+            if (tracingDiv) {
+                tracingDiv.style.display = 'block';
+            }
+            setIsTrackingOpen(true);
+            setIsAlertsOpen(false);
+        };
+        if (menuMapBtn) {
+            menuMapBtn.addEventListener('click', handleReturnToMap);
+        }
+        return () => {
+            if (menuMapBtn) {
+                menuMapBtn.removeEventListener('click', handleReturnToMap);
+            }
+        };
+    }, []);
+
     const handleContextMenu = (ev) => {
         const menuRoutes = document.getElementById('menuRoutes');
         // Verifica si el elemento tiene la clase btn-primary

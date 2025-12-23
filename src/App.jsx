@@ -160,6 +160,7 @@ export default function App(props) {
     const [isTrackingOpen, setIsTrackingOpen] = useState(true);
     const [refsReady, setRefsReady] = useState(false);
     const [selectedAlert, setSelectedAlert] = useState(null);
+    const prevNotifCount = useRef(0);
 
 
     const appContainerRef = useRef(null);
@@ -655,6 +656,11 @@ export default function App(props) {
                 const response = await fetch(`${base_url}/reports/deviations/unseen`);
                 if (response.ok) {
                     const data = await response.json();
+                    if (data.length > prevNotifCount.current) {
+                        const audio = new Audio('/sounds/alert.wav');
+                        audio.play().catch(e => console.log("Autoplay bloqueado o error de audio:", e));
+                    }
+                    prevNotifCount.current = data.length;
                     setNotifications(data);
 
                     const notifBtn = document.getElementById('notificationsButton');
@@ -724,7 +730,7 @@ export default function App(props) {
         const menuMap = document.getElementById('menuMap');
         const menuUsers = document.getElementById('menuUsers');
         const menuReports = document.getElementById('menuReports');
-        const menuRoutes = document.getElementById('menuRoutes'); 
+        const menuRoutes = document.getElementById('menuRoutes');
 
         const cleanMapState = () => {
             if (menuMap) {
@@ -732,7 +738,7 @@ export default function App(props) {
                     menuMap.classList.remove('btn-primary');
                     menuMap.classList.add('btn-outline-primary');
                 }
-                                const link = menuMap.querySelector('a');
+                const link = menuMap.querySelector('a');
                 if (link) {
                     link.classList.remove('btn-primary');
                     link.classList.add('btn-outline-primary');
@@ -1376,12 +1382,12 @@ export default function App(props) {
         const mapContainer = document.getElementById('map');
         const mapDriversContainer = document.getElementById('map-drivers');
 
-        if (mapContainer) mapContainer.style.display = 'none';          
-        if (mapDriversContainer) mapDriversContainer.style.display = 'block'; 
+        if (mapContainer) mapContainer.style.display = 'none';
+        if (mapDriversContainer) mapDriversContainer.style.display = 'block';
 
-        setSelectedAlert(null);   
-        setIsAlertsOpen(true);   
-        setIsTrackingOpen(false); 
+        setSelectedAlert(null);
+        setIsAlertsOpen(true);
+        setIsTrackingOpen(false);
 
         setTimeout(() => {
             if (mapDrivers) mapDrivers.getViewPort().resize();
@@ -1417,7 +1423,7 @@ export default function App(props) {
                                         onClick={() => handleAlertClick(notif)}
                                     >
                                         <div className="notif-title">
-                                            {notif.type === "ORIGINAL_ROUTE" ? "Alerta de ruta recalculada" : "Alerta de desviación"}
+                                            {notif.type === "ORIGINAL_ROUTE" ? "Alerta de desviación" : "Alerta de ruta recalculada"}
                                         </div>
                                         <div className="notif-subtitle">
                                             {notif.driverName || "CONDUCTOR"}

@@ -656,9 +656,10 @@ export default function App(props) {
                 const response = await fetch(`${base_url}/reports/deviations/unseen`);
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.length > prevNotifCount.current) {
+                    const hasSession = sessionStorage.getItem('data_user');
+                    if (hasSession && data.length > prevNotifCount.current) {
                         const audio = new Audio('/sounds/alert.wav');
-                        audio.play().catch(e => console.log("Autoplay bloqueado o error de audio:", e));
+                        audio.play().catch(e => console.log("Autoplay bloqueado o error:", e));
                     }
                     prevNotifCount.current = data.length;
                     setNotifications(data);

@@ -338,7 +338,10 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             border: 'none',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             width: '100%',
-            fontFamily: 'Arial, sans-serif'
+            fontFamily: 'Arial, sans-serif',
+            display: 'flex',
+            flexDirection: 'column',
+            maxHeight: 'calc(100vh - 75px)'
         }}>
             <div className="card-header" onClick={toggleOpen} style={{
                 background: 'linear-gradient(to right, #FB8800, #FB8800)',
@@ -367,7 +370,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             </div>
 
             {isOpen && (
-                <div style={{ background: '#F8F9FA', padding: '10px' }}>
+                <div style={{ background: '#F8F9FA', padding: '10px', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
                     {/* FILTROS */}
                     <div style={{ marginBottom: '15px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
@@ -476,7 +479,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                             Cargando alertas...
                         </div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
                             {filteredAlerts.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
                                     No hay alertas para mostrar

@@ -341,7 +341,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             fontFamily: 'Arial, sans-serif',
             display: 'flex',
             flexDirection: 'column',
-            maxHeight: 'calc(100vh - 160px)'
+            height: 'calc(100vh - 125px)'
         }}>
             <div className="card-header" onClick={toggleOpen} style={{
                 background: 'linear-gradient(to right, #FB8800, #FB8800)',

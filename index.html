@@ -335,6 +335,18 @@
       showIndications.style.display = showIndications.style.display === 'none' ? 'block' : 'none';
       showRoutes.style.display = showRoutes.style.display === 'none' ? 'block' : 'none';
     }
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnLogout = document.getElementById('logout');
+      
+      if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+          e.preventDefault(); 
+          localStorage.clear();
+          sessionStorage.clear();
+          window.location.reload();
+        });
+      }
+    });
   </script>
 </body>
 

@@ -199,24 +199,25 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                         right: 8px; 
                         cursor: pointer; 
                         z-index: 10;
-                        width: 18px;              /* Mucho más pequeño (antes 22px) */
-                        height: 18px;             /* Mucho más pequeño */
-                        border: 1.5px solid #000; /* Mantenemos borde negro sólido */
+                        width: 16px;              /* Círculo más pequeño (antes 18px) */
+                        height: 16px;             /* Círculo más pequeño */
+                        border: 1px solid #000;   /* Borde más fino (antes 1.5px) para un look más ligero */
                         border-radius: 50%;       
                         display: flex;            
                         justify-content: center;
                         align-items: center;
                         background: transparent;
-                        padding: 0;               /* Asegura que no haya espacio extra */
+                        padding: 0;
                     "
                     onmouseover="this.style.backgroundColor='rgba(0,0,0,0.05)'"
                     onmouseout="this.style.backgroundColor='transparent'"
                 >
                     <i class="fas fa-times" style="
-                        font-size: 14px;          /* Grande respecto al contenedor de 18px */
+                        font-size: 10px;          /* X más pequeña (antes 14px/11px) */
                         color: #000;              
-                        line-height: 1;           /* Crucial para que no se desplace verticalmente */
+                        line-height: 1;
                         margin: 0;
+                        font-weight: 400;         /* Fuerza a que la X no sea gruesa (negrita) */
                     "></i>
                 </div>
 

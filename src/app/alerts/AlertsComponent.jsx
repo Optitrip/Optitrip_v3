@@ -33,7 +33,22 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         }
 
         applyFilters();
-    }, [allowedDrivers]);
+        if (selectedAlert && map && alertMarkerRef.current) {
+            try {
+                const mapObjects = map.getObjects();
+                const isMarkerStillThere = mapObjects.some(obj => obj === alertMarkerRef.current);
+
+                if (!isMarkerStillThere) {
+                    map.addObject(alertMarkerRef.current);
+                    
+                    alertMarkerRef.current.setZIndex(1000);
+                }
+            } catch (error) {
+                console.error("Error restaurando el marcador de alerta:", error);
+                centerMapOnAlert(selectedAlert);
+            }
+        }
+    }, [allowedDrivers, selectedAlert, map]);
 
     // Aplicar filtros cuando cambian
     useEffect(() => {

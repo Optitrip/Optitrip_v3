@@ -281,25 +281,31 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         if (filterStatus === 'all') {
             setFilteredDriversStatus(filteredDrivers);
         }
+
         if (mapDrivers) {
-            mapDrivers.removeObjects(mapDrivers.getObjects());
+            const currentObjects = mapDrivers.getObjects();
+
+            const objectsToRemove = currentObjects.filter(obj => {
+                const data = obj.getData();
+                const isProtected = data && (data.protected || data.persistentAlert || data.isAlertMarker);
+                return !isProtected;
+            });
+
+            mapDrivers.removeObjects(objectsToRemove);
 
             filteredDriversStatus.forEach((driver) => {
-                // Verificar que el driver tenga tracking y location antes de acceder
                 if (!driver.tracking || !driver.tracking.location) {
-                    return; // Saltar este driver si no tiene tracking
+                    return; 
                 }
 
                 const { latitude, longitude } = driver.tracking.location;
 
-                // Solo agregar marcadores si la latitud y longitud no son 0
                 if (latitude !== 0 && longitude !== 0) {
                     addMarkerToMap(mapDrivers, driver._id, latitude, longitude, driver.tracking.status, driver.name);
                 }
             });
         }
 
-        // Contar conductores activos e inactivos
         const offlineCount = filteredDrivers.filter(driver =>
             driver.tracking && driver.tracking.status === "Fuera de línea"
         ).length;
@@ -309,7 +315,8 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         setDriversOnline(onlineCount);
         setDriversOffline(offlineCount);
 
-    }, [filteredDrivers, filteredDriversStatus, filterStatus, mapDrivers]);
+    }, [filteredDrivers, filteredDriversStatus, filterStatus, mapDrivers, addMarkerToMap]);
+
 
     const handleFilterStatusChange = (status) => {
         setFilterStatus(status);
@@ -354,21 +361,21 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
             <div className="card-header" onClick={toggleOpen} style={{
                 background: 'linear-gradient(to right, #FB8800, #FB8800)',
                 color: 'white',
-                padding: '6px', 
+                padding: '6px',
                 cursor: 'pointer',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                position: 'relative', 
+                position: 'relative',
                 borderRadius: '10px 10px 0 0'
             }}>
                 {/* Título centrado absolutamente */}
-                <span style={{ 
-                    position: 'absolute', 
-                    left: '50%', 
-                    transform: 'translateX(-50%)', 
-                    fontWeight: 'bold', 
-                    fontSize: '14px' 
+                <span style={{
+                    position: 'absolute',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    fontWeight: 'bold',
+                    fontSize: '14px'
                 }}>
                     Diagrama de cuentas
                 </span>

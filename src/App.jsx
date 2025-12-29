@@ -156,8 +156,15 @@ export default function App(props) {
     const [formKey, setFormKey] = useState(0);
     const [notifications, setNotifications] = useState([]);
     const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
-    const [isAlertsOpen, setIsAlertsOpen] = useState(false);
-    const [isTrackingOpen, setIsTrackingOpen] = useState(true);
+    const [isAlertsOpen, setIsAlertsOpen] = useState(() => {
+        const saved = localStorage.getItem('optitrip_isAlertsOpen');
+        return saved !== null ? JSON.parse(saved) : false;
+    });
+
+    const [isTrackingOpen, setIsTrackingOpen] = useState(() => {
+        const saved = localStorage.getItem('optitrip_isTrackingOpen');
+        return saved !== null ? JSON.parse(saved) : true;
+    });
     const [refsReady, setRefsReady] = useState(false);
     const [selectedAlert, setSelectedAlert] = useState(null);
     const prevNotifCount = useRef(0);
@@ -172,17 +179,27 @@ export default function App(props) {
     const email = sessionStorageUser.email;
 
     const handleTrackingToggle = () => {
-        if (!isTrackingOpen) {
+        const newState = !isTrackingOpen;
+
+        setIsTrackingOpen(newState);
+        localStorage.setItem('optitrip_isTrackingOpen', JSON.stringify(newState));
+
+        if (newState) {
             setIsAlertsOpen(false);
+            localStorage.setItem('optitrip_isAlertsOpen', JSON.stringify(false));
         }
-        setIsTrackingOpen(!isTrackingOpen);
     };
 
     const handleAlertsToggle = () => {
-        if (!isAlertsOpen) {
+        const newState = !isAlertsOpen;
+
+        setIsAlertsOpen(newState);
+        localStorage.setItem('optitrip_isAlertsOpen', JSON.stringify(newState));
+
+        if (newState) {
             setIsTrackingOpen(false);
+            localStorage.setItem('optitrip_isTrackingOpen', JSON.stringify(false));
         }
-        setIsAlertsOpen(!isAlertsOpen);
     };
 
     const handleFullReset = () => {
@@ -773,8 +790,11 @@ export default function App(props) {
             if (tracingDiv) {
                 tracingDiv.style.display = 'block';
             }
-            setIsTrackingOpen(true);
-            setIsAlertsOpen(false);
+            const savedTracking = localStorage.getItem('optitrip_isTrackingOpen');
+            const savedAlerts = localStorage.getItem('optitrip_isAlertsOpen');
+
+            setIsTrackingOpen(savedTracking !== null ? JSON.parse(savedTracking) : true);
+            setIsAlertsOpen(savedAlerts !== null ? JSON.parse(savedAlerts) : false);
         };
         if (menuMapBtn) {
             menuMapBtn.addEventListener('click', handleReturnToMap);

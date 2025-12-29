@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base_url } from '../../config.js';
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -13,7 +13,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     const [driverFilter, setDriverFilter] = useState('');
     const [drivers, setDrivers] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [alertMarker, setAlertMarker] = useState(null);
+    const alertMarkerRef = useRef(null);
 
     // Cargar alertas al montar el componente o cuando cambie isOpen
     useEffect(() => {
@@ -45,16 +45,25 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         if (selectedAlert && map) {
             centerMapOnAlert(selectedAlert);
         } else {
-            if (alertMarker && map) {
+            if (alertMarkerRef.current) {
                 try {
-                    map.removeObject(alertMarker);
-                    setAlertMarker(null);
-                } catch (error) {
-                    console.log('Error removiendo marcador:', error);
-                }
+                    map.removeObject(alertMarkerRef.current);
+                    alertMarkerRef.current = null;
+                } catch (e) { console.log(e) }
             }
         }
-    }, [selectedAlert, map, alertMarker]);
+    }, [selectedAlert, map]);
+
+    useEffect(() => {
+        return () => {
+            // Solo se ejecuta cuando el usuario CIERRA el panel de alertas o cambia de página
+            if (alertMarkerRef.current && map) {
+                try {
+                    map.removeObject(alertMarkerRef.current);
+                } catch (e) { console.log(e); }
+            }
+        };
+    }, []);
 
     const fetchAlerts = async () => {
         setLoading(true);
@@ -126,16 +135,15 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     };
 
     const addAlertMarkerToMap = (alert) => {
-        // Remover marcador anterior si existe
-        if (alertMarker) {
+        if (alertMarkerRef.current) {
             try {
-                const markersInMap = map.getObjects();
-                if (markersInMap.includes(alertMarker)) {
-                    map.removeObject(alertMarker);
-                }
+                map.removeObject(alertMarkerRef.current);
             } catch (error) {
-                console.log('Error removiendo marcador:', error);
+                map.getObjects().forEach(obj => {
+                    if (obj.getData()?.isAlertMarker) map.removeObject(obj);
+                });
             }
+            alertMarkerRef.current = null;
         }
 
         const alertIcon = new H.map.Icon('/iconos%20principales/alert.svg', {
@@ -153,7 +161,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     protected: true,
                     persistentAlert: true
                 },
-                volatility: false,
+                volatility: true,
                 zIndex: 1000
             }
         );
@@ -164,7 +172,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             showAlertPopup(alert);
         });
 
-        setAlertMarker(marker);
+        alertMarkerRef.current = marker;
     };
 
     const showAlertPopup = (alert) => {
@@ -288,21 +296,25 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         ui.addBubble(bubble);
     };
 
-    // Función global para cerrar popup desde el HTML string
-    window.closeAlertPopup = () => {
-        if (ui && ui.getBubbles().length > 0) {
-            ui.getBubbles().forEach(b => ui.removeBubble(b));
-        }
+    useEffect(() => {
+        window.closeAlertPopup = () => {
+            if (ui) {
+                ui.getBubbles().forEach(b => ui.removeBubble(b));
+            }
 
-        if (map) {
-            map.getObjects().forEach(object => {
-                const data = object.getData();
-                if (data && data.isAlertMarker) {
-                    map.removeObject(object);
-                }
-            });
-        }
-    };
+            if (map) {
+                map.getObjects().forEach(object => {
+                    const data = object.getData();
+                    if (data && data.isAlertMarker) {
+                        map.removeObject(object);
+                    }
+                });
+            }
+
+            alertMarkerRef.current = null;
+
+        };
+    }, [map, ui]);
 
     const handleAlertCardClick = async (alert) => {
         if (!alert.seenByAdmin) {

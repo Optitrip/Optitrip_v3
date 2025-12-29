@@ -201,7 +201,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                         z-index: 10;
                         width: 12px;            
                         height: 12px;             
-                        border: 1.5px solid #000; 
+                        border: 2px solid #000; 
                         border-radius: 50%;       
                         display: flex;            
                         justify-content: center;
@@ -213,7 +213,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     onmouseout="this.style.backgroundColor='transparent'"
                 >
                     <i class="fas fa-times" style="
-                        font-size: 11px;          
+                        font-size: 10px;          
                         color: #000;              
                         line-height: 1;
                         margin: 0;

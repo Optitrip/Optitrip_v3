@@ -99,7 +99,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             });
         }
 
-        if (allowedDrivers && allowedDrivers.length > 0) {
+        if (allowedDrivers) { 
             const allowedNames = allowedDrivers.map(d => d.name);
             filtered = filtered.filter(alert => allowedNames.includes(alert.driverName));
         }

@@ -24,7 +24,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
     useEffect(() => {
         setDriverFilter('all');
-        
+
         if (allowedDrivers && allowedDrivers.length > 0) {
             const driverNames = allowedDrivers.map(d => d.name);
             setDrivers(driverNames);
@@ -44,24 +44,17 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     useEffect(() => {
         if (selectedAlert && map) {
             centerMapOnAlert(selectedAlert);
-        }
-    }, [selectedAlert, map]);
-
-    // Limpiar marcador al cerrar el componente
-    useEffect(() => {
-        return () => {
+        } else {
             if (alertMarker && map) {
                 try {
-                    const markersInMap = map.getObjects();
-                    if (markersInMap.includes(alertMarker)) {
-                        map.removeObject(alertMarker);
-                    }
+                    map.removeObject(alertMarker);
+                    setAlertMarker(null);
                 } catch (error) {
-                    console.log('Error al limpiar marcador:', error);
+                    console.log('Error removiendo marcador:', error);
                 }
             }
-        };
-    }, [alertMarker, map]);
+        }
+    }, [selectedAlert, map, alertMarker]);
 
     const fetchAlerts = async () => {
         setLoading(true);
@@ -99,7 +92,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             });
         }
 
-        if (allowedDrivers) { 
+        if (allowedDrivers) {
             const allowedNames = allowedDrivers.map(d => d.name);
             filtered = filtered.filter(alert => allowedNames.includes(alert.driverName));
         }

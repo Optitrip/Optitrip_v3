@@ -249,9 +249,10 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 <div style="
                     font-size: 11px; 
                     color: #888888; 
-                    white-space: nowrap; 
-                    overflow: hidden; 
-                    text-overflow: ellipsis;
+                    white-space: normal;      
+                    word-wrap: break-word;   
+                    margin-bottom: 2px;
+                    line-height: 1.4;          
                 ">
                     ${alert.address || `${alert.lat.toFixed(5)}, ${alert.lng.toFixed(5)}`}
                 </div>

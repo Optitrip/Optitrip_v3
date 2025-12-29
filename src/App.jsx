@@ -149,6 +149,7 @@ export default function App(props) {
     const cardReportsInfoRef = useRef(null);
     const divPrintRouteRef = useRef(null);
     const divAssignRouteRef = useRef(null);
+    const [currentAccountDrivers, setCurrentAccountDrivers] = useState([]);
     const [stateUser, setUser] = useState([]);
     const [error, setError] = useState('');
     const [initialized, setInitialized] = useState(false);
@@ -1498,6 +1499,7 @@ export default function App(props) {
                             zoomLocation={zoomLocation}
                             isOpen={isTrackingOpen}
                             toggleOpen={handleTrackingToggle}
+                            onDriversUpdate={setCurrentAccountDrivers}
                         />
                         <AlertsComponent
                             isOpen={isAlertsOpen}
@@ -1506,6 +1508,7 @@ export default function App(props) {
                             onAlertSelect={setSelectedAlert}
                             map={mapDrivers}
                             ui={uiDrivers}
+                            allowedDrivers={currentAccountDrivers}
                         />
                     </div>,
                     cardTracingRef.current

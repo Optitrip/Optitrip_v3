@@ -8,7 +8,7 @@ const statusColors = {
     'Inactivo': '#FB8800'      // Naranja
 };
 
-export default function TrackingComponent({ email, mapDrivers, state, addMarkerToMap, zoomLocation, isOpen, toggleOpen }) {
+export default function TrackingComponent({ email, mapDrivers, state, addMarkerToMap, zoomLocation, isOpen, toggleOpen, onDriversUpdate }) {
     const [dataUsers, setDataUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [filteredDrivers, setFilteredDrivers] = useState([])
@@ -95,6 +95,9 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                 try {
                     const { users } = await getUsersDriverService(selectedSuperiorAccount);
                     setFilteredDrivers(users);
+                    if (onDriversUpdate) {
+                        onDriversUpdate(users);
+                    }
                 } catch (error) {
                     setError(error.message);
                 }

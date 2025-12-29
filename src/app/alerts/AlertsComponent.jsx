@@ -5,7 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import es from 'date-fns/locale/es';
 registerLocale('es', es);
 
-export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onAlertSelect, map, ui }) {
+export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onAlertSelect, map, ui, allowedDrivers }) {
     const [alerts, setAlerts] = useState([]);
     const [filteredAlerts, setFilteredAlerts] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
@@ -22,10 +22,23 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        setDriverFilter('all');
+        
+        if (allowedDrivers && allowedDrivers.length > 0) {
+            const driverNames = allowedDrivers.map(d => d.name);
+            setDrivers(driverNames);
+        } else {
+            setDrivers([]);
+        }
+
+        applyFilters();
+    }, [allowedDrivers]);
+
     // Aplicar filtros cuando cambian
     useEffect(() => {
         applyFilters();
-    }, [alerts, dateRange, driverFilter]);
+    }, [alerts, dateRange, driverFilter, allowedDrivers]);
 
     // Centrar mapa cuando hay una alerta seleccionada
     useEffect(() => {
@@ -88,6 +101,11 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
                 return alertDate >= start && alertDate <= end;
             });
+        }
+
+        if (allowedDrivers && allowedDrivers.length > 0) {
+            const allowedNames = allowedDrivers.map(d => d.name);
+            filtered = filtered.filter(alert => allowedNames.includes(alert.driverName));
         }
 
         // Filtro por conductor

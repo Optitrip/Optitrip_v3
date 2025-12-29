@@ -195,27 +195,29 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     onclick="window.closeAlertPopup()"
                     style="
                         position: absolute; 
-                        top: 8px; 
-                        right: 8px; 
+                        top: 10px; 
+                        right: 10px; 
                         cursor: pointer; 
                         z-index: 10;
-                        width: 16px;
-                        height: 16px;
-                        border: 1px solid #000;
-                        border-radius: 50%;
-                        display: flex;
+                        width: 22px;              
+                        height: 22px;             
+                        border: 1.5px solid #333; 
+                        border-radius: 50%;       
+                        display: flex;            
                         justify-content: center;
                         align-items: center;
                         background: transparent;
+                        transition: background 0.2s;
                     "
+                    onmouseover="this.style.backgroundColor='rgba(0,0,0,0.05)'"
+                    onmouseout="this.style.backgroundColor='transparent'"
                 >
-                    <span style="
-                        font-size: 11px; 
-                        color: #000; 
-                        font-weight: bold; 
-                        line-height: 0;
-                        padding-bottom: 1px;
-                    ">&times;</span>
+                    <i class="fas fa-times" style="
+                        font-size: 12px;         
+                        color: #333;            
+                        margin: 0;
+                        padding: 0;
+                    "></i>
                 </div>
 
                 <div style="
@@ -283,6 +285,15 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     window.closeAlertPopup = () => {
         if (ui && ui.getBubbles().length > 0) {
             ui.getBubbles().forEach(b => ui.removeBubble(b));
+        }
+
+        if (map) {
+            map.getObjects().forEach(object => {
+                const data = object.getData();
+                if (data && data.isAlertMarker) {
+                    map.removeObject(object);
+                }
+            });
         }
     };
 

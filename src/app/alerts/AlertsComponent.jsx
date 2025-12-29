@@ -195,28 +195,28 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     onclick="window.closeAlertPopup()"
                     style="
                         position: absolute; 
-                        top: 10px; 
-                        right: 10px; 
+                        top: 8px; 
+                        right: 8px; 
                         cursor: pointer; 
                         z-index: 10;
-                        width: 22px;              
-                        height: 22px;             
-                        border: 1.5px solid #333; 
+                        width: 18px;              /* Mucho más pequeño (antes 22px) */
+                        height: 18px;             /* Mucho más pequeño */
+                        border: 1.5px solid #000; /* Mantenemos borde negro sólido */
                         border-radius: 50%;       
                         display: flex;            
                         justify-content: center;
                         align-items: center;
                         background: transparent;
-                        transition: background 0.2s;
+                        padding: 0;               /* Asegura que no haya espacio extra */
                     "
                     onmouseover="this.style.backgroundColor='rgba(0,0,0,0.05)'"
                     onmouseout="this.style.backgroundColor='transparent'"
                 >
                     <i class="fas fa-times" style="
-                        font-size: 12px;         
-                        color: #333;            
+                        font-size: 14px;          /* Grande respecto al contenedor de 18px */
+                        color: #000;              
+                        line-height: 1;           /* Crucial para que no se desplace verticalmente */
                         margin: 0;
-                        padding: 0;
                     "></i>
                 </div>
 

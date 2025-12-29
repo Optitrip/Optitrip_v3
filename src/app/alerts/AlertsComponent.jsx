@@ -71,10 +71,6 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             if (response.ok) {
                 const data = await response.json();
                 setAlerts(data);
-
-                // Extraer conductores únicos
-                const uniqueDrivers = [...new Set(data.map(alert => alert.driverName))];
-                setDrivers(uniqueDrivers);
             }
         } catch (error) {
             console.error("Error fetching alerts", error);

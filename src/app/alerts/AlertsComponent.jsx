@@ -159,7 +159,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         // Centrar el mapa
         map.setCenter({ lat, lng });
-        map.setZoom(13); // Zoom más alejado para ver ambas rutas
+        map.setZoom(15); // Zoom más alejado para ver ambas rutas
 
         clearDeviationRoutes();
         addAlertMarkerToMap(alert);

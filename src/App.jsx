@@ -4,10 +4,10 @@ import ReactDOM from 'react-dom';
 import { apiKeyHERE, base_url } from './config.js';
 import { getUserByIdService, getUsersService } from './services/UserService.js';
 import { here_api_routes, resetRoutesModule } from './app/routes/GenerateRoute.jsx';
-import { getCookie } from './cookies.js';
+import { getCookie } from '../src/cookies.js';
+import { decode } from '../src/decode.js';
 import './App.css'
 import './style.css'
-import { decode } from './decode.js';
 import { SearchComponent } from './app/routes/search/SearchComponent.jsx';
 import { SelectDestinationsComponent } from './app/routes/select-destinations/SelectDestinationsComponent.jsx';
 import SelectVehiclesComponent from './app/routes/select-vehicles/SelectVehiclesComponent.jsx';

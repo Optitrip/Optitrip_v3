@@ -392,90 +392,70 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
    const drawOriginalAndRecalculatedRoutes = async (alert) => {
         try {
+            const routeGroup = new H.map.Group();
+            routeGroup.setData({ isDeviationRoute: true });
+
             const response = await fetch(`${base_url}/route/edit/${alert.routeId}`);
-            if (!response.ok) return;
             
-            const routeData = await response.json();
-            
-            if (routeData.routeSections && routeData.routeSections.length > 0) {
-                const originalCoords = [];
-                
-                for (const section of routeData.routeSections) {
-                    const decoded = decode(section.polyline); 
-                    decoded.polyline.forEach(coord => {
-                        originalCoords.push({ lat: coord[0], lng: coord[1] });
-                    });
-                }
-                
-                if (originalCoords.length >= 2) {
+            if (response.ok) {
+                const routeData = await response.json();
+                if (routeData.routeSections && routeData.routeSections.length > 0) {
                     const originalLineString = new H.geo.LineString();
-                    originalCoords.forEach(coord => originalLineString.pushPoint(coord));
                     
-                    const originalPolyline = new H.map.Polyline(originalLineString, {
-                        style: {
-                            lineWidth: 5,
-                            strokeColor: '#00BD2A',
-                            lineDash: [10, 5] 
-                        },
-                        data: { isDeviationRoute: true, routeType: 'original' }
+                    routeData.routeSections.forEach(section => {
+                        const decoded = decode(section.polyline); 
+                        decoded.polyline.forEach(coord => {
+                            originalLineString.pushPoint({ lat: coord[0], lng: coord[1] });
+                        });
                     });
-                    
-                    map.addObject(originalPolyline);
+
+                    if (originalLineString.getPointCount() >= 2) {
+                        const originalPolyline = new H.map.Polyline(originalLineString, {
+                            style: { lineWidth: 5, strokeColor: '#00BD2A', lineDash: [10, 5] },
+                            data: { routeType: 'original' } // Data interna
+                        });
+                        routeGroup.addObject(originalPolyline);
+                    }
                 }
             }
             
             if (alert.recalculatedRoute) {
-                const recalcCoords = [];
-                
+                const recalcLineString = new H.geo.LineString();
+                let pointsAdded = false;
+
                 if (alert.recalculatedRoute.polyline && alert.recalculatedRoute.polyline.length > 10) {
                     const decoded = decode(alert.recalculatedRoute.polyline);
                     decoded.polyline.forEach(coord => {
-                        recalcCoords.push({ lat: coord[0], lng: coord[1] });
+                        recalcLineString.pushPoint({ lat: coord[0], lng: coord[1] });
                     });
-                } else if (alert.recalculatedRoute.sections && alert.recalculatedRoute.sections.length > 0) {
-                     for (const section of alert.recalculatedRoute.sections) {
+                    pointsAdded = true;
+                } 
+                else if (alert.recalculatedRoute.sections && alert.recalculatedRoute.sections.length > 0) {
+                     alert.recalculatedRoute.sections.forEach(section => {
                         const decoded = decode(section.polyline);
                         decoded.polyline.forEach(coord => {
-                            recalcCoords.push({ lat: coord[0], lng: coord[1] });
+                            recalcLineString.pushPoint({ lat: coord[0], lng: coord[1] });
                         });
-                    }
+                    });
+                    pointsAdded = true;
                 }
                 
-                if (recalcCoords.length >= 2) {
-                    const recalcLineString = new H.geo.LineString();
-                    recalcCoords.forEach(coord => recalcLineString.pushPoint(coord));
-                    
+                if (pointsAdded && recalcLineString.getPointCount() >= 2) {
                     const recalcPolyline = new H.map.Polyline(recalcLineString, {
-                        style: {
-                            lineWidth: 6,
-                            strokeColor: '#007BFF' 
-                        },
-                        data: { isDeviationRoute: true, routeType: 'recalculated' }
+                        style: { lineWidth: 6, strokeColor: '#007BFF' },
+                        data: { routeType: 'recalculated' }
                     });
-                    
-                    map.addObject(recalcPolyline);
+                    routeGroup.addObject(recalcPolyline);
                 }
             }
             
-            const allObjects = map.getObjects().filter(obj => 
-                obj instanceof H.map.Polyline && obj.getData()?.isDeviationRoute
-            );
-            
-            if (allObjects.length > 0) {
-                let combinedBoundingBox = null;
-
-                allObjects.forEach(obj => {
-                    const objBounds = obj.getBoundingBox();
-                    if (combinedBoundingBox) {
-                        combinedBoundingBox = combinedBoundingBox.merge(objBounds);
-                    } else {
-                        combinedBoundingBox = objBounds;
-                    }
-                });
-
-                if (combinedBoundingBox) {
+            if (routeGroup.getObjects().length > 0) {
+                map.addObject(routeGroup);
+                
+                const groupBounds = routeGroup.getBoundingBox();
+                if (groupBounds) {
                     map.getViewModel().setLookAtData({ 
-                        bounds: combinedBoundingBox, 
+                        bounds: groupBounds, 
                         padding: { top: 50, bottom: 50, left: 50, right: 50 } 
                     });
                 }

@@ -62,10 +62,15 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             centerMapOnAlert(selectedAlert);
         } else {
             if (alertMarkerRef.current) {
-                try {
-                    map.removeObject(alertMarkerRef.current);
-                    alertMarkerRef.current = null;
-                } catch (e) { console.log(e) }
+                try { map.removeObject(alertMarkerRef.current); } catch (e) { }
+                alertMarkerRef.current = null;
+            }
+            if (routeGroupRef.current) {
+                map.getObjects().forEach(obj => {
+                    if (obj instanceof H.map.Group && obj.getData()?.isDeviationRoute) {
+                        map.removeObject(obj);
+                    }
+                });
             }
         }
     }, [selectedAlert, map]);
@@ -210,8 +215,8 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         }
 
         const typeText = alert.type === "ORIGINAL_ROUTE"
-            ? "Alerta de ruta recalculada"
-            : "Alerta de desviación de ruta";
+            ? "Alerta de desviación de ruta"
+            : "Alerta de ruta recalculada";
 
         const d = new Date(alert.timestamp);
         const dateStr = d.getFullYear() + "-" +
@@ -390,20 +395,23 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         setDriverFilter(e.target.value);
     };
 
-   const drawOriginalAndRecalculatedRoutes = async (alert) => {
+    const drawOriginalAndRecalculatedRoutes = async (alert) => {
         try {
             const routeGroup = new H.map.Group();
-            routeGroup.setData({ isDeviationRoute: true });
+            routeGroup.setData({
+                isDeviationRoute: true,
+                protected: true
+            });
 
             const response = await fetch(`${base_url}/route/edit/${alert.routeId}`);
-            
+
             if (response.ok) {
                 const routeData = await response.json();
                 if (routeData.routeSections && routeData.routeSections.length > 0) {
                     const originalLineString = new H.geo.LineString();
-                    
+
                     routeData.routeSections.forEach(section => {
-                        const decoded = decode(section.polyline); 
+                        const decoded = decode(section.polyline);
                         decoded.polyline.forEach(coord => {
                             originalLineString.pushPoint({ lat: coord[0], lng: coord[1] });
                         });
@@ -411,14 +419,17 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
                     if (originalLineString.getPointCount() >= 2) {
                         const originalPolyline = new H.map.Polyline(originalLineString, {
-                            style: { lineWidth: 5, strokeColor: '#00BD2A', lineDash: [10, 5] },
-                            data: { routeType: 'original' } // Data interna
+                            style: {
+                                lineWidth: 5,
+                                strokeColor: '#00BD2A' // Verde sólido
+                            },
+                            data: { routeType: 'original' }
                         });
                         routeGroup.addObject(originalPolyline);
                     }
                 }
             }
-            
+
             if (alert.recalculatedRoute) {
                 const recalcLineString = new H.geo.LineString();
                 let pointsAdded = false;
@@ -429,9 +440,9 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                         recalcLineString.pushPoint({ lat: coord[0], lng: coord[1] });
                     });
                     pointsAdded = true;
-                } 
+                }
                 else if (alert.recalculatedRoute.sections && alert.recalculatedRoute.sections.length > 0) {
-                     alert.recalculatedRoute.sections.forEach(section => {
+                    alert.recalculatedRoute.sections.forEach(section => {
                         const decoded = decode(section.polyline);
                         decoded.polyline.forEach(coord => {
                             recalcLineString.pushPoint({ lat: coord[0], lng: coord[1] });
@@ -439,7 +450,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     });
                     pointsAdded = true;
                 }
-                
+
                 if (pointsAdded && recalcLineString.getPointCount() >= 2) {
                     const recalcPolyline = new H.map.Polyline(recalcLineString, {
                         style: { lineWidth: 6, strokeColor: '#007BFF' },
@@ -448,19 +459,19 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     routeGroup.addObject(recalcPolyline);
                 }
             }
-            
+
             if (routeGroup.getObjects().length > 0) {
                 map.addObject(routeGroup);
-                
+
                 const groupBounds = routeGroup.getBoundingBox();
                 if (groupBounds) {
-                    map.getViewModel().setLookAtData({ 
-                        bounds: groupBounds, 
-                        padding: { top: 50, bottom: 50, left: 50, right: 50 } 
+                    map.getViewModel().setLookAtData({
+                        bounds: groupBounds,
+                        padding: { top: 150, bottom: 150, left: 150, right: 150 }
                     });
                 }
             }
-            
+
         } catch (error) {
             console.error('Error dibujando rutas de desviación:', error);
         }
@@ -626,7 +637,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                     const primaryColor = isSelected ? '#007BFF' : '#000000';
                                     const borderColor = isSelected ? '#007BFF' : '#d1d1d1';
                                     const cardBackground = isSelected ? '#E9ECEF' : '#F8F9FA';
-                                    const typeText = alert.type === "ORIGINAL_ROUTE" ? "Ruta recalculada" : "Desviación de ruta";
+                                    const typeText = alert.type === "ORIGINAL_ROUTE" ? "Desviación de ruta" : "Ruta recalculada";
 
                                     return (
                                         <div

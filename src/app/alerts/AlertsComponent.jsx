@@ -66,10 +66,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 try { map.removeObject(alertMarkerRef.current); } catch (e) { }
                 alertMarkerRef.current = null;
             }
-            if (routeGroupRef.current) {
-                try { map.removeObject(routeGroupRef.current); } catch (e) { }
-                routeGroupRef.current = null;
-            }
+            clearDeviationRoutes();
         }
     }, [selectedAlert, map]);
 
@@ -138,6 +135,22 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         setFilteredAlerts(filtered);
     };
 
+    const clearDeviationRoutes = () => {
+        if (!map) return;
+
+        if (routeGroupRef.current) {
+            try { map.removeObject(routeGroupRef.current); } catch (e) { }
+            routeGroupRef.current = null;
+        }
+
+        map.getObjects().forEach(obj => {
+            const data = obj.getData();
+            if (data && data.isDeviationRoute) {
+                map.removeObject(obj);
+            }
+        });
+    };
+
     const centerMapOnAlert = (alert) => {
         if (!map) return;
 
@@ -146,25 +159,18 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         // Centrar el mapa
         map.setCenter({ lat, lng });
-        map.setZoom(14); // Zoom más alejado para ver ambas rutas
+        map.setZoom(12); // Zoom más alejado para ver ambas rutas
 
-        // Limpiar polilíneas anteriores del mapa
-        map.getObjects().forEach(obj => {
-            if (obj instanceof H.map.Polyline && obj.getData()?.isDeviationRoute) {
-                map.removeObject(obj);
-            }
-        });
-
-        // Agregar marcador de alerta
+        clearDeviationRoutes();
         addAlertMarkerToMap(alert);
 
-        // NUEVO: Si existe ruta recalculada, dibujar ambas rutas
+        // Dibujar ambas rutas
         if (alert.recalculatedRoute && alert.recalculatedRoute.polyline) {
             drawOriginalAndRecalculatedRoutes(alert);
         }
 
         // Mostrar popup
-        showAlertPopup(alert);
+        showAlertPopup(alert)
     };
 
     const addAlertMarkerToMap = (alert) => {
@@ -340,10 +346,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 alertMarkerRef.current = null;
             }
 
-            if (map && routeGroupRef.current) {
-                try { map.removeObject(routeGroupRef.current); } catch (e) { }
-                routeGroupRef.current = null;
-            }
+            clearDeviationRoutes();
 
             if (onAlertSelect) onAlertSelect(null);
         };

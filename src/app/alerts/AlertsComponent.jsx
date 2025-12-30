@@ -335,17 +335,17 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 ui.getBubbles().forEach(b => ui.removeBubble(b));
             }
 
-            if (map) {
-                map.getObjects().forEach(object => {
-                    const data = object.getData();
-                    if (data && data.isAlertMarker) {
-                        map.removeObject(object);
-                    }
-                });
+            if (map && alertMarkerRef.current) {
+                try { map.removeObject(alertMarkerRef.current); } catch (e) { }
+                alertMarkerRef.current = null;
             }
 
-            alertMarkerRef.current = null;
+            if (map && routeGroupRef.current) {
+                try { map.removeObject(routeGroupRef.current); } catch (e) { }
+                routeGroupRef.current = null;
+            }
 
+            if (onAlertSelect) onAlertSelect(null);
         };
     }, [map, ui]);
 
@@ -468,7 +468,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 if (groupBounds) {
                     map.getViewModel().setLookAtData({
                         bounds: groupBounds,
-                        padding: { top: 150, bottom: 150, left: 150, right: 150 }
+                        padding: { top: 300, bottom: 300, left: 300, right: 300 }
                     });
                 }
             }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base_url } from '../../config.js';
-import { decode } from '../src/decode.js';
+import { decode } from '../../decode.js';
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import es from 'date-fns/locale/es';

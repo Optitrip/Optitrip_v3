@@ -40,7 +40,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
                 if (!isMarkerStillThere) {
                     map.addObject(alertMarkerRef.current);
-                    
+
                     alertMarkerRef.current.setZIndex(1000);
                 }
             } catch (error) {
@@ -140,12 +140,24 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         // Centrar el mapa
         map.setCenter({ lat, lng });
-        map.setZoom(16);
+        map.setZoom(14); // Zoom más alejado para ver ambas rutas
 
-        // Crear o actualizar marcador
+        // Limpiar polilíneas anteriores del mapa
+        map.getObjects().forEach(obj => {
+            if (obj instanceof H.map.Polyline && obj.getData()?.isDeviationRoute) {
+                map.removeObject(obj);
+            }
+        });
+
+        // Agregar marcador de alerta
         addAlertMarkerToMap(alert);
 
-        // Crear popup con información
+        // NUEVO: Si existe ruta recalculada, dibujar ambas rutas
+        if (alert.recalculatedRoute && alert.recalculatedRoute.polyline) {
+            drawOriginalAndRecalculatedRoutes(alert);
+        }
+
+        // Mostrar popup
         showAlertPopup(alert);
     };
 
@@ -376,6 +388,86 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     const handleDriverChange = (e) => {
         setDriverFilter(e.target.value);
     };
+
+    const drawOriginalAndRecalculatedRoutes = async (alert) => {
+    try {
+        const response = await fetch(`${base_url}/route/edit/${alert.routeId}`);
+        if (!response.ok) return;
+        
+        const routeData = await response.json();
+        
+        if (routeData.routeSections && routeData.routeSections.length > 0) {
+            const originalCoords = [];
+            
+            for (const section of routeData.routeSections) {
+                const decoded = decode(section.polyline); 
+                decoded.polyline.forEach(coord => {
+                    originalCoords.push({ lat: coord[0], lng: coord[1] });
+                });
+            }
+            
+            if (originalCoords.length >= 2) {
+                const originalLineString = new H.geo.LineString();
+                originalCoords.forEach(coord => {
+                    originalLineString.pushPoint(coord);
+                });
+                
+                const originalPolyline = new H.map.Polyline(originalLineString, {
+                    style: {
+                        lineWidth: 5,
+                        strokeColor: '#00BD2A', 
+                        lineDash: [10, 5] 
+                    },
+                    data: { isDeviationRoute: true, routeType: 'original' }
+                });
+                
+                map.addObject(originalPolyline);
+            }
+        }
+        
+        if (alert.recalculatedRoute.sections && alert.recalculatedRoute.sections.length > 0) {
+            const recalcCoords = [];
+            
+            for (const section of alert.recalculatedRoute.sections) {
+                const decoded = decode(section.polyline);
+                decoded.polyline.forEach(coord => {
+                    recalcCoords.push({ lat: coord[0], lng: coord[1] });
+                });
+            }
+            
+            if (recalcCoords.length >= 2) {
+                const recalcLineString = new H.geo.LineString();
+                recalcCoords.forEach(coord => {
+                    recalcLineString.pushPoint(coord);
+                });
+                
+                const recalcPolyline = new H.map.Polyline(recalcLineString, {
+                    style: {
+                        lineWidth: 6,
+                        strokeColor: '#007BFF'
+                    },
+                    data: { isDeviationRoute: true, routeType: 'recalculated' }
+                });
+                
+                map.addObject(recalcPolyline);
+            }
+        }
+        
+        const allObjects = map.getObjects().filter(obj => 
+            obj instanceof H.map.Polyline && obj.getData()?.isDeviationRoute
+        );
+        
+        if (allObjects.length > 0) {
+            const boundingBox = H.geo.Rect.coverPoints(
+                allObjects.flatMap(obj => obj.getGeometry().getLatLngAltArray())
+            );
+            map.getViewModel().setLookAtData({ bounds: boundingBox });
+        }
+        
+    } catch (error) {
+        console.error('Error dibujando rutas de desviación:', error);
+    }
+};
 
     return (
         <div className="card" style={{

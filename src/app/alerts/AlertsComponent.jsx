@@ -15,6 +15,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
     const [drivers, setDrivers] = useState([]);
     const [loading, setLoading] = useState(false);
     const alertMarkerRef = useRef(null);
+    const routeGroupRef = useRef(null);
 
     // Cargar alertas al montar el componente o cuando cambie isOpen
     useEffect(() => {
@@ -66,22 +67,21 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 alertMarkerRef.current = null;
             }
             if (routeGroupRef.current) {
-                map.getObjects().forEach(obj => {
-                    if (obj instanceof H.map.Group && obj.getData()?.isDeviationRoute) {
-                        map.removeObject(obj);
-                    }
-                });
+                try { map.removeObject(routeGroupRef.current); } catch (e) { }
+                routeGroupRef.current = null;
             }
         }
     }, [selectedAlert, map]);
 
     useEffect(() => {
         return () => {
-            // Solo se ejecuta cuando el usuario CIERRA el panel de alertas o cambia de página
-            if (alertMarkerRef.current && map) {
-                try {
-                    map.removeObject(alertMarkerRef.current);
-                } catch (e) { console.log(e); }
+            if (map) {
+                if (alertMarkerRef.current) {
+                    try { map.removeObject(alertMarkerRef.current); } catch (e) { }
+                }
+                if (routeGroupRef.current) {
+                    try { map.removeObject(routeGroupRef.current); } catch (e) { }
+                }
             }
         };
     }, []);
@@ -462,6 +462,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
             if (routeGroup.getObjects().length > 0) {
                 map.addObject(routeGroup);
+                routeGroupRef.current = routeGroup;
 
                 const groupBounds = routeGroup.getBoundingBox();
                 if (groupBounds) {

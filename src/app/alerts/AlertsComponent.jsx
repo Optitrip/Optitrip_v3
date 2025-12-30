@@ -414,7 +414,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                     const originalPolyline = new H.map.Polyline(originalLineString, {
                         style: {
                             lineWidth: 5,
-                            strokeColor: '#00BD2A', 
+                            strokeColor: '#00BD2A',
                             lineDash: [10, 5] 
                         },
                         data: { isDeviationRoute: true, routeType: 'original' }
@@ -424,23 +424,21 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 }
             }
             
-            if (alert.recalculatedRoute && 
-                (alert.recalculatedRoute.polyline || (alert.recalculatedRoute.sections && alert.recalculatedRoute.sections.length > 0))) {
-                
+            if (alert.recalculatedRoute) {
                 const recalcCoords = [];
                 
-                if (alert.recalculatedRoute.sections && alert.recalculatedRoute.sections.length > 0) {
+                if (alert.recalculatedRoute.polyline && alert.recalculatedRoute.polyline.length > 10) {
+                    const decoded = decode(alert.recalculatedRoute.polyline);
+                    decoded.polyline.forEach(coord => {
+                        recalcCoords.push({ lat: coord[0], lng: coord[1] });
+                    });
+                } else if (alert.recalculatedRoute.sections && alert.recalculatedRoute.sections.length > 0) {
                      for (const section of alert.recalculatedRoute.sections) {
                         const decoded = decode(section.polyline);
                         decoded.polyline.forEach(coord => {
                             recalcCoords.push({ lat: coord[0], lng: coord[1] });
                         });
                     }
-                } else if (alert.recalculatedRoute.polyline) {
-                    const decoded = decode(alert.recalculatedRoute.polyline);
-                    decoded.polyline.forEach(coord => {
-                        recalcCoords.push({ lat: coord[0], lng: coord[1] });
-                    });
                 }
                 
                 if (recalcCoords.length >= 2) {
@@ -464,10 +462,23 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
             );
             
             if (allObjects.length > 0) {
-                const boundingBox = H.geo.Rect.coverPoints(
-                    allObjects.flatMap(obj => obj.getGeometry().getLatLngAltArray())
-                );
-                map.getViewModel().setLookAtData({ bounds: boundingBox, padding: { top: 50, bottom: 50, left: 50, right: 50 } });
+                let combinedBoundingBox = null;
+
+                allObjects.forEach(obj => {
+                    const objBounds = obj.getBoundingBox();
+                    if (combinedBoundingBox) {
+                        combinedBoundingBox = combinedBoundingBox.merge(objBounds);
+                    } else {
+                        combinedBoundingBox = objBounds;
+                    }
+                });
+
+                if (combinedBoundingBox) {
+                    map.getViewModel().setLookAtData({ 
+                        bounds: combinedBoundingBox, 
+                        padding: { top: 50, bottom: 50, left: 50, right: 50 } 
+                    });
+                }
             }
             
         } catch (error) {

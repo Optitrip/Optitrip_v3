@@ -159,7 +159,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
 
         // Centrar el mapa
         map.setCenter({ lat, lng });
-        map.setZoom(12); // Zoom más alejado para ver ambas rutas
+        map.setZoom(13); // Zoom más alejado para ver ambas rutas
 
         clearDeviationRoutes();
         addAlertMarkerToMap(alert);
@@ -467,13 +467,14 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                 map.addObject(routeGroup);
                 routeGroupRef.current = routeGroup;
 
-                const groupBounds = routeGroup.getBoundingBox();
+                /* const groupBounds = routeGroup.getBoundingBox();
                 if (groupBounds) {
                     map.getViewModel().setLookAtData({
                         bounds: groupBounds,
                         padding: { top: 300, bottom: 300, left: 300, right: 300 }
                     });
-                }
+                } 
+                */
             }
 
         } catch (error) {

@@ -1450,7 +1450,11 @@ export default function App(props) {
                                         onClick={() => handleAlertClick(notif)}
                                     >
                                         <div className="notif-title">
-                                            {notif.type === "ORIGINAL_ROUTE" ? "Alerta de desviación" : "Alerta de ruta recalculada"}
+                                            {notif.type === "ORIGINAL_ROUTE"
+                                                ? "Alerta: Retomando ruta original"
+                                                : notif.type === "NEW_DESTINATION"
+                                                    ? "Alerta de ruta recalculada"
+                                                    : "Alerta por desviación de ruta"}
                                         </div>
                                         <div className="notif-subtitle">
                                             {notif.driverName || "CONDUCTOR"}

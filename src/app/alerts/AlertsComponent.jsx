@@ -221,8 +221,10 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         }
 
         const typeText = alert.type === "ORIGINAL_ROUTE"
-            ? "Alerta de desviación de ruta"
-            : "Alerta de ruta recalculada";
+        ? "Alerta: Retomando ruta original" 
+        : alert.type === "NEW_DESTINATION"
+            ? "Alerta de ruta recalculada"
+            : "Alerta por desviación de ruta";
 
         const d = new Date(alert.timestamp);
         const dateStr = d.getFullYear() + "-" +
@@ -642,7 +644,11 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                     const primaryColor = isSelected ? '#007BFF' : '#000000';
                                     const borderColor = isSelected ? '#007BFF' : '#d1d1d1';
                                     const cardBackground = isSelected ? '#E9ECEF' : '#F8F9FA';
-                                    const typeText = alert.type === "ORIGINAL_ROUTE" ? "Desviación de ruta" : "Ruta recalculada";
+                                    const typeText = alert.type === "ORIGINAL_ROUTE"
+                                        ? "Alerta: Retomando ruta original"
+                                        : alert.type === "NEW_DESTINATION"
+                                            ? "Ruta recalculada"
+                                            : "Alerta por desviación de ruta";
 
                                     return (
                                         <div

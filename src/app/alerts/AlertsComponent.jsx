@@ -165,9 +165,11 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         addAlertMarkerToMap(alert);
 
         // Dibujar ambas rutas
-        if (alert.recalculatedRoute && alert.recalculatedRoute.polyline) {
-            drawOriginalAndRecalculatedRoutes(alert);
-        }
+        if (alert.type !== "DEVIATION_DETECTED" && 
+        alert.recalculatedRoute && 
+        alert.recalculatedRoute.polyline) {
+        drawOriginalAndRecalculatedRoutes(alert);
+    }
 
         // Mostrar popup
         showAlertPopup(alert)

@@ -647,7 +647,7 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
                                     const typeText = alert.type === "ORIGINAL_ROUTE"
                                         ? "Alerta: Retomando ruta original"
                                         : alert.type === "NEW_DESTINATION"
-                                            ? "Ruta recalculada"
+                                            ? "Alerta por ruta recalculada"
                                             : "Alerta por desviación de ruta";
 
                                     return (

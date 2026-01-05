@@ -671,7 +671,12 @@ export default function App(props) {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                const response = await fetch(`${base_url}/reports/deviations/unseen`);
+                const storedUserData = sessionStorage.getItem('data_user');
+                if (!storedUserData) return;
+
+                const userData = JSON.parse(storedUserData);
+                const userId = userData._id;
+                const response = await fetch(`${base_url}/reports/deviations/unseen?userId=${userId}`);
                 if (response.ok) {
                     const data = await response.json();
                     const hasSession = sessionStorage.getItem('data_user');

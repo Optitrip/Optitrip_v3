@@ -35,7 +35,7 @@ export default function ReportComponent() {
     };
 
     useEffect(() => {
-        fetchUsers(); 
+        fetchUsers();
 
         const handleUserUpdate = () => {
             fetchUsers();
@@ -615,7 +615,7 @@ export default function ReportComponent() {
                 doc.text('Información detallada', 14, 128);
 
                 if (reportByPoint && !reportByPoint.error && reportByPoint.data.results && reportByPoint.data.results.length > 0) {
-                    let startY = 135; 
+                    let startY = 135;
 
                     reportByPoint.data.results.forEach((point) => {
                         const pointData = point.point[0];
@@ -627,11 +627,11 @@ export default function ReportComponent() {
 
                         if (startY > 250) {
                             doc.addPage();
-                            startY = 20; 
+                            startY = 20;
                         }
 
                         if (pointData) {
-                            const lineHeight = 7; 
+                            const lineHeight = 7;
 
                             // 1. TIPO
                             doc.setFont("helvetica", "bold");
@@ -645,10 +645,10 @@ export default function ReportComponent() {
                             doc.setFont("helvetica", "bold");
                             doc.text(`Ubicación:`, 14, startY + lineHeight);
                             doc.setFont("helvetica", "normal");
-                            const addressLines = doc.splitTextToSize(`${pointData.name}`, pageWidth - 45); 
+                            const addressLines = doc.splitTextToSize(`${pointData.name}`, pageWidth - 45);
                             doc.text(addressLines, 14 + doc.getTextWidth("Ubicación:   "), startY + lineHeight);
-                            
-                            const addressExtraHeight = (addressLines.length - 1) * 5; 
+
+                            const addressExtraHeight = (addressLines.length - 1) * 5;
 
                             // 3. ESTATUS 
                             doc.setFont("helvetica", "bold");
@@ -672,14 +672,14 @@ export default function ReportComponent() {
 
                             // 6. FOTOS
                             doc.setFont("helvetica", "bold");
-                            const photosY = startY + (lineHeight * 5) + 5 + addressExtraHeight; 
+                            const photosY = startY + (lineHeight * 5) + 5 + addressExtraHeight;
                             doc.text(`Fotos:`, 14, photosY);
 
-                            let imgEndY = photosY; 
-                            
+                            let imgEndY = photosY;
+
                             if (images && images.length > 0) {
-                                const imageWidth = 50; 
-                                const imageHeight = 70; 
+                                const imageWidth = 50;
+                                const imageHeight = 70;
                                 const margin = 10;
                                 let imgStartY = photosY + 5;
                                 let imgStartX = 14;
@@ -694,11 +694,11 @@ export default function ReportComponent() {
 
                                     doc.addImage(imgUrl, 'PNG', imgStartX, imgStartY, imageWidth, imageHeight);
                                     imgStartX += imageWidth + margin;
-                                    
-                                    imgEndY = imgStartY + imageHeight; 
+
+                                    imgEndY = imgStartY + imageHeight;
                                 });
                             } else {
-                                imgEndY = photosY + 10; 
+                                imgEndY = photosY + 10;
                             }
 
                             doc.setFont("helvetica", "bold");
@@ -707,7 +707,7 @@ export default function ReportComponent() {
                             doc.addImage(imgSignature, 'PNG', centerX, signatureLabelY + 5, 50, 30);
 
                             // Calculamos el final de la firma + margen
-                            startY = signatureLabelY + 40 + 15; 
+                            startY = signatureLabelY + 40 + 15;
                         }
                     });
 
@@ -751,6 +751,33 @@ export default function ReportComponent() {
             detail: { routeId }
         }));
     };
+
+    const handleReuseRoute = (routeId) => {
+    // Cambiar a la vista de rutas
+    const menuRoutesBtn = document.getElementById('menuRoutes');
+    const menuReportsBtn = document.getElementById('menuReports');
+
+    if (menuReportsBtn) {
+        menuReportsBtn.classList.remove('btn-primary');
+        menuReportsBtn.classList.add('btn-outline-primary');
+    }
+
+    if (menuRoutesBtn) {
+        menuRoutesBtn.classList.remove('btn-outline-primary');
+        menuRoutesBtn.classList.add('btn-primary');
+    }
+
+    // Mostrar la tarjeta de creación de rutas
+    const createRouteCard = document.getElementById('create-route');
+    if (createRouteCard) {
+        createRouteCard.style.display = 'block';
+    }
+
+    // Disparar evento personalizado con el routeId y flag de reutilización
+    window.dispatchEvent(new CustomEvent('loadRouteForReuse', {
+        detail: { routeId }
+    }));
+};
 
     return (
         <div>
@@ -1142,6 +1169,23 @@ export default function ReportComponent() {
                                                                                     <img
                                                                                         src="/iconos principales/editar.svg"
                                                                                         alt="Editar"
+                                                                                        width="20"
+                                                                                        height="20"
+                                                                                    />
+                                                                                </button>
+                                                                            )}
+
+                                                                            {/* Botón de reutilizar */}
+                                                                            {(trip.status === 'Completado' || trip.status === 'Ruta vencida' || trip.status === 'Ruta expirada' || trip.status === 'Ruta en curso' || trip.status === 'Ruta futura') && (
+                                                                                <button
+                                                                                    className="btn btn-link"
+                                                                                    style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer' }}
+                                                                                    onClick={() => handleReuseRoute(trip.routeId)}
+                                                                                    title="Reutilizar ruta"
+                                                                                >
+                                                                                    <img
+                                                                                        src="/iconos principales/reuse route.svg"
+                                                                                        alt="Reutilizar"
                                                                                         width="20"
                                                                                         height="20"
                                                                                     />

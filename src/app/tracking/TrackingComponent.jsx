@@ -310,32 +310,32 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
 
 
     const handleFilterStatusChange = (status) => {
-        setFilterStatus(status);
+    setFilterStatus(status);
 
-        let filtered = [...filteredDrivers];
+    let filtered = [...filteredDrivers];
 
-        if (status === 'available') {
-            // Solo conductores disponibles (sin ruta)
-            filtered = filtered.filter((user) =>
-                user.tracking && user.tracking.status === 'Disponible'
-            );
-        } else if (status === 'active') {
-            // Solo conductores activos (en ruta)
-            filtered = filtered.filter((user) =>
-                user.tracking && user.tracking.status === 'Activo'
-            );
-        } else if (status === 'offline') {
-            // Solo conductores fuera de línea
-            filtered = filtered.filter((user) =>
-                user.tracking && user.tracking.status === 'Fuera de línea'
-            );
-        } else {
-            // Todos los conductores
-            filtered = [...filteredDrivers];
-        }
+    if (status === 'available') {
+        // Solo conductores disponibles (sin ruta)
+        filtered = filtered.filter((user) =>
+            user.tracking && user.tracking.status === 'Disponible'
+        );
+    } else if (status === 'active') {
+        // Solo conductores activos (en ruta)
+        filtered = filtered.filter((user) =>
+            user.tracking && user.tracking.status === 'Activo'
+        );
+    } else if (status === 'offline') {
+        // Solo conductores fuera de línea
+        filtered = filtered.filter((user) =>
+            user.tracking && user.tracking.status === 'Fuera de línea'
+        );
+    } else {
+        // Todos los conductores
+        filtered = [...filteredDrivers];
+    }
 
-        setFilteredDriversStatus(filtered);
-    };
+    setFilteredDriversStatus(filtered);
+};
 
     const handleZoomLocation = (latitude, longitude) => {
         zoomLocation(mapDrivers, latitude, longitude);
@@ -477,55 +477,46 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                         <div className="card mt-2" style={{ borderColor: "#007bff", height: '30vh', overflowY: 'auto', overflowX: 'hidden' }}>
                             {filteredDrivers.length > 0 ? (
                                 <>
-                                    <div className="row text-center">
-                                        <div className="row text-center px-2">
-                                            {/* Botón TODOS */}
-                                            <div className="col-3 pt-2 pb-2 px-1">
-                                                <button
-                                                    onClick={() => handleFilterStatusChange('all')}
-                                                    type="button"
-                                                    className={`btn btn-light btn-sm ${filterStatus === 'all' ? 'btn-status-active' : ''}`}
-                                                    style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8, width: '100%', paddingLeft: 0, paddingRight: 0 }}
-                                                >
-                                                    TODOS ({filteredDrivers.length})
-                                                </button>
-                                            </div>
-
-                                            {/* Botón DISPONIBLES */}
-                                            <div className="col-3 pt-2 pb-2 px-1">
-                                                <button
-                                                    onClick={() => handleFilterStatusChange('available')}
-                                                    type="button"
-                                                    className={`btn btn-light btn-sm ${filterStatus === 'available' ? 'btn-status-active' : ''}`}
-                                                    style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8, width: '100%', paddingLeft: 0, paddingRight: 0 }}
-                                                >
-                                                    DISPONIBLES ({availableCount})
-                                                </button>
-                                            </div>
-
-                                            {/* Botón EN RUTA */}
-                                            <div className="col-3 pt-2 pb-2 px-1">
-                                                <button
-                                                    onClick={() => handleFilterStatusChange('active')}
-                                                    type="button"
-                                                    className={`btn btn-light btn-sm ${filterStatus === 'active' ? 'btn-status-active' : ''}`}
-                                                    style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8, width: '100%', paddingLeft: 0, paddingRight: 0 }}
-                                                >
-                                                    EN RUTA ({activeCount})
-                                                </button>
-                                            </div>
-
-                                            {/* Botón OFFLINE */}
-                                            <div className="col-3 pt-2 pb-2 px-1">
-                                                <button
-                                                    onClick={() => handleFilterStatusChange('offline')}
-                                                    type="button"
-                                                    className={`btn btn-light btn-sm ${filterStatus === 'offline' ? 'btn-status-active' : ''}`}
-                                                    style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8, width: '100%', paddingLeft: 0, paddingRight: 0 }}
-                                                >
-                                                    OFFLINE ({offlineCount})
-                                                </button>
-                                            </div>
+                                    <div className="row text-center px-2">
+                                        <div className="col-3 pt-2 pb-2">
+                                            <button
+                                                onClick={() => handleFilterStatusChange('all')}
+                                                type="button"
+                                                className={`btn btn-light btn-sm ${filterStatus === 'all' ? 'btn-status-active' : ''}`}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
+                                            >
+                                                TODOS ({filteredDrivers.length})
+                                            </button>
+                                        </div>
+                                        <div className="col-3 pt-2 pb-2">
+                                            <button
+                                                onClick={() => handleFilterStatusChange('available')}
+                                                type="button"
+                                                className={`btn btn-light btn-sm ${filterStatus === 'available' ? 'btn-status-active' : ''}`}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
+                                            >
+                                                DISPONIBLES ({availableCount})
+                                            </button>
+                                        </div>
+                                        <div className="col-3 pt-2 pb-2">
+                                            <button
+                                                onClick={() => handleFilterStatusChange('active')}
+                                                type="button"
+                                                className={`btn btn-light btn-sm ${filterStatus === 'active' ? 'btn-status-active' : ''}`}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
+                                            >
+                                                EN RUTA ({activeCount})
+                                            </button>
+                                        </div>
+                                        <div className="col-3 pt-2 pb-2">
+                                            <button
+                                                onClick={() => handleFilterStatusChange('offline')}
+                                                type="button"
+                                                className={`btn btn-light btn-sm ${filterStatus === 'offline' ? 'btn-status-active' : ''}`}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
+                                            >
+                                                OFFLINE ({offlineCount})
+                                            </button>
                                         </div>
                                     </div>
                                     <div className="row text-center mt-2">

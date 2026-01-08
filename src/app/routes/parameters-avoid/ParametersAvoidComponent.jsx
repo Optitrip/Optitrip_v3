@@ -57,6 +57,15 @@ export default function ParametersAvoidComponent({ state, setState, map, behavio
         }
     }, [isAreaCardOpen, avoidZoneIndex, state.avoid_zones]);
 
+    useEffect(() => {
+        if (state.isEditMode || 
+            (state.avoid_parameters && state.avoid_parameters.length > 0) || 
+            (state.avoid_highways && state.avoid_highways.length > 0) || 
+            (state.avoid_zones && state.avoid_zones.length > 0)) {
+            setIsCardBodyOpen(true);
+        }
+    }, [state.isEditMode, state.avoid_parameters, state.avoid_highways, state.avoid_zones]);
+
     const toggleIndications = () => {
         setIsIndicationsVisible(!isIndicationsVisible);
     };

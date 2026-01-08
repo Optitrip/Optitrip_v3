@@ -16,6 +16,12 @@ export default function DeviationAlertComponent({ state, setState }) {
         }
     }, [state.deviationAlertDistance, state.deviationAlertEnabled]);
 
+    useEffect(() => {
+        if (state.isEditMode || state.deviationAlertEnabled) {
+            setIsCardBodyOpen(true);
+        }
+    }, [state.isEditMode, state.deviationAlertEnabled]);
+
     const handleToggleAlert = (enabled) => {
         setAlertEnabled(enabled);
         

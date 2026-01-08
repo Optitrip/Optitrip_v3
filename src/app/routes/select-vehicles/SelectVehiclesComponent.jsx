@@ -20,6 +20,12 @@ export default function SelectVehiclesComponent({ state, setState }) {
         tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
     }, []);
 
+    useEffect(() => {
+        if (state.isEditMode || state.activeVehicleButton) {
+            setIsCardBodyOpen(true);
+        }
+    }, [state.isEditMode, state.activeVehicleButton]);
+
     const handleButtonClick = (buttonType, transportationValue) => {
         setActiveButton(buttonType);
         setState(prevState => ({ ...prevState, activeVehicleButton: buttonType, transportation: transportationValue }));

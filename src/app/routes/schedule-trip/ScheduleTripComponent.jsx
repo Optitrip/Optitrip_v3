@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../../App.css';
 
 export default function ScheduleTripComponent({ state, setState }) {
@@ -7,6 +7,19 @@ export default function ScheduleTripComponent({ state, setState }) {
         time_type: state.time_type,
     });
     const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
+
+    useEffect(() => {
+        if (state.isEditMode || (state.time && state.time !== "")) {
+            setIsCardBodyOpen(true);
+        }
+    }, [state.isEditMode, state.time]);
+
+    useEffect(() => {
+        setTime({
+            time: state.time,
+            time_type: state.time_type,
+        });
+    }, [state.time, state.time_type]);
 
     const values_select_time = ["Salir ahora", "Salir a las:", "Llegar a las:"];
 

@@ -4,7 +4,7 @@ import '../../../App.css';
 export default function TypeTripComponent({ state, setState }) {
     const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
     const [activeMode, setActiveMode] = useState(state.mode || null);
-    const [traffic, setTraffic] = useState(state.traffic || 'default');  // Cambiado a 'default' como valor inicial
+    const [traffic, setTraffic] = useState(state.traffic || 'default');  
     const setStateRef = useRef(setState);
 
     useEffect(() => {
@@ -14,6 +14,12 @@ export default function TypeTripComponent({ state, setState }) {
     useEffect(() => {
         setActiveMode(state.mode);
     }, [state.mode]);
+
+    useEffect(() => {
+        if (state.isEditMode || state.mode) {
+            setIsCardBodyOpen(true);
+        }
+    }, [state.isEditMode, state.mode])
 
     const handleButtonClick = (mode) => {
         setActiveMode(mode);

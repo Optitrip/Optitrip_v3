@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { apiKeyHERE } from '../../../config';
 import '../../../App.css';
@@ -65,6 +65,12 @@ export function SelectDestinationsComponent(props) {
         setLoad(0);
         setUnload(0);
     };
+
+    useEffect(() => {
+        if (props.state.isEditMode || (props.state.destinations && props.state.destinations.length > 0)) {
+            setIsCardBodyOpen(true);
+        }
+    }, [props.state.isEditMode, props.state.destinations]);
 
     function updateResponse(event) {
         const { value } = event.target;

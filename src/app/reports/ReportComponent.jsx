@@ -1186,8 +1186,8 @@ export default function ReportComponent() {
                                                                                     <img
                                                                                         src="/iconos principales/reuse route.svg"
                                                                                         alt="Reutilizar"
-                                                                                        width="20"
-                                                                                        height="20"
+                                                                                        width="18"
+                                                                                        height="18"
                                                                                     />
                                                                                 </button>
                                                                             )}

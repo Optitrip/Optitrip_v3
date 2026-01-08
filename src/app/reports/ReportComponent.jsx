@@ -1176,7 +1176,7 @@ export default function ReportComponent() {
                                                                             )}
 
                                                                             {/* Botón de reutilizar */}
-                                                                            {(trip.status === 'Completado' || trip.status === 'Ruta vencida' || trip.status === 'Ruta expirada' || trip.status === 'Ruta en curso' || trip.status === 'Ruta futura') && (
+                                                                            {(trip.status === 'Completado' || trip.status === 'Ruta vencida' || trip.status === 'Ruta expirada' || trip.status === 'Ruta en curso' || trip.status === 'Ruta futura' || trip.status === 'Ruta no iniciada') && (
                                                                                 <button
                                                                                     className="btn btn-link"
                                                                                     style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer' }}

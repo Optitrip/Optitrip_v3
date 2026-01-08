@@ -33,13 +33,18 @@ export default function ScheduleTripComponent({ state, setState }) {
         const { id, value } = e.target;
 
         if (id === 'select-type') {
+            const newTimeValue = value === "Salir ahora" ? "" : state.time; 
+            
             setTime(prevTime => ({
                 ...prevTime,
-                time_type: value
+                time_type: value,
+                time: newTimeValue 
             }));
+            
             setState(prevState => ({
                 ...prevState,
-                time_type: value
+                time_type: value,
+                time: newTimeValue 
             }));
         } else if (id === 'select-time') {
             setTime(prevTime => ({

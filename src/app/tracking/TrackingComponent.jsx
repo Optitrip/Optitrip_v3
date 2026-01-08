@@ -306,24 +306,6 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
             });
         }
 
-        const offlineCount = filteredDrivers.filter(driver =>
-            driver.tracking && driver.tracking.status === "Fuera de línea"
-        ).length;
-
-        const availableCount = filteredDrivers.filter(driver =>
-            driver.tracking && driver.tracking.status === "Disponible"
-        ).length;
-
-        const activeCount = filteredDrivers.filter(driver =>
-            driver.tracking && driver.tracking.status === "Activo"
-        ).length;
-
-        // Total en línea = Disponibles + Activos
-        const onlineCount = availableCount + activeCount;
-
-        setDriversOnline(onlineCount);
-        setDriversOffline(offlineCount);
-
     }, [filteredDrivers, filteredDriversStatus, filterStatus, mapDrivers, addMarkerToMap]);
 
 
@@ -364,6 +346,18 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
             return str.toUpperCase();
         }
     };
+
+    const offlineCount = filteredDrivers.filter(driver =>
+        driver.tracking && driver.tracking.status === "Fuera de línea"
+    ).length;
+
+    const availableCount = filteredDrivers.filter(driver =>
+        driver.tracking && driver.tracking.status === "Disponible"
+    ).length;
+
+    const activeCount = filteredDrivers.filter(driver =>
+        driver.tracking && driver.tracking.status === "Activo"
+    ).length;
 
     return (
         <div className="card" style={{

@@ -4,8 +4,8 @@ import { bold } from "fontawesome";
 
 const statusColors = {
     'Fuera de línea': '#535353', // Gris
-    'Activo': '#007BFF',       // Azul
-    'Inactivo': '#FB8800'      // Naranja
+    'Activo': '#007BFF',         // Azul (en ruta)
+    'Disponible': '#FB8800'      // Naranja (disponible para asignar)
 };
 
 export default function TrackingComponent({ email, mapDrivers, state, addMarkerToMap, zoomLocation, isOpen, toggleOpen, onDriversUpdate }) {
@@ -295,7 +295,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
 
             filteredDriversStatus.forEach((driver) => {
                 if (!driver.tracking || !driver.tracking.location) {
-                    return; 
+                    return;
                 }
 
                 const { latitude, longitude } = driver.tracking.location;
@@ -309,8 +309,17 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         const offlineCount = filteredDrivers.filter(driver =>
             driver.tracking && driver.tracking.status === "Fuera de línea"
         ).length;
-        const driversWithTracking = filteredDrivers.filter(driver => driver.tracking).length;
-        const onlineCount = driversWithTracking - offlineCount;
+
+        const availableCount = filteredDrivers.filter(driver =>
+            driver.tracking && driver.tracking.status === "Disponible"
+        ).length;
+
+        const activeCount = filteredDrivers.filter(driver =>
+            driver.tracking && driver.tracking.status === "Activo"
+        ).length;
+
+        // Total en línea = Disponibles + Activos
+        const onlineCount = availableCount + activeCount;
 
         setDriversOnline(onlineCount);
         setDriversOffline(offlineCount);
@@ -319,26 +328,32 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
 
 
     const handleFilterStatusChange = (status) => {
-        setFilterStatus(status);
+    setFilterStatus(status);
 
-        let filtered = [...filteredDrivers];
+    let filtered = [...filteredDrivers];
 
-        if (status === 'offline') {
-            filtered = filtered.filter((user) =>
-                user.tracking && user.tracking.status === 'Fuera de línea'
-            );
+    if (status === 'available') {
+        // Solo conductores disponibles (sin ruta)
+        filtered = filtered.filter((user) =>
+            user.tracking && user.tracking.status === 'Disponible'
+        );
+    } else if (status === 'active') {
+        // Solo conductores activos (en ruta)
+        filtered = filtered.filter((user) =>
+            user.tracking && user.tracking.status === 'Activo'
+        );
+    } else if (status === 'offline') {
+        // Solo conductores fuera de línea
+        filtered = filtered.filter((user) =>
+            user.tracking && user.tracking.status === 'Fuera de línea'
+        );
+    } else {
+        // Todos los conductores
+        filtered = [...filteredDrivers];
+    }
 
-        } else if (status === 'online') {
-            filtered = filtered.filter((user) =>
-                user.tracking && user.tracking.status !== 'Fuera de línea'
-            );
-
-        } else {
-            filtered = [...filteredDrivers];
-        }
-
-        setFilteredDriversStatus(filtered);
-    };
+    setFilteredDriversStatus(filtered);
+};
 
     const handleZoomLocation = (latitude, longitude) => {
         zoomLocation(mapDrivers, latitude, longitude);
@@ -469,34 +484,44 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                             {filteredDrivers.length > 0 ? (
                                 <>
                                     <div className="row text-center">
-                                        <div className="col-4 pt-2 pb-2 pr-0 pl-3">
+                                        <div className="col-3 pt-2 pb-2 pr-0 pl-1">
                                             <button
                                                 onClick={() => handleFilterStatusChange('all')}
                                                 type="button"
                                                 className={`btn btn-light btn-sm ${filterStatus === 'all' ? 'btn-status-active' : ''}`}
-                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 9 }}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
                                             >
                                                 TODOS ({filteredDrivers.length})
                                             </button>
                                         </div>
                                         <div className="col-3 pt-2 pb-2 pr-0 pl-0">
                                             <button
-                                                onClick={() => handleFilterStatusChange('online')}
+                                                onClick={() => handleFilterStatusChange('available')}
                                                 type="button"
-                                                className={`btn btn-light btn-sm ${filterStatus === 'online' ? 'btn-status-active' : ''}`}
-                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 9 }}
+                                                className={`btn btn-light btn-sm ${filterStatus === 'available' ? 'btn-status-active' : ''}`}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
                                             >
-                                                EN LÍNEA ({driversOnline})
+                                                DISPONIBLES ({availableCount})
                                             </button>
                                         </div>
-                                        <div className="col-5 pt-2 pb-2 pl-0">
+                                        <div className="col-3 pt-2 pb-2 pr-0 pl-0">
+                                            <button
+                                                onClick={() => handleFilterStatusChange('active')}
+                                                type="button"
+                                                className={`btn btn-light btn-sm ${filterStatus === 'active' ? 'btn-status-active' : ''}`}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
+                                            >
+                                                EN RUTA ({activeCount})
+                                            </button>
+                                        </div>
+                                        <div className="col-3 pt-2 pb-2 pl-0 pr-1">
                                             <button
                                                 onClick={() => handleFilterStatusChange('offline')}
                                                 type="button"
                                                 className={`btn btn-light btn-sm ${filterStatus === 'offline' ? 'btn-status-active' : ''}`}
-                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 9 }}
+                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
                                             >
-                                                FUERA DE LÍNEA ({driversOffline})
+                                                OFFLINE ({offlineCount})
                                             </button>
                                         </div>
                                     </div>

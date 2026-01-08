@@ -99,6 +99,36 @@ export default function AssignRouteComponent(state) {
                 return;
             }
 
+            const selectedDriverData = users.find(user => user._id === selectedDriver);
+        
+        if (selectedDriverData && selectedDriverData.tracking) {
+            if (selectedDriverData.tracking.status === 'Activo') {
+                Swal.fire({
+                    title: '¡Conductor no disponible!',
+                    text: 'El conductor seleccionado está actualmente en ruta. Por favor, selecciona otro conductor disponible.',
+                    icon: 'warning',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Aceptar',
+                    width: '400px',
+                    padding: '2rem'
+                });
+                return;
+            }
+            
+            if (selectedDriverData.tracking.status === 'Fuera de línea') {
+                Swal.fire({
+                    title: '¡Conductor fuera de línea!',
+                    text: 'El conductor seleccionado no tiene sesión activa. Por favor, selecciona otro conductor.',
+                    icon: 'warning',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Aceptar',
+                    width: '400px',
+                    padding: '2rem'
+                });
+                return;
+            }
+        }
+
             // Obtener los datos necesarios para crear la ruta
             const url = state.state.url;
             const selectedOption = state.state.selectedCardIndex;

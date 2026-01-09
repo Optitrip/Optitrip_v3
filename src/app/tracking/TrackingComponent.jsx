@@ -546,14 +546,12 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                             const driverStatus = driver.tracking?.status || 'Fuera de línea';
                                             const backgroundColor = statusColors[driverStatus] || '#535353';
 
-                                            // NUEVO: Obtener datos de progreso
                                             const routeProgress = driver.tracking?.routeProgress || null;
                                             const isActive = driverStatus === 'Activo';
                                             const percentage = routeProgress?.percentage || 0;
                                             const etaMinutes = routeProgress?.etaMinutes;
 
-                                            // Formatear ETA
-                                            let etaFormatted = 'N/A';
+                                            let etaFormatted = 'ETA no disponible';
                                             if (etaMinutes !== null && etaMinutes !== undefined) {
                                                 const hours = Math.floor(etaMinutes / 60);
                                                 const mins = etaMinutes % 60;
@@ -575,128 +573,115 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                         }}
                                                         style={{
                                                             width: '100%',
-                                                            padding: 5,
-                                                            paddingLeft: 5,
+                                                            padding: '8px 12px', // Un poco más de padding interno
                                                             display: 'flex',
-                                                            flexDirection: 'column', 
-                                                            alignItems: 'flex-start',
+                                                            flexDirection: 'row', // Layout principal horizontal (Icono | Info)
+                                                            alignItems: 'center', // Centrado verticalmente
                                                             textAlign: 'left',
                                                             borderRadius: 10,
-                                                            position: 'relative'
+                                                            position: 'relative',
+                                                            border: '1px solid #e0e0e0' // Un borde sutil opcional
                                                         }}
                                                     >
-                                                        {/* Fila superior: ícono + nombre + estatus */}
-                                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: isActive ? 4 : 0 }}>
-                                                            <svg
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                viewBox="-5.0 -10.0 110.0 135.0"
-                                                                className={'icon-active-report'}
-                                                                style={{
-                                                                    width: '30px',
-                                                                    height: '30px',
-                                                                    paddingTop: 2,
-                                                                    background: backgroundColor,
-                                                                    borderRadius: 6,
-                                                                    flexShrink: 0
-                                                                }}
-                                                            >
-                                                                <path d="m57.711 64.23c-1.0234-1.0234-2.418-1.6055-3.8672-1.6055l-22.645 0.003906-4.0938-20.16h22.109c3.0195 0 5.4727-2.4453 5.4727-5.4727 0-3.0195-2.4492-5.4727-5.4727-5.4727l-28.801 0.003906c-1.6445 0-3.1953 0.73438-4.2344 2.0078-1.0391 1.2695-1.4531 2.9414-1.125 4.5547l6.3125 31.105c0.51953 2.5469 2.7617 4.3828 5.3633 4.3828h24.852l18.414 18.414c1.0664 1.0703 2.4688 1.6055 3.8672 1.6055 1.3984 0 2.8008-0.53125 3.8672-1.6055 2.1367-2.1367 2.1367-5.6016 0-7.7344zm23.77-32.703h-13.332v-6.5781c0-3.0195-2.4492-5.4727-5.4727-5.4727-3.0195 0-5.4727 2.4492-5.4727 5.4727v21.98c0 3.0195 2.4492 5.4727 5.4727 5.4727 3.0234 0 5.4727-2.4492 5.4727-5.4727v-4.4609h13.332c3.0195 0 5.4727-2.4453 5.4727-5.4727-0.003906-3.0195-2.4531-5.4688-5.4727-5.4688zm-57.785-25.117c5.8828 0 10.648 4.7695 10.648 10.648 0 5.8828-4.7695 10.648-10.648 10.648-5.8789 0-10.648-4.7656-10.648-10.648 0-5.8789 4.7695-10.648 10.648-10.648z" />
-                                                            </svg>
+                                                        {/* 1. ÍCONO DE CAMIÓN (Izquierda) */}
+                                                        <div style={{ marginRight: 12 }}>
+                                                            <div style={{
+                                                                width: '36px',
+                                                                height: '36px',
+                                                                backgroundColor: backgroundColor,
+                                                                borderRadius: 8,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}>
+                                                                <svg
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="-5.0 -10.0 110.0 135.0"
+                                                                    style={{ width: '24px', height: '24px', fill: 'white' }} // Icono blanco
+                                                                >
+                                                                    <path d="m57.711 64.23c-1.0234-1.0234-2.418-1.6055-3.8672-1.6055l-22.645 0.003906-4.0938-20.16h22.109c3.0195 0 5.4727-2.4453 5.4727-5.4727 0-3.0195-2.4492-5.4727-5.4727-5.4727l-28.801 0.003906c-1.6445 0-3.1953 0.73438-4.2344 2.0078-1.0391 1.2695-1.4531 2.9414-1.125 4.5547l6.3125 31.105c0.51953 2.5469 2.7617 4.3828 5.3633 4.3828h24.852l18.414 18.414c1.0664 1.0703 2.4688 1.6055 3.8672 1.6055 1.3984 0 2.8008-0.53125 3.8672-1.6055 2.1367-2.1367 2.1367-5.6016 0-7.7344zm23.77-32.703h-13.332v-6.5781c0-3.0195-2.4492-5.4727-5.4727-5.4727-3.0195 0-5.4727 2.4492-5.4727 5.4727v21.98c0 3.0195 2.4492 5.4727 5.4727 5.4727 3.0234 0 5.4727-2.4492 5.4727-5.4727v-4.4609h13.332c3.0195 0 5.4727-2.4453 5.4727-5.4727-0.003906-3.0195-2.4531-5.4688-5.4727-5.4688zm-57.785-25.117c5.8828 0 10.648 4.7695 10.648 10.648 0 5.8828-4.7695 10.648-10.648 10.648-5.8789 0-10.648-4.7656-10.648-10.648 0-5.8789 4.7695-10.648 10.648-10.648z" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
 
-                                                            <div style={{ marginLeft: '10px', display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1 }}>
-                                                                <span className={'text-driver-name'} style={{ fontWeight: 'bold' }}>
+                                                        {/* 2. COLUMNA DE INFORMACIÓN (Derecha) */}
+                                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
+
+                                                            {/* 2.1 Nombre y Fecha */}
+                                                            <div style={{ marginBottom: 4 }}>
+                                                                <div className={'text-driver-name'} style={{ fontWeight: 'bold', fontSize: '14px', lineHeight: 1.2 }}>
                                                                     {driver.name}
-                                                                </span>
-                                                                <span className={'text-driver-date'}>
+                                                                </div>
+                                                                <div className={'text-driver-date'} style={{ fontSize: '11px', color: '#6c757d' }}>
                                                                     {driver.tracking?.location?.timestamp
                                                                         ? getCurrentLocalDateTime(driver.tracking.location.timestamp)
                                                                         : '--/--/----, --:--:--'}
-                                                                </span>
+                                                                </div>
                                                             </div>
 
-                                                            <span
-                                                                className={'text-driver-date'}
-                                                                style={{
-                                                                    border: '2px solid',
-                                                                    borderColor: backgroundColor,
-                                                                    borderRadius: 10,
+                                                            {/* 2.2 Bloque de Progreso y ETA (Solo si está ACTIVO) */}
+                                                            {isActive && (
+                                                                <div style={{
+                                                                    marginTop: 4,
+                                                                    marginBottom: 6,
+                                                                    backgroundColor: '#f8f9fa', // Fondo gris claro para destacar
+                                                                    borderRadius: 6,
+                                                                    padding: '4px 8px'
+                                                                }}>
+                                                                    {/* Fila de ETA */}
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                                                                        <span style={{ fontSize: 10, fontWeight: 'bold', color: '#007BFF' }}>ETA:</span>
+                                                                        <span style={{ fontSize: 10, fontWeight: '600', color: '#333' }}>
+                                                                            {etaFormatted}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    {/* Barra de Progreso */}
+                                                                    <div style={{
+                                                                        width: '100%',
+                                                                        height: 10,
+                                                                        backgroundColor: '#e9ecef',
+                                                                        borderRadius: 5,
+                                                                        overflow: 'hidden',
+                                                                        position: 'relative'
+                                                                    }}>
+                                                                        <div style={{
+                                                                            width: `${percentage}%`,
+                                                                            height: '100%',
+                                                                            backgroundColor: '#007BFF',
+                                                                            borderRadius: 5,
+                                                                            transition: 'width 0.3s ease'
+                                                                        }} />
+                                                                        {/* Texto de porcentaje centrado sobre la barra */}
+                                                                        <span style={{
+                                                                            position: 'absolute',
+                                                                            top: 0, left: 0, right: 0, bottom: 0,
+                                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                            fontSize: '7px', fontWeight: 'bold',
+                                                                            color: percentage > 50 ? '#fff' : '#333'
+                                                                        }}>
+                                                                            {percentage}%
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {/* 2.3 Etiqueta de Estado (Abajo del todo) */}
+                                                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}> {/* Alineado a la derecha opcionalmente, o quita justifyContent para izquierda */}
+                                                                <span style={{
+                                                                    border: `1px solid ${backgroundColor}`,
+                                                                    borderRadius: 12,
                                                                     fontSize: 10,
                                                                     color: backgroundColor,
                                                                     fontWeight: 'bold',
-                                                                    padding: '2px 8px',
-                                                                    flexShrink: 0,
-                                                                    marginLeft: 8
-                                                                }}
-                                                            >
-                                                                {convertToUpperCase(driverStatus)}
-                                                            </span>
-                                                        </div>
-
-                                                        {isActive && (
-                                                            <div style={{
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                width: '100%',
-                                                                gap: 10,
-                                                                marginTop: 4,
-                                                                paddingLeft: 40 
-                                                            }}>
-                                                                {/* Etiqueta ETA */}
-                                                                <div style={{
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: 4
+                                                                    padding: '1px 8px',
+                                                                    backgroundColor: 'white' // Fondo blanco para que resalte el borde
                                                                 }}>
-                                                                    <span style={{
-                                                                        fontSize: 9,
-                                                                        fontWeight: 'bold',
-                                                                        color: '#007BFF'
-                                                                    }}>
-                                                                        ETA:
-                                                                    </span>
-                                                                    <span style={{
-                                                                        fontSize: 9,
-                                                                        fontWeight: '600',
-                                                                        color: '#000'
-                                                                    }}>
-                                                                        {etaFormatted}
-                                                                    </span>
-                                                                </div>
-
-                                                                {/* Barra de progreso */}
-                                                                <div style={{
-                                                                    flex: 1,
-                                                                    height: 12,
-                                                                    backgroundColor: '#e0e0e0',
-                                                                    borderRadius: 6,
-                                                                    overflow: 'hidden',
-                                                                    position: 'relative'
-                                                                }}>
-                                                                    <div style={{
-                                                                        height: '100%',
-                                                                        width: `${percentage}%`,
-                                                                        backgroundColor: '#007BFF',
-                                                                        transition: 'width 0.3s ease',
-                                                                        borderRadius: 6
-                                                                    }}></div>
-                                                                    <span style={{
-                                                                        position: 'absolute',
-                                                                        top: 0,
-                                                                        left: 0,
-                                                                        right: 0,
-                                                                        bottom: 0,
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        fontSize: 8,
-                                                                        fontWeight: 'bold',
-                                                                        color: percentage > 50 ? '#fff' : '#000'
-                                                                    }}>
-                                                                        {percentage}%
-                                                                    </span>
-                                                                </div>
+                                                                    {convertToUpperCase(driverStatus)}
+                                                                </span>
                                                             </div>
-                                                        )}
+
+                                                        </div>
                                                     </button>
                                                 </div>
                                             );

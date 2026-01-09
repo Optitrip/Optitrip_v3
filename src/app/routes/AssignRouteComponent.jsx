@@ -370,7 +370,7 @@ export default function AssignRouteComponent(state) {
                                     >
                                         <option value="">Sin seleccionar</option>
                                         {filteredDrivers.map(user => {
-                                            const status = user.tracking?.status || 'Desconocido';
+                                            const status = user.tracking?.status || 'No disponible';
                                             const isAvailable = status === 'Disponible';
 
                                             const optionStyle = {
@@ -382,7 +382,7 @@ export default function AssignRouteComponent(state) {
 
                                             let label = user.name;
                                             if (!isAvailable) {
-                                                label += ` (${status}) 🚫`;
+                                                label += ` (${status})`;
                                             }
 
                                             return (

@@ -14,6 +14,19 @@ async function assignRouteService(route) {
             // Ruta asignada exitosamente
             const data = await response.json();
 
+            try {
+                await fetch(`${base_url}/send-route-notification`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        codeRoute: data.route.codeRoute,
+                        driverId: route.driverId
+                    })
+                });
+            } catch (notifError) {
+                console.error('Error enviando notificación:', notifError);
+            }
+
             await Swal.fire({
                 title: '¡La ruta ha sido asignada correctamente al conductor!',
                 confirmButtonColor: '#d33',
@@ -28,8 +41,8 @@ async function assignRouteService(route) {
 
             // Retornar éxito
             return { success: true, data };
-
-        } else if (response.status === 500) {
+        }
+        else if (response.status === 500) {
             // Error interno del servidor
             await Swal.fire({
                 title: '¡Error interno del servidor! Favor de contactar a soporte',

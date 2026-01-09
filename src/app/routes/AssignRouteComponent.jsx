@@ -37,6 +37,14 @@ export default function AssignRouteComponent(state) {
         }
     };
 
+    const getDriverStatus = (driverId) => {
+        const driver = users.find(user => user._id === driverId);
+        if (!driver || !driver.tracking) {
+            return 'unknown'; // No tiene tracking
+        }
+        return driver.tracking.status;
+    };
+
     useEffect(() => {
         // Filtrar usuarios por type_user igual a 'Conductor' y 'Cliente'
         const drivers = users.filter(user => user.type_user === 'Conductor');
@@ -99,14 +107,61 @@ export default function AssignRouteComponent(state) {
                 return;
             }
 
-            const selectedDriverData = users.find(user => user._id === selectedDriver);
-        
-        if (selectedDriverData && selectedDriverData.tracking) {
-            if (selectedDriverData.tracking.status === 'Activo') {
+            // Obtener el estado actualizado del conductor desde el backend
+            try {
+                const response = await fetch(`${base_url}/user/${selectedDriver}`);
+                if (!response.ok) {
+                    throw new Error('Error al verificar el estado del conductor');
+                }
+
+                const driverData = await response.json();
+
+                // Verificar si el conductor tiene tracking
+                if (!driverData.tracking) {
+                    Swal.fire({
+                        title: '¡Conductor sin rastreo activo!',
+                        text: 'El conductor seleccionado no tiene información de rastreo disponible.',
+                        icon: 'warning',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Aceptar',
+                        width: '400px',
+                        padding: '2rem'
+                    });
+                    return;
+                }
+
+                const driverStatus = driverData.tracking.status;
+
+                // Solo permitir asignación a conductores "Disponible"
+                if (driverStatus !== 'Disponible') {
+                    let mensaje = '';
+
+                    if (driverStatus === 'Activo') {
+                        mensaje = 'El conductor seleccionado está actualmente en ruta. Por favor, selecciona otro conductor disponible.';
+                    } else if (driverStatus === 'Fuera de línea') {
+                        mensaje = 'El conductor seleccionado no tiene sesión activa. Por favor, selecciona otro conductor.';
+                    } else {
+                        mensaje = 'El conductor seleccionado no está disponible para asignar rutas.';
+                    }
+
+                    Swal.fire({
+                        title: '¡Conductor no disponible!',
+                        text: mensaje,
+                        icon: 'warning',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Aceptar',
+                        width: '400px',
+                        padding: '2rem'
+                    });
+                    return;
+                }
+
+            } catch (error) {
+                console.error('Error al verificar estado del conductor:', error);
                 Swal.fire({
-                    title: '¡Conductor no disponible!',
-                    text: 'El conductor seleccionado está actualmente en ruta. Por favor, selecciona otro conductor disponible.',
-                    icon: 'warning',
+                    title: '¡Error!',
+                    text: 'No se pudo verificar el estado del conductor. Por favor, intenta de nuevo.',
+                    icon: 'error',
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'Aceptar',
                     width: '400px',
@@ -114,20 +169,7 @@ export default function AssignRouteComponent(state) {
                 });
                 return;
             }
-            
-            if (selectedDriverData.tracking.status === 'Fuera de línea') {
-                Swal.fire({
-                    title: '¡Conductor fuera de línea!',
-                    text: 'El conductor seleccionado no tiene sesión activa. Por favor, selecciona otro conductor.',
-                    icon: 'warning',
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'Aceptar',
-                    width: '400px',
-                    padding: '2rem'
-                });
-                return;
-            }
-        }
+
 
             // Obtener los datos necesarios para crear la ruta
             const url = state.state.url;
@@ -258,7 +300,7 @@ export default function AssignRouteComponent(state) {
                 timeType: state.state.time_type,
                 scheduledTime: state.state.time,
                 routeSections: sectionsToSave,
-                deviationAlertEnabled: state.state.deviationAlertEnabled || false,  
+                deviationAlertEnabled: state.state.deviationAlertEnabled || false,
                 deviationAlertDistance: state.state.deviationAlertDistance || 50
             };
 
@@ -326,9 +368,27 @@ export default function AssignRouteComponent(state) {
                                         onChange={(e) => setSelectedDriver(e.target.value)}
                                     >
                                         <option value="">Sin seleccionar</option>
-                                        {filteredDrivers.map(user => (
-                                            <option key={user._id} value={user._id}>{user.name}</option>
-                                        ))}
+                                        {filteredDrivers.map(user => {
+                                            const isDisabled = user.tracking?.status !== 'Disponible';
+                                            const statusLabel = user.tracking?.status
+                                                ? ` (${user.tracking.status})`
+                                                : ' (Sin rastreo)';
+
+                                            return (
+                                                <option
+                                                    key={user._id}
+                                                    value={user._id}
+                                                    disabled={isDisabled}
+                                                    style={{
+                                                        opacity: isDisabled ? 0.5 : 1,
+                                                        color: isDisabled ? '#999' : '#000',
+                                                        cursor: isDisabled ? 'not-allowed' : 'pointer'
+                                                    }}
+                                                >
+                                                    {user.name}{statusLabel}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
                                 </div>
                                 <div className="col-12 mt-2">

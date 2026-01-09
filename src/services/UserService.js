@@ -140,7 +140,6 @@ async function createUserService(user) {
             return { success: true };
 
         } else if (response.status === 403) {
-            // NUEVO: Manejo de permisos
             const errorData = await response.json();
             Swal.fire({
                 title: 'Permiso denegado',

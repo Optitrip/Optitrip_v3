@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { getUsersService } from '../../services/UserService';
 import { assignRouteService } from '../../services/RouteService';
+import { base_url } from '../../config.js';
 
 export default function AssignRouteComponent(state) {
     const [showModal, setShowModal] = useState(false);
@@ -369,23 +370,29 @@ export default function AssignRouteComponent(state) {
                                     >
                                         <option value="">Sin seleccionar</option>
                                         {filteredDrivers.map(user => {
-                                            const isDisabled = user.tracking?.status !== 'Disponible';
-                                            const statusLabel = user.tracking?.status
-                                                ? ` (${user.tracking.status})`
-                                                : ' (Sin rastreo)';
+                                            const status = user.tracking?.status || 'Desconocido';
+                                            const isAvailable = status === 'Disponible';
+
+                                            const optionStyle = {
+                                                color: isAvailable ? '#000000' : '#A9A9A9',
+                                                backgroundColor: isAvailable ? '#FFFFFF' : '#F2F2F2',
+                                                fontStyle: isAvailable ? 'normal' : 'italic',
+                                                fontWeight: isAvailable ? '500' : '400'
+                                            };
+
+                                            let label = user.name;
+                                            if (!isAvailable) {
+                                                label += ` (${status}) 🚫`;
+                                            }
 
                                             return (
                                                 <option
                                                     key={user._id}
                                                     value={user._id}
-                                                    disabled={isDisabled}
-                                                    style={{
-                                                        opacity: isDisabled ? 0.5 : 1,
-                                                        color: isDisabled ? '#999' : '#000',
-                                                        cursor: isDisabled ? 'not-allowed' : 'pointer'
-                                                    }}
+                                                    disabled={!isAvailable}
+                                                    style={optionStyle}
                                                 >
-                                                    {user.name}{statusLabel}
+                                                    {label}
                                                 </option>
                                             );
                                         })}

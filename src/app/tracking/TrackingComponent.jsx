@@ -576,7 +576,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                             padding: 5,
                                                             paddingLeft: 5,
                                                             display: 'flex',
-                                                            flexDirection: 'column',
+                                                            flexDirection: 'column', 
                                                             alignItems: 'flex-start',
                                                             textAlign: 'left',
                                                             borderRadius: 10,
@@ -584,7 +584,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                         }}
                                                     >
                                                         {/* Fila superior: ícono + nombre + estatus */}
-                                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: 0 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', width: '100%', marginBottom: isActive ? 4 : 0 }}>
                                                             <svg
                                                                 xmlns="http://www.w3.org/2000/svg"
                                                                 viewBox="-5.0 -10.0 110.0 135.0"
@@ -622,8 +622,8 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                                     color: backgroundColor,
                                                                     fontWeight: 'bold',
                                                                     padding: '2px 8px',
-                                                                    alignSelf: 'flex-end', // NUEVO
-                                                                    marginRight: 8 // NUEVO (en lugar de marginLeft)
+                                                                    flexShrink: 0,
+                                                                    marginLeft: 8
                                                                 }}
                                                             >
                                                                 {convertToUpperCase(driverStatus)}
@@ -636,9 +636,8 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                                 alignItems: 'center',
                                                                 width: '100%',
                                                                 gap: 10,
-                                                                marginTop: 6,
-                                                                marginBottom: 6,
-                                                                paddingLeft: 40
+                                                                marginTop: 4,
+                                                                paddingLeft: 40 
                                                             }}>
                                                                 {/* Etiqueta ETA */}
                                                                 <div style={{
@@ -696,7 +695,6 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                                 </div>
                                                             </div>
                                                         )}
-
                                                     </button>
                                                 </div>
                                             );

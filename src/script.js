@@ -88,7 +88,7 @@ async function handleLogin(event) {
         let errorTitle = '';
         if (error.message.includes('Campos incompletos')) {
             errorTitle = '¡Campos incompletos! Por favor completa todos los campos';
-        } else if (error.message.includes('Invalid email or password')) {
+        } else if (error.message.includes('Credenciales inválidas') || error.message.includes('Invalid email or password')) {
             errorTitle = '¡Credenciales incorrectas! Por favor, inténtelo de nuevo';
         } else {
             errorTitle = '¡Error inesperado! Por favor, inténtelo de nuevo';

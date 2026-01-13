@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getUsersAdminService, getUsersDriverService } from "../../services/UserService.js";
+import { getUsersAdminService, getVisibleDriversService } from "../../services/UserService.js";
 import { bold } from "fontawesome";
 
 const statusColors = {
@@ -89,32 +89,26 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
     }, [selectedSuperiorAccount]);
 
     useEffect(() => {
-        // Función para obtener los conductores
         const fetchUsersDriver = async () => {
-            if (selectedSuperiorAccount) {
-                try {
-                    const { users } = await getUsersDriverService(selectedSuperiorAccount);
-                    setFilteredDrivers(users);
-                    if (onDriversUpdate) {
-                        onDriversUpdate(users);
-                    }
-                } catch (error) {
-                    setError(error.message);
+            try {
+                const { users } = await getVisibleDriversService();
+                setFilteredDrivers(users);
+                if (onDriversUpdate) {
+                    onDriversUpdate(users);
                 }
+            } catch (error) {
+                setError(error.message);
             }
         };
 
-        // Inicializa la primera llamada
         fetchUsersDriver();
 
-        // Configura el intervalo para actualizar cada `updateInterval` milisegundos
         const intervalId = setInterval(() => {
             fetchUsersDriver();
         }, updateInterval);
 
-        // Limpia el intervalo cuando el componente se desmonte o se actualice el intervalo
         return () => clearInterval(intervalId);
-    }, [selectedSuperiorAccount, updateInterval]);
+    }, [updateInterval]);
 
     // Agrupar usuarios por cuenta superior
     const superiorAccounts = dataUsers.reduce((acc, user) => {
@@ -576,7 +570,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                             padding: 5,
                                                             paddingLeft: 5,
                                                             display: 'flex',
-                                                            flexDirection: 'column', 
+                                                            flexDirection: 'column',
                                                             alignItems: 'flex-start',
                                                             textAlign: 'left',
                                                             borderRadius: 10,
@@ -637,7 +631,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                                 width: '100%',
                                                                 gap: 10,
                                                                 marginTop: 4,
-                                                                paddingLeft: 40 
+                                                                paddingLeft: 40
                                                             }}>
                                                                 {/* Etiqueta ETA */}
                                                                 <div style={{

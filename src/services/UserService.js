@@ -104,6 +104,32 @@ async function getUsersDriverService(email) {
     }
 }
 
+async function getVisibleDriversService() {
+    try {
+        const sessionUser = JSON.parse(sessionStorage.getItem('data_user'));
+        if (!sessionUser || !sessionUser._id) {
+            throw new Error('Sesión no válida');
+        }
+
+        const response = await fetch(`${base_url}/users/visible-drivers?requestingUserId=${sessionUser._id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return { users: data };
+        } else {
+            throw new Error('Error al obtener conductores visibles');
+        }
+    } catch (error) {
+        console.error('Error fetching visible drivers:', error.message);
+        throw error;
+    }
+}
+
 async function createUserService(user) {
     try {
         const sessionUser = JSON.parse(sessionStorage.getItem('data_user'));
@@ -457,4 +483,4 @@ async function moveAccountService(ids, superiorAccount) {
 }
 
 // Exportar la función para que esté disponible fuera de este módulo
-export { getUserByIdService, getUsersService, getUsersAdminService, getUsersDriverService, createUserService, updateUserService, deleteUserService, resetPasswordService, moveAccountService };
+export { getUserByIdService, getUsersService, getUsersAdminService, getUsersDriverService, getVisibleDriversService, createUserService, updateUserService, deleteUserService, resetPasswordService, moveAccountService };

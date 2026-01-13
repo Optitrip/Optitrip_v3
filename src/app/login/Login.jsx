@@ -7,21 +7,22 @@ function Login({ onLogin }) {
     const [password, setPassword] = useState('');
 
     const handleSubmit = async (event) => {
-        event.preventDefault();
+    event.preventDefault();
 
-        // Validar campos vacíos en el frontend
-        if (!username.trim() || !password.trim()) {
-            alert('Campos incompletos. Por favor completa todos los campos');
-            return;
-        }
+    if (!username.trim() || !password.trim()) {
+        alert('Campos incompletos. Por favor completa todos los campos');
+        return;
+    }
 
-        try {
-            const result = await loginService(username, password);
-            onLogin(result.data);
-        } catch (error) {
-            alert(error.message);
-        }
-    };
+    try {
+        const result = await loginService(username, password);
+        onLogin(result.data);
+    } catch (error) {
+        console.log('Error capturado:', error);
+        console.log('Mensaje del error:', error.message);
+        alert(error.message || '¡Error inesperado! Por favor, inténtelo de nuevo');
+    }
+};
 
     return (
         <div>

@@ -9,6 +9,17 @@ export default function ScheduleTripComponent({ state, setState }) {
     const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
     const [minDateTime, setMinDateTime] = useState('');
 
+    const getCurrentDateString = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
     useEffect(() => {
         if (state.isEditMode || (state.time && state.time !== "")) {
             setIsCardBodyOpen(true);
@@ -23,20 +34,10 @@ export default function ScheduleTripComponent({ state, setState }) {
     }, [state.time, state.time_type]);
 
     useEffect(() => {
-        const updateMinDateTime = () => {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-
-            const minDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
-            setMinDateTime(minDateTimeString);
-        };
-
-        updateMinDateTime();
-        const interval = setInterval(updateMinDateTime, 60000);
+        setMinDateTime(getCurrentDateString());
+        const interval = setInterval(() => {
+            setMinDateTime(getCurrentDateString());
+        }, 60000);
         return () => clearInterval(interval);
     }, []);
 
@@ -49,58 +50,58 @@ export default function ScheduleTripComponent({ state, setState }) {
     }
 
     const updateTime = (e) => {
-    const { id, value } = e.target;
+        const { id, value } = e.target;
 
-    if (id === 'select-type') {
-        const newTimeValue = value === "Salir ahora" ? "" : state.time; 
-        
-        setTime(prevTime => ({
-            ...prevTime,
-            time_type: value,
-            time: newTimeValue 
-        }));
-        
-        setState(prevState => ({
-            ...prevState,
-            time_type: value,
-            time: newTimeValue 
-        }));
-    } else if (id === 'select-time') {
-        const selectedDateTime = new Date(value);
-        const currentDateTime = new Date();
-        
-        if (selectedDateTime < currentDateTime) {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            
-            const currentDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
-            
+        if (id === 'select-type') {
+            const newTimeValue = value === "Salir ahora" ? "" : state.time;
+
             setTime(prevTime => ({
                 ...prevTime,
-                time: currentDateTimeString
+                time_type: value,
+                time: newTimeValue
+            }));
+
+            setState(prevState => ({
+                ...prevState,
+                time_type: value,
+                time: newTimeValue
+            }));
+        } else if (id === 'select-time') {
+            const selectedDateTime = new Date(value);
+            const currentDateTime = new Date();
+
+            if (selectedDateTime < currentDateTime) {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+
+                const currentDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+                setTime(prevTime => ({
+                    ...prevTime,
+                    time: currentDateTimeString
+                }));
+                setState(prevState => ({
+                    ...prevState,
+                    time: currentDateTimeString
+                }));
+
+                return;
+            }
+
+            setTime(prevTime => ({
+                ...prevTime,
+                time: value
             }));
             setState(prevState => ({
                 ...prevState,
-                time: currentDateTimeString
+                time: value
             }));
-            
-            return; 
         }
-        
-        setTime(prevTime => ({
-            ...prevTime,
-            time: value
-        }));
-        setState(prevState => ({
-            ...prevState,
-            time: value
-        }));
     }
-}
 
     return (
         <div className="card mt-2">
@@ -121,7 +122,7 @@ export default function ScheduleTripComponent({ state, setState }) {
                         </div>
                         <div className="col-8">
                             <div style={{ display: `${time.time_type === "Salir ahora" ? "none" : "block"}` }}>
-                                <input id="select-time" style={{ fontSize: 9 }} value={time.time} onChange={updateTime} className="form-control" type="datetime-local" min={minDateTime} required />
+                                <input id="select-time" style={{ fontSize: 9 }} value={time.time} onChange={updateTime} className="form-control" type="datetime-local" min={minDateTime} onFocus={() => setMinDateTime(getCurrentDateString())} required />
                             </div>
                         </div>
                     </div>

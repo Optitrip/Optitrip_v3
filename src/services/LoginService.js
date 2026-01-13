@@ -10,21 +10,22 @@ async function loginService(email, password) {
             body: JSON.stringify({ email, password })
         });
 
+        const data = await response.json();
+
         if (response.ok) {
-            const data = await response.json();
             return {
                 data: data,
             };
-
         } else {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Credenciales incorrectas');
+            throw new Error(data.message || 'Error desconocido');
         }
 
     } catch (error) {
-        throw error; // Propaga el error para que sea manejado por el código que llame a esta función
+        if (error instanceof TypeError || error.message.includes('JSON')) {
+            throw new Error('Error de conexión. Por favor, verifica tu conexión a internet');
+        }
+        throw error;
     }
 }
 
-// Exportar la función de login para que esté disponible fuera de este módulo
 export { loginService };

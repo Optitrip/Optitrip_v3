@@ -7,6 +7,7 @@ export default function ScheduleTripComponent({ state, setState }) {
         time_type: state.time_type,
     });
     const [isCardBodyOpen, setIsCardBodyOpen] = useState(state.isEditMode || false);
+    const [minDateTime, setMinDateTime] = useState('');
 
     useEffect(() => {
         if (state.isEditMode || (state.time && state.time !== "")) {
@@ -21,6 +22,24 @@ export default function ScheduleTripComponent({ state, setState }) {
         });
     }, [state.time, state.time_type]);
 
+    useEffect(() => {
+        const updateMinDateTime = () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            const minDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+            setMinDateTime(minDateTimeString);
+        };
+
+        updateMinDateTime();
+        const interval = setInterval(updateMinDateTime, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
     const values_select_time = ["Salir ahora", "Salir a las:", "Llegar a las:"];
 
     const options = () => {
@@ -30,33 +49,33 @@ export default function ScheduleTripComponent({ state, setState }) {
     }
 
     const updateTime = (e) => {
-        const { id, value } = e.target;
+    const { id, value } = e.target;
 
-        if (id === 'select-type') {
-            const newTimeValue = value === "Salir ahora" ? "" : state.time; 
-            
-            setTime(prevTime => ({
-                ...prevTime,
-                time_type: value,
-                time: newTimeValue 
-            }));
-            
-            setState(prevState => ({
-                ...prevState,
-                time_type: value,
-                time: newTimeValue 
-            }));
-        } else if (id === 'select-time') {
-            setTime(prevTime => ({
-                ...prevTime,
-                time: value
-            }));
-            setState(prevState => ({
-                ...prevState,
-                time: value
-            }));
-        }
+    if (id === 'select-type') {
+        const newTimeValue = value === "Salir ahora" ? "" : state.time; 
+        
+        setTime(prevTime => ({
+            ...prevTime,
+            time_type: value,
+            time: newTimeValue 
+        }));
+        
+        setState(prevState => ({
+            ...prevState,
+            time_type: value,
+            time: newTimeValue 
+        }));
+    } else if (id === 'select-time') {
+        setTime(prevTime => ({
+            ...prevTime,
+            time: value
+        }));
+        setState(prevState => ({
+            ...prevState,
+            time: value
+        }));
     }
+}
 
     return (
         <div className="card mt-2">
@@ -77,7 +96,7 @@ export default function ScheduleTripComponent({ state, setState }) {
                         </div>
                         <div className="col-8">
                             <div style={{ display: `${time.time_type === "Salir ahora" ? "none" : "block"}` }}>
-                                <input id="select-time" style={{ fontSize: 9 }} value={time.time} onChange={updateTime} className="form-control" type="datetime-local" required />
+                                <input id="select-time" style={{ fontSize: 9 }} value={time.time} onChange={updateTime} className="form-control" type="datetime-local" min={minDateTime} required />
                             </div>
                         </div>
                     </div>

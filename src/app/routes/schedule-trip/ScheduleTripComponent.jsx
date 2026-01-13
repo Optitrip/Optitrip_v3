@@ -66,6 +66,31 @@ export default function ScheduleTripComponent({ state, setState }) {
             time: newTimeValue 
         }));
     } else if (id === 'select-time') {
+        const selectedDateTime = new Date(value);
+        const currentDateTime = new Date();
+        
+        if (selectedDateTime < currentDateTime) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            const currentDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+            
+            setTime(prevTime => ({
+                ...prevTime,
+                time: currentDateTimeString
+            }));
+            setState(prevState => ({
+                ...prevState,
+                time: currentDateTimeString
+            }));
+            
+            return; 
+        }
+        
         setTime(prevTime => ({
             ...prevTime,
             time: value

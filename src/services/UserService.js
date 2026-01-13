@@ -161,7 +161,7 @@ async function createUserService(user) {
 
             let titleMessage = errorData.message;
             if (titleMessage === "Email already exists") {
-                titleMessage = "El correo electrónico ya está registrado";
+                titleMessage = "¡El correo electrónico ya está registrado!";
             }
             Swal.fire({
                 title: titleMessage || 'Error en la solicitud',

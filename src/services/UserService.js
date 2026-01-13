@@ -121,7 +121,7 @@ async function createUserService(user) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload) 
+            body: JSON.stringify(payload)
         });
 
         if (response.status === 201) {
@@ -158,8 +158,13 @@ async function createUserService(user) {
 
         } else if (response.status === 400) {
             const errorData = await response.json();
+
+            let titleMessage = errorData.message;
+            if (titleMessage === "Email already exists") {
+                titleMessage = "El correo electrónico ya está registrado";
+            }
             Swal.fire({
-                title: errorData.message || 'Error en la solicitud',
+                title: titleMessage || 'Error en la solicitud',
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Aceptar',
                 width: '400px',
@@ -170,7 +175,6 @@ async function createUserService(user) {
                 }
             });
             throw new Error(errorData.message);
-
         } else {
             Swal.fire({
                 title: '¡Respuesta inesperada del servidor!',
@@ -186,7 +190,7 @@ async function createUserService(user) {
             throw new Error('Unexpected server response');
         }
     } catch (error) {
-        if (error.message !== 'Email already exists' && 
+        if (error.message !== 'Email already exists' &&
             error.message !== 'Unexpected server response' &&
             !error.message.includes('no puede crear')) {
             Swal.fire({

@@ -153,11 +153,14 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         return nestedAccounts;
     }
 
+    const GLOBAL_ROOT_ACCOUNT = "optitripmex@gmail.com";
+    const rootAccountToRender = (email === GLOBAL_ROOT_ACCOUNT) ? GLOBAL_ROOT_ACCOUNT : email;
     // Llamar a la función para obtener la estructura anidada
     const nestedSuperiorAccounts = nestAccounts(
         superiorAccounts,
-        email
+        rootAccountToRender 
     );
+
     // Función para determinar el color del ícono basado en el rol
     const getIconColor = (email) => {
         const user = dataUsers.find((user) => user.email === email);

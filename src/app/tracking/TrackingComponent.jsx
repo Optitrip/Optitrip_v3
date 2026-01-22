@@ -306,9 +306,10 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         if (selectedSuperiorAccount) {
             const selectedUserObj = dataUsers.find(u => u.email === selectedSuperiorAccount);
             
-            const shouldShowAllBackendDrivers = 
-                (selectedUserObj?.type_user === 'Cliente') || 
-                (!selectedUserObj && selectedSuperiorAccount === email);
+            const isExplicitClient = selectedUserObj?.type_user === 'Cliente';
+            const isSelf = (!selectedUserObj && selectedSuperiorAccount === email);
+            const isSelfAsClient = isSelf && dataUsers.length === 0;
+            const shouldShowAllBackendDrivers = isExplicitClient || isSelfAsClient;
 
             if (!shouldShowAllBackendDrivers) {
                 result = result.filter(

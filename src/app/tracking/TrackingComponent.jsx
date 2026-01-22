@@ -270,12 +270,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
     };
 
 
-    // Actualizar mapa con marcadores
     useEffect(() => {
-        if (filterStatus === 'all') {
-            setFilteredDriversStatus(filteredDrivers);
-        }
-
         if (mapDrivers) {
             const currentObjects = mapDrivers.getObjects();
 
@@ -300,35 +295,32 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
             });
         }
 
-    }, [filteredDrivers, filteredDriversStatus, filterStatus, mapDrivers, addMarkerToMap]);
+    }, [filteredDriversStatus, mapDrivers, addMarkerToMap]);
+
+    useEffect(() => {
+        let result = [...filteredDrivers];
+
+        if (selectedSuperiorAccount) {
+            result = result.filter(
+                (driver) => driver.superior_account === selectedSuperiorAccount
+            );
+        }
+
+        if (filterStatus === 'available') {
+            result = result.filter((d) => d.tracking && d.tracking.status === 'Disponible');
+        } else if (filterStatus === 'active') {
+            result = result.filter((d) => d.tracking && d.tracking.status === 'Activo');
+        } else if (filterStatus === 'offline') {
+            result = result.filter((d) => d.tracking && d.tracking.status === 'Fuera de línea');
+        }
+
+        setFilteredDriversStatus(result);
+
+    }, [filteredDrivers, selectedSuperiorAccount, filterStatus]);
 
 
     const handleFilterStatusChange = (status) => {
         setFilterStatus(status);
-
-        let filtered = [...filteredDrivers];
-
-        if (status === 'available') {
-            // Solo conductores disponibles (sin ruta)
-            filtered = filtered.filter((user) =>
-                user.tracking && user.tracking.status === 'Disponible'
-            );
-        } else if (status === 'active') {
-            // Solo conductores activos (en ruta)
-            filtered = filtered.filter((user) =>
-                user.tracking && user.tracking.status === 'Activo'
-            );
-        } else if (status === 'offline') {
-            // Solo conductores fuera de línea
-            filtered = filtered.filter((user) =>
-                user.tracking && user.tracking.status === 'Fuera de línea'
-            );
-        } else {
-            // Todos los conductores
-            filtered = [...filteredDrivers];
-        }
-
-        setFilteredDriversStatus(filtered);
     };
 
     const handleZoomLocation = (latitude, longitude) => {

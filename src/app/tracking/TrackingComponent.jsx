@@ -304,9 +304,14 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         let result = [...filteredDrivers];
 
         if (selectedSuperiorAccount) {
-            result = result.filter(
-                (driver) => driver.superior_account === selectedSuperiorAccount
-            );
+            const selectedUserObj = dataUsers.find(u => u.email === selectedSuperiorAccount);
+            const isClient = selectedUserObj?.type_user === 'Cliente';
+
+            if (!isClient) {
+                result = result.filter(
+                    (driver) => driver.superior_account === selectedSuperiorAccount
+                );
+            }
         }
 
         if (filterStatus === 'available') {
@@ -319,7 +324,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
 
         setFilteredDriversStatus(result);
 
-    }, [filteredDrivers, selectedSuperiorAccount, filterStatus]);
+    }, [filteredDrivers, selectedSuperiorAccount, filterStatus, dataUsers]);
 
 
     const handleFilterStatusChange = (status) => {

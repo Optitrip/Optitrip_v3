@@ -305,9 +305,12 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
 
         if (selectedSuperiorAccount) {
             const selectedUserObj = dataUsers.find(u => u.email === selectedSuperiorAccount);
-            const isClient = selectedUserObj?.type_user === 'Cliente';
+            
+            const shouldShowAllBackendDrivers = 
+                (selectedUserObj?.type_user === 'Cliente') || 
+                (!selectedUserObj && selectedSuperiorAccount === email);
 
-            if (!isClient) {
+            if (!shouldShowAllBackendDrivers) {
                 result = result.filter(
                     (driver) => driver.superior_account === selectedSuperiorAccount
                 );
@@ -324,7 +327,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
 
         setFilteredDriversStatus(result);
 
-    }, [filteredDrivers, selectedSuperiorAccount, filterStatus, dataUsers]);
+    }, [filteredDrivers, selectedSuperiorAccount, filterStatus, dataUsers, email]);
 
 
     const handleFilterStatusChange = (status) => {

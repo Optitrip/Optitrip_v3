@@ -93,9 +93,6 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
             try {
                 const { users } = await getVisibleDriversService();
                 setFilteredDrivers(users);
-                if (onDriversUpdate) {
-                    onDriversUpdate(users);
-                }
             } catch (error) {
                 setError(error.message);
             }
@@ -308,7 +305,6 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
             const isRoot = selectedSuperiorAccount === ROOT_ACCOUNT;
             const isAdminOrDistributor = dataUsers.some(u => u.email === selectedSuperiorAccount);
             const isSelf = selectedSuperiorAccount === email;
-            
             const isClientSelf = !isRoot && !isAdminOrDistributor && isSelf;
 
             if (!isClientSelf) {
@@ -328,7 +324,11 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
 
         setFilteredDriversStatus(result);
 
-    }, [filteredDrivers, selectedSuperiorAccount, filterStatus, dataUsers, email]);
+        if (onDriversUpdate) {
+            onDriversUpdate(result);
+        }
+
+    }, [filteredDrivers, selectedSuperiorAccount, filterStatus, dataUsers, email, onDriversUpdate]);
 
 
     const handleFilterStatusChange = (status) => {

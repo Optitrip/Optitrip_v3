@@ -304,14 +304,14 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         let result = [...filteredDrivers];
 
         if (selectedSuperiorAccount) {
-            const selectedUserObj = dataUsers.find(u => u.email === selectedSuperiorAccount);
+            const ROOT_ACCOUNT = "optitripmex@gmail.com";
+            const isRoot = selectedSuperiorAccount === ROOT_ACCOUNT;
+            const isAdminOrDistributor = dataUsers.some(u => u.email === selectedSuperiorAccount);
+            const isSelf = selectedSuperiorAccount === email;
             
-            const isExplicitClient = selectedUserObj?.type_user === 'Cliente';
-            const isSelf = (!selectedUserObj && selectedSuperiorAccount === email);
-            const isSelfAsClient = isSelf && dataUsers.length === 0;
-            const shouldShowAllBackendDrivers = isExplicitClient || isSelfAsClient;
+            const isClientSelf = !isRoot && !isAdminOrDistributor && isSelf;
 
-            if (!shouldShowAllBackendDrivers) {
+            if (!isClientSelf) {
                 result = result.filter(
                     (driver) => driver.superior_account === selectedSuperiorAccount
                 );

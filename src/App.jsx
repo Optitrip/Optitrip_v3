@@ -21,6 +21,7 @@ import ReportComponent from './app/reports/ReportComponent.jsx';
 import TrackingComponent from './app/tracking/TrackingComponent.jsx';
 import AlertsComponent from './app/alerts/AlertsComponent.jsx';
 import PrintRouteComponent from './app/routes/PrintRouteComponent.jsx';
+import HeavyTransportLayerComponent from './app/routes/HeavyTransportLayerComponent.jsx';
 
 // Comenzamos con la creación de las variables globales para el uso de los mapas de HERE:
 var platformHERE = null;
@@ -82,7 +83,16 @@ var default_state = {
     deviationAlertEnabled: false,
     deviationAlertDistance: 50,
     selectedAlert: null,
-    isAlertsMaximized: false
+    isAlertsMaximized: false,
+    heavyTransportLayers: {
+        heightRestrictions: false,
+        weightRestrictions: false,
+        widthRestrictions: false,
+        tunnels: false,
+        bridges: false,
+        prohibitedStreets: false,
+        steepGrades: false
+    }
 };
 
 var currentBubble = null;
@@ -226,6 +236,13 @@ export default function App(props) {
             if (obj instanceof H.map.Group) {
                 map.removeObject(obj);
             }
+            // Borrar capas de transporte pesado
+            if (obj instanceof H.map.Polyline) {
+                const data = obj.getData();
+                if (data && data.layerType) {
+                    map.removeObject(obj);
+                }
+            }
         });
 
         const assignButton = document.getElementById('btn-assign-route');
@@ -275,7 +292,16 @@ export default function App(props) {
             preloadedDriverId: null,
             preloadedCustomerId: null,
             deviationAlertEnabled: false,
-            deviationAlertDistance: 50
+            deviationAlertDistance: 50,
+            heavyTransportLayers: {
+                heightRestrictions: false,
+                weightRestrictions: false,
+                widthRestrictions: false,
+                tunnels: false,
+                bridges: false,
+                prohibitedStreets: false,
+                steepGrades: false
+            }
         };
 
         setState(cleanState);
@@ -345,6 +371,7 @@ export default function App(props) {
             } else {
                 document.getElementById('map').style.display = 'none';
                 document.getElementById('map-drivers').style.display = 'block';
+                if (mapDrivers) mapDrivers.getViewPort().resize();
                 document.getElementById('users').style.display = 'none';
                 document.getElementById('reports').style.display = 'none';
             }
@@ -813,17 +840,17 @@ export default function App(props) {
     }, []);
 
     useEffect(() => {
-    const handleReuseRouteEvent = (event) => {
-        const { routeId } = event.detail;
-        loadRouteForReuse(routeId);
-    };
+        const handleReuseRouteEvent = (event) => {
+            const { routeId } = event.detail;
+            loadRouteForReuse(routeId);
+        };
 
-    window.addEventListener('loadRouteForReuse', handleReuseRouteEvent);
+        window.addEventListener('loadRouteForReuse', handleReuseRouteEvent);
 
-    return () => {
-        window.removeEventListener('loadRouteForReuse', handleReuseRouteEvent);
-    };
-}, [map, state]);
+        return () => {
+            window.removeEventListener('loadRouteForReuse', handleReuseRouteEvent);
+        };
+    }, [map, state]);
 
     const handleContextMenu = (ev) => {
         const menuRoutes = document.getElementById('menuRoutes');
@@ -1229,167 +1256,167 @@ export default function App(props) {
     };
 
     const loadRouteForReuse = async (routeId) => {
-    try {
-        const { getRouteByIdService } = await import('./services/RouteService.js');
-        const routeData = await getRouteByIdService(routeId);
+        try {
+            const { getRouteByIdService } = await import('./services/RouteService.js');
+            const routeData = await getRouteByIdService(routeId);
 
-        // Limpiar el mapa completamente EXCEPTO el marcador de ubicación actual
-        handleFullReset();
+            // Limpiar el mapa completamente EXCEPTO el marcador de ubicación actual
+            handleFullReset();
 
-        // Construir los puntos de la ruta (origen, waypoints, destino)
-        const allPoints = [
-            routeData.origin,
-            ...routeData.waypoints,
-            routeData.destination
-        ];
+            // Construir los puntos de la ruta (origen, waypoints, destino)
+            const allPoints = [
+                routeData.origin,
+                ...routeData.waypoints,
+                routeData.destination
+            ];
 
-        const loadedDestinations = [];
-        allPoints.forEach((point, index) => {
-            const color = index === 0 ? "#00BD2A" : (index === allPoints.length - 1 ? "#DC3545" : "#9FA6B2");
+            const loadedDestinations = [];
+            allPoints.forEach((point, index) => {
+                const color = index === 0 ? "#00BD2A" : (index === allPoints.length - 1 ? "#DC3545" : "#9FA6B2");
 
-            const marker = createMarker(
-                map,
-                point.lat,
-                point.lng,
-                index,
-                loadedDestinations,
-                color
-            );
+                const marker = createMarker(
+                    map,
+                    point.lat,
+                    point.lng,
+                    index,
+                    loadedDestinations,
+                    color
+                );
 
-            loadedDestinations[index] = {
-                name: point.name,
-                lat: point.lat,
-                lng: point.lng,
-                load: point.load || 0,
-                unload: point.unload || 0,
-                duration: point.duration || 0,
-                minutes: point.minutes || 0,
-                status: "Sin completar",
-                marker: marker,
-                string: `${point.lat},${point.lng}`
-            };
-        });
+                loadedDestinations[index] = {
+                    name: point.name,
+                    lat: point.lat,
+                    lng: point.lng,
+                    load: point.load || 0,
+                    unload: point.unload || 0,
+                    duration: point.duration || 0,
+                    minutes: point.minutes || 0,
+                    status: "Sin completar",
+                    marker: marker,
+                    string: `${point.lat},${point.lng}`
+                };
+            });
 
-        // Recrear zonas a evitar
-        const loadedAvoidZones = [];
-        if (routeData.avoidAreas && routeData.avoidAreas.length > 0) {
-            routeData.avoidAreas.forEach((area) => {
-                const points = area.points.map(p => Array.isArray(p) ? { lat: p[0], lng: p[1] } : p);
+            // Recrear zonas a evitar
+            const loadedAvoidZones = [];
+            if (routeData.avoidAreas && routeData.avoidAreas.length > 0) {
+                routeData.avoidAreas.forEach((area) => {
+                    const points = area.points.map(p => Array.isArray(p) ? { lat: p[0], lng: p[1] } : p);
 
-                const lineString = new H.geo.LineString();
-                points.forEach(point => {
-                    lineString.pushPoint({ lat: point.lat, lng: point.lng });
-                });
+                    const lineString = new H.geo.LineString();
+                    points.forEach(point => {
+                        lineString.pushPoint({ lat: point.lat, lng: point.lng });
+                    });
 
-                // Cerrar el polígono
-                if (points.length > 0) {
-                    lineString.pushPoint({ lat: points[0].lat, lng: points[0].lng });
-                }
-
-                const polygon = new H.map.Polygon(lineString, {
-                    style: {
-                        fillColor: area.color || 'rgba(255, 0, 0, 0.4)',
-                        strokeColor: area.color || '#FF0000',
-                        lineWidth: 2
+                    // Cerrar el polígono
+                    if (points.length > 0) {
+                        lineString.pushPoint({ lat: points[0].lat, lng: points[0].lng });
                     }
-                });
 
-                map.addObject(polygon);
+                    const polygon = new H.map.Polygon(lineString, {
+                        style: {
+                            fillColor: area.color || 'rgba(255, 0, 0, 0.4)',
+                            strokeColor: area.color || '#FF0000',
+                            lineWidth: 2
+                        }
+                    });
 
-                loadedAvoidZones.push({
-                    name: area.name,
-                    points: area.points,
-                    color: area.color,
-                    polygon: polygon,
-                    LineString: lineString,
-                    icons: []
+                    map.addObject(polygon);
+
+                    loadedAvoidZones.push({
+                        name: area.name,
+                        points: area.points,
+                        color: area.color,
+                        polygon: polygon,
+                        LineString: lineString,
+                        icons: []
+                    });
                 });
+            }
+
+            // Determinar botón de vehículo activo
+            let activeBtn = null;
+            const transport = routeData.transportation || "";
+
+            if (transport === "car") activeBtn = "auto";
+            else if (transport === "truck") activeBtn = "camion";
+            else if (transport === "scooter") activeBtn = "moto";
+            else if (transport === "bus") activeBtn = "bus";
+            else if (transport === "pedestrian") activeBtn = "peaton";
+
+            // Formatear tiempo programado si existe
+            let formattedTime = "";
+            if (routeData.scheduledTime) {
+                formattedTime = routeData.scheduledTime.substring(0, 16);
+            }
+
+            // Actualizar el estado con los parámetros de la ruta
+            setState({
+                ...state,
+                isEditMode: false,
+                editingRouteId: null,
+
+                // Cargar origen, destino y waypoints
+                destinations: loadedDestinations,
+
+                // Precargar conductor y cliente
+                preloadedDriverId: routeData.driverId?._id || routeData.driverId,
+                preloadedCustomerId: routeData.customerId?._id || routeData.customerId,
+
+                // Configuración del vehículo
+                transportation: transport,
+                activeVehicleButton: activeBtn,
+                type_of_truck: routeData.type_of_truck || "tractor",
+                number_of_axles: routeData.number_of_axles || "2",
+                number_of_trailers: routeData.number_of_trailers || "1",
+
+                // Configuración de tiempo y modo
+                time: formattedTime,
+                time_type: routeData.timeType || "Salir a las:",
+                mode: routeData.mode || "fast",
+                traffic: routeData.traffic ? "default" : "disabled",
+
+                // Parámetros de evitación
+                avoid_parameters: routeData.avoidParameters || [],
+                avoid_highways: routeData.avoidHighways || [],
+                avoid_zones: loadedAvoidZones,
+
+                // Alertas de desviación
+                deviationAlertEnabled: routeData.deviationAlertEnabled || false,
+                deviationAlertDistance: routeData.deviationAlertDistance || 50,
+
+                // Estado limpio para nueva ruta
+                lines: [],
+                response: null,
+                selectedCardIndex: null,
+                show_results: false,
+                created: true
+            });
+
+            // Forzar re-render del formulario
+            setFormKey(prev => prev + 1);
+
+            // Centrar mapa en el origen
+            if (loadedDestinations.length > 0) {
+                moveMapToPlace(map, loadedDestinations[0].lat, loadedDestinations[0].lng);
+            }
+
+        } catch (error) {
+            console.error('Error al reutilizar la ruta:', error);
+            Swal.fire({
+                title: '¡Error al cargar la ruta!',
+                text: 'No se pudo cargar la información de la ruta',
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Aceptar',
+                width: '400px',
+                padding: '2rem',
+                customClass: {
+                    title: 'title-handle',
+                    popup: 'popup-handle'
+                }
             });
         }
-
-        // Determinar botón de vehículo activo
-        let activeBtn = null;
-        const transport = routeData.transportation || "";
-
-        if (transport === "car") activeBtn = "auto";
-        else if (transport === "truck") activeBtn = "camion";
-        else if (transport === "scooter") activeBtn = "moto";
-        else if (transport === "bus") activeBtn = "bus";
-        else if (transport === "pedestrian") activeBtn = "peaton";
-
-        // Formatear tiempo programado si existe
-        let formattedTime = "";
-        if (routeData.scheduledTime) {
-            formattedTime = routeData.scheduledTime.substring(0, 16);
-        }
-
-        // Actualizar el estado con los parámetros de la ruta
-        setState({
-            ...state,
-            isEditMode: false,
-            editingRouteId: null,
-            
-            // Cargar origen, destino y waypoints
-            destinations: loadedDestinations,
-
-            // Precargar conductor y cliente
-            preloadedDriverId: routeData.driverId?._id || routeData.driverId,
-            preloadedCustomerId: routeData.customerId?._id || routeData.customerId,
-
-            // Configuración del vehículo
-            transportation: transport,
-            activeVehicleButton: activeBtn,
-            type_of_truck: routeData.type_of_truck || "tractor",
-            number_of_axles: routeData.number_of_axles || "2",
-            number_of_trailers: routeData.number_of_trailers || "1",
-
-            // Configuración de tiempo y modo
-            time: formattedTime,
-            time_type: routeData.timeType || "Salir a las:",
-            mode: routeData.mode || "fast",
-            traffic: routeData.traffic ? "default" : "disabled",
-
-            // Parámetros de evitación
-            avoid_parameters: routeData.avoidParameters || [],
-            avoid_highways: routeData.avoidHighways || [],
-            avoid_zones: loadedAvoidZones,
-
-            // Alertas de desviación
-            deviationAlertEnabled: routeData.deviationAlertEnabled || false,
-            deviationAlertDistance: routeData.deviationAlertDistance || 50,
-
-            // Estado limpio para nueva ruta
-            lines: [],
-            response: null,
-            selectedCardIndex: null,
-            show_results: false,
-            created: true
-        });
-
-        // Forzar re-render del formulario
-        setFormKey(prev => prev + 1);
-
-        // Centrar mapa en el origen
-        if (loadedDestinations.length > 0) {
-            moveMapToPlace(map, loadedDestinations[0].lat, loadedDestinations[0].lng);
-        }
-
-    } catch (error) {
-        console.error('Error al reutilizar la ruta:', error);
-        Swal.fire({
-            title: '¡Error al cargar la ruta!',
-            text: 'No se pudo cargar la información de la ruta',
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Aceptar',
-            width: '400px',
-            padding: '2rem',
-            customClass: {
-                title: 'title-handle',
-                popup: 'popup-handle'
-            }
-        });
-    }
-};
+    };
 
     const successCallback = (position) => {
         localStorage.setItem("current_position", JSON.stringify({ "lat": position.coords.latitude, "lng": position.coords.longitude }));
@@ -1659,19 +1686,36 @@ export default function App(props) {
                     </div>
                 </div>
             )}
-            <div className="container clearfix" style={{ zIndex: 1, position: "absolute", top: 50, right: 30, margin: "10px", width: "350px" }}>
-                <div style={{ position: 'relative' }}>
-                    {showSearch && (
-                        <div style={{ marginBottom: '20px' }}>
-                            <SearchComponent state={state} setState={setState} userPosition={state.current_position} moveMapToPlace={moveMapToPlace} placeholder="Busca lugares" map={map} addPoint={false} />
-                        </div>
-                    )}
+            <div style={{ zIndex: 1, position: "absolute", top: 60, right: 10, display: 'flex', flexDirection: 'row-reverse', gap: '10px', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {showBtnSearch && (
-                        <button onClick={toggleSearch} id='btnSearch' style={{ position: 'absolute', top: 0, right: -30, borderRadius: '20%' }}>
-                            <i className="icon-search"></i>
+                        <button onClick={toggleSearch} id='btnSearch' style={{ borderRadius: '20%' }}>
+                            <i className="icon-search" style={{ fontSize: '14px' }}></i>
                         </button>
                     )}
+
+                    {initialized && (
+                        <HeavyTransportLayerComponent
+                            map={map}
+                            state={state}
+                            setState={setState}
+                        />
+                    )}
                 </div>
+
+                {showSearch && (
+                    <div style={{ width: '350px', marginTop: '0px' }}>
+                        <SearchComponent
+                            state={state}
+                            setState={setState}
+                            userPosition={state.current_position}
+                            moveMapToPlace={moveMapToPlace}
+                            placeholder="Busca lugares"
+                            map={map}
+                            addPoint={false}
+                        />
+                    </div>
+                )}
             </div>
             {
                 refsReady && cardTracingRef.current && ReactDOM.createPortal(

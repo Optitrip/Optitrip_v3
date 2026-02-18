@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var cardRoutes = document.getElementById('show-routes');
         var cardInd = document.getElementById('show-indications');
 
-        divMap.style.display = 'bloc';
+        divMap.style.display = 'block';
         divMapDrivers.style.display = 'block';
         cardTracing.style.display = 'block';
         divUsers.style.display = 'none';

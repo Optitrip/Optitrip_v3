@@ -9,15 +9,10 @@ export const LAYER_COLORS = {
     steepGrades: '#FFCC00'
 };
 
-/**
- * Función para activar o desactivar la capa nativa de camiones de HERE Maps.
- */
 export function toggleTruckLayer(map, enable) {
     if (!window.H || !map) return;
 
     if (enable) {
-
-        const service = new window.H.service.Platform({ apikey: apiKeyHERE });
         const truckProvider = new window.H.map.provider.ImageTileProvider({
             label: 'truck-icons',
             getURL: function (col, row, level) {
@@ -32,15 +27,13 @@ export function toggleTruckLayer(map, enable) {
         });
 
         const truckLayer = new window.H.map.layer.TileLayer(truckProvider);
-
-        // Guardamos y aplicamos
         map.truckLayerInstance = truckLayer;
         map.addLayer(truckLayer);
 
     } else {
         if (map.truckLayerInstance) {
             map.removeLayer(map.truckLayerInstance);
-            map.setData('truckLayerInstance', null);
+            map.truckLayerInstance = null;
         }
     }
 }

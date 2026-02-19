@@ -15,25 +15,33 @@ export function toggleTruckLayer(map, enable) {
     if (enable) {
         const truckProvider = new window.H.map.provider.ImageTileProvider({
             label: 'truck-icons',
+            tileSize: 512,
             getURL: function (col, row, level) {
                 return [
                     'https://maps.hereapi.com/v3/base/mc/',
-                    level, '/', col, '/', row, '/png8',
+                    level, '/', col, '/', row, '/png',
                     '?features=vehicle_restrictions:active_and_inactive',
                     '&style=explore.day',
+                    '&size=512',
+                    '&ppi=100',
                     '&apikey=', apiKeyHERE
                 ].join('');
             }
         });
 
         const truckLayer = new window.H.map.layer.TileLayer(truckProvider);
+
+        if (!map.originalBaseLayer) {
+            map.originalBaseLayer = map.getBaseLayer();
+        }
+
+        map.setBaseLayer(truckLayer);
         map.truckLayerInstance = truckLayer;
-        map.addLayer(truckLayer);
 
     } else {
-        if (map.truckLayerInstance) {
-            map.removeLayer(map.truckLayerInstance);
-            map.truckLayerInstance = null;
+        if (map.originalBaseLayer) {
+            map.setBaseLayer(map.originalBaseLayer);
         }
+        map.truckLayerInstance = null;
     }
 }

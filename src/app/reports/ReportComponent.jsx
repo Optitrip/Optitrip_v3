@@ -3,7 +3,40 @@ import React, { useEffect, useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { getUsersService } from '../../services/UserService';
+import DatePicker, { registerLocale } from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
+import es from 'date-fns/locale/es'
 import { getReportDetailsByDriver, getReportDetailsByStatus, getReportDetailsByCustomer, getReportDetailsByCodeRoute } from '../../services/ReportService';
+
+registerLocale('es', es)
+
+const CustomDatePickerInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
+    <div style={{ position: 'relative', width: '100%' }}>
+        <input
+            type="text"
+            value={value}
+            onClick={onClick}
+            placeholder={placeholder}
+            readOnly
+            ref={ref}
+            className="form-control"
+            style={{
+                cursor: 'pointer',
+                paddingRight: '55px', /* Más espacio para que no choque el texto con los íconos */
+                backgroundColor: '#ffffff' /* Fuerza el fondo blanco ignorando el readOnly de Bootstrap */
+            }}
+        />
+        {/* Recorremos el ícono a la izquierda (right: 35px) para dejarle el borde derecho libre a la 'X' */}
+        <div style={{ position: 'absolute', right: '35px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#6c757d' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+        </div>
+    </div>
+))
 
 export default function ReportComponent() {
     const [isCardBodyOpen, setIsCardBodyOpen] = useState(true);
@@ -17,6 +50,17 @@ export default function ReportComponent() {
     const [selectedCustomer, setSelectedCustomer] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [dateRange, setDateRange] = useState([null, null])
+    const [startDateObj, endDateObj] = dateRange
+
+    const formatStringDate = (date) => {
+        if (!date) return ''
+        const d = new Date(date)
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const day = String(d.getDate()).padStart(2, '0')
+        const year = d.getFullYear()
+        return `${year}-${month}-${day}`
+    }
     const [status, setStatus] = useState('');
     const [reportByDriver, setReportByDriver] = useState(null);
     const [reportByStatus, setReportByStatus] = useState(null);
@@ -128,40 +172,43 @@ export default function ReportComponent() {
     };
 
     const handleReportsByDriver = () => {
-        setStartDate('');
-        setEndDate('');
-        setSelectedDriver('');
-        setStatus('');
-        setSelectedCustomer('');
-        setDateError('');
-        setReportsRoutes(false);
-        setReportsCustomers(false);
-        setReportsDriver(true);
-    };
+        setDateRange([null, null])
+        setStartDate('')
+        setEndDate('')
+        setSelectedDriver('')
+        setStatus('')
+        setSelectedCustomer('')
+        setDateError('')
+        setReportsRoutes(false)
+        setReportsCustomers(false)
+        setReportsDriver(true)
+    }
 
     const handleReportsByRoute = () => {
-        setStartDate('');
-        setEndDate('');
-        setSelectedDriver('');
-        setStatus('');
-        setSelectedCustomer('');
-        setDateError('');
-        setReportsDriver(false);
-        setReportsCustomers(false);
-        setReportsRoutes(true);
-    };
+        setDateRange([null, null])
+        setStartDate('')
+        setEndDate('')
+        setSelectedDriver('')
+        setStatus('')
+        setSelectedCustomer('')
+        setDateError('')
+        setReportsDriver(false)
+        setReportsCustomers(false)
+        setReportsRoutes(true)
+    }
 
     const handleReportsByCustomer = () => {
-        setStartDate('');
-        setEndDate('');
-        setSelectedDriver('');
-        setStatus('');
-        setSelectedCustomer('');
-        setDateError('');
-        setReportsDriver(false);
-        setReportsRoutes(false);
-        setReportsCustomers(true);
-    };
+        setDateRange([null, null])
+        setStartDate('')
+        setEndDate('')
+        setSelectedDriver('')
+        setStatus('')
+        setSelectedCustomer('')
+        setDateError('')
+        setReportsDriver(false)
+        setReportsRoutes(false)
+        setReportsCustomers(true)
+    }
 
     const convertUTCToLocal = (utcDateStr) => {
         // Convertir la fecha UTC a un objeto Date
@@ -753,31 +800,31 @@ export default function ReportComponent() {
     };
 
     const handleReuseRoute = (routeId) => {
-    // Cambiar a la vista de rutas
-    const menuRoutesBtn = document.getElementById('menuRoutes');
-    const menuReportsBtn = document.getElementById('menuReports');
+        // Cambiar a la vista de rutas
+        const menuRoutesBtn = document.getElementById('menuRoutes');
+        const menuReportsBtn = document.getElementById('menuReports');
 
-    if (menuReportsBtn) {
-        menuReportsBtn.classList.remove('btn-primary');
-        menuReportsBtn.classList.add('btn-outline-primary');
-    }
+        if (menuReportsBtn) {
+            menuReportsBtn.classList.remove('btn-primary');
+            menuReportsBtn.classList.add('btn-outline-primary');
+        }
 
-    if (menuRoutesBtn) {
-        menuRoutesBtn.classList.remove('btn-outline-primary');
-        menuRoutesBtn.classList.add('btn-primary');
-    }
+        if (menuRoutesBtn) {
+            menuRoutesBtn.classList.remove('btn-outline-primary');
+            menuRoutesBtn.classList.add('btn-primary');
+        }
 
-    // Mostrar la tarjeta de creación de rutas
-    const createRouteCard = document.getElementById('create-route');
-    if (createRouteCard) {
-        createRouteCard.style.display = 'block';
-    }
+        // Mostrar la tarjeta de creación de rutas
+        const createRouteCard = document.getElementById('create-route');
+        if (createRouteCard) {
+            createRouteCard.style.display = 'block';
+        }
 
-    // Disparar evento personalizado con el routeId y flag de reutilización
-    window.dispatchEvent(new CustomEvent('loadRouteForReuse', {
-        detail: { routeId }
-    }));
-};
+        // Disparar evento personalizado con el routeId y flag de reutilización
+        window.dispatchEvent(new CustomEvent('loadRouteForReuse', {
+            detail: { routeId }
+        }));
+    };
 
     return (
         <div>
@@ -831,52 +878,42 @@ export default function ReportComponent() {
                         {reportsDrivers && (
                             <div className="card-body p-3">
                                 <div className="row">
-                                    <div className="col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-center p-0 pl-4 mb-2 pr-4">
-                                        <label className='text-modal mr-2' htmlFor="start-time" style={{ marginTop: '4px' }}>Desde:</label>
-                                        <input
-                                            id="start-time"
-                                            className="form-control"
-                                            type="date"
-                                            value={startDate}
-                                            onChange={(e) => {
-                                                const newStartDate = e.target.value;
-                                                setStartDate(newStartDate);
-                                                if (endDate && newStartDate) {
-                                                    if (!validateDateRange(newStartDate, endDate)) {
-                                                        setDateError('La fecha de inicio no puede ser posterior a la fecha de fin');
-                                                    } else {
-                                                        setDateError('');
-                                                    }
-                                                }
-                                            }}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-center p-0 pl-4 mb-2 pr-4">
-                                        <label className='text-modal mr-2' htmlFor="end-time" style={{ marginTop: '4px' }}>Hasta:</label>
-                                        <input
-                                            id="end-time"
-                                            className="form-control"
-                                            type="date"
-                                            value={endDate}
-                                            min={startDate}
-                                            onChange={(e) => {
-                                                const newEndDate = e.target.value;
-                                                setEndDate(newEndDate);
-                                                if (startDate && newEndDate) {
-                                                    if (!validateDateRange(startDate, newEndDate)) {
-                                                        setDateError('La fecha de fin no puede ser anterior a la fecha de inicio');
-                                                    } else {
-                                                        setDateError('');
-                                                    }
-                                                }
-                                            }}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-lg-4 col-md-12 col-sm-12 col-12 p-0 pl-4 pr-4 mb-2">
-                                        <div className="d-flex align-items-center">
-                                            <label htmlFor="selectCount" className="mr-2 mb-0 text-modal">Conductor:</label>
+                                    <div className="col-12 d-flex flex-wrap justify-content-end px-4 mb-2">
+                                        <div className="d-flex align-items-center ml-3 mb-2" style={{ width: '280px' }}>
+                                            <label className="text-modal mr-2 mb-0">Fechas:</label>
+                                            <div className="flex-grow-1">
+                                                <DatePicker
+                                                    selectsRange={true}
+                                                    startDate={startDateObj}
+                                                    endDate={endDateObj}
+                                                    onChange={(update) => {
+                                                        setDateRange(update)
+                                                        const [start, end] = update
+                                                        const formattedStart = formatStringDate(start)
+                                                        const formattedEnd = formatStringDate(end)
+                                                        setStartDate(formattedStart)
+                                                        setEndDate(formattedEnd)
+
+                                                        if (start && end) {
+                                                            if (!validateDateRange(formattedStart, formattedEnd)) {
+                                                                setDateError('La fecha de inicio no puede ser posterior a la fecha de fin')
+                                                            } else {
+                                                                setDateError('')
+                                                            }
+                                                        } else {
+                                                            setDateError('')
+                                                        }
+                                                    }}
+                                                    isClearable={true}
+                                                    placeholderText="Selecciona el rango"
+                                                    dateFormat="dd/MM/yyyy"
+                                                    customInput={<CustomDatePickerInput />}
+                                                    locale="es"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="d-flex align-items-center ml-3 mb-2" style={{ width: '240px' }}>
+                                            <label className="text-modal mr-2 mb-0">Conductor:</label>
                                             <div className="flex-grow-1">
                                                 <select
                                                     className="form-control pl-1 p-0"
@@ -1005,52 +1042,42 @@ export default function ReportComponent() {
                         {reportsRoutes && (
                             <div className="card-body p-3">
                                 <div className="row">
-                                    <div className="col-lg-3 col-md-6 col-sm-6 col-12 d-flex align-items-center p-0 pl-4 mb-2 pr-4">
-                                        <label className='text-modal mr-2' htmlFor="start-time" style={{ marginTop: '4px' }}>Desde:</label>
-                                        <input
-                                            id="start-time"
-                                            className="form-control"
-                                            type="date"
-                                            value={startDate}
-                                            onChange={(e) => {
-                                                const newStartDate = e.target.value;
-                                                setStartDate(newStartDate);
-                                                if (endDate && newStartDate) {
-                                                    if (!validateDateRange(newStartDate, endDate)) {
-                                                        setDateError('La fecha de inicio no puede ser posterior a la fecha de fin');
-                                                    } else {
-                                                        setDateError('');
-                                                    }
-                                                }
-                                            }}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-lg-3 col-md-6 col-sm-6 col-12 d-flex align-items-center p-0 pl-4 mb-2 pr-4">
-                                        <label className='text-modal mr-2' htmlFor="end-time" style={{ marginTop: '4px' }}>Hasta:</label>
-                                        <input
-                                            id="end-time"
-                                            className="form-control"
-                                            type="date"
-                                            value={endDate}
-                                            min={startDate}
-                                            onChange={(e) => {
-                                                const newEndDate = e.target.value;
-                                                setEndDate(newEndDate);
-                                                if (startDate && newEndDate) {
-                                                    if (!validateDateRange(startDate, newEndDate)) {
-                                                        setDateError('La fecha de fin no puede ser anterior a la fecha de inicio');
-                                                    } else {
-                                                        setDateError('');
-                                                    }
-                                                }
-                                            }}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-lg-3 col-md-6 col-sm-6 col-12 p-0 pl-4 pr-4 mb-2">
-                                        <div className="d-flex align-items-center">
-                                            <label htmlFor="selectCount" className="mr-2 mb-0 text-modal">Conductor:</label>
+                                    <div className="col-12 d-flex flex-wrap justify-content-end px-4 mb-2">
+                                        <div className="d-flex align-items-center ml-3 mb-2" style={{ width: '280px' }}>
+                                            <label className="text-modal mr-2 mb-0">Fechas:</label>
+                                            <div className="flex-grow-1">
+                                                <DatePicker
+                                                    selectsRange={true}
+                                                    startDate={startDateObj}
+                                                    endDate={endDateObj}
+                                                    onChange={(update) => {
+                                                        setDateRange(update)
+                                                        const [start, end] = update
+                                                        const formattedStart = formatStringDate(start)
+                                                        const formattedEnd = formatStringDate(end)
+                                                        setStartDate(formattedStart)
+                                                        setEndDate(formattedEnd)
+
+                                                        if (start && end) {
+                                                            if (!validateDateRange(formattedStart, formattedEnd)) {
+                                                                setDateError('La fecha de inicio no puede ser posterior a la fecha de fin')
+                                                            } else {
+                                                                setDateError('')
+                                                            }
+                                                        } else {
+                                                            setDateError('')
+                                                        }
+                                                    }}
+                                                    isClearable={true}
+                                                    placeholderText="Selecciona el rango"
+                                                    dateFormat="dd/MM/yyyy"
+                                                    customInput={<CustomDatePickerInput />}
+                                                    locale="es"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="d-flex align-items-center ml-3 mb-2" style={{ width: '240px' }}>
+                                            <label className="text-modal mr-2 mb-0">Conductor:</label>
                                             <div className="flex-grow-1">
                                                 <select
                                                     className="form-control pl-1 p-0"
@@ -1065,19 +1092,8 @@ export default function ReportComponent() {
                                                 </select>
                                             </div>
                                         </div>
-                                    </div>
-                                    {dateError && (
-                                        <div className="col-12 p-0 pl-4 pr-4 mb-2">
-                                            <div className="alert alert-danger" role="alert" style={{ padding: '8px', marginBottom: '0', fontSize: '14px' }}>
-                                                <i className="fas fa-exclamation-triangle mr-2"></i>
-                                                {dateError}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="col-lg-3 col-md-6 col-sm-6 col-12 p-0 pl-4 pr-4 mb-2">
-                                        <div className="d-flex align-items-center">
-                                            <label htmlFor="selectCount" className="mr-2 mb-0 text-modal">Estatus:</label>
+                                        <div className="d-flex align-items-center ml-3 mb-2" style={{ width: '200px' }}>
+                                            <label className="text-modal mr-2 mb-0">Estatus:</label>
                                             <div className="flex-grow-1">
                                                 <select
                                                     className="form-control pl-1 p-0"
@@ -1094,6 +1110,16 @@ export default function ReportComponent() {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {dateError && (
+                                        <div className="col-12 p-0 pl-4 pr-4 mb-2">
+                                            <div className="alert alert-danger" role="alert" style={{ padding: '8px', marginBottom: '0', fontSize: '14px' }}>
+                                                <i className="fas fa-exclamation-triangle mr-2"></i>
+                                                {dateError}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="col-lg-12 mt-2 mb-2">
                                         <button className="btn btn-primary float-right" onClick={generateRoutePDF} style={{ display: 'flex', alignItems: 'center' }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125" x="0px" y="0px" width="20" height="20" style={{ marginRight: '4px', marginTop: '4px' }}>
@@ -1113,13 +1139,16 @@ export default function ReportComponent() {
                                             <table className="table table-hover text-center">
                                                 <thead style={{ border: '2px' }}>
                                                     <tr style={{ height: '20px', backgroundColor: '#C8C8C8' }}>
+                                                        <th className='pl-4' colSpan="10" style={{ textAlign: 'left', padding: 0, border: '1px solid black' }}>Detalles de los viajes</th>
+                                                    </tr>
+                                                    <tr style={{ height: '20px', backgroundColor: '#C8C8C8' }}>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">No.</th>
-                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle', minWidth: '130px' }} scope="col">Conductor</th>                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Fecha de inicio</th>
+                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Fecha de inicio</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Origen</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Fecha de finalización</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Destino</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Total de paradas</th>
-                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle', minWidth: '140px' }} scope="col">Kilometraje total</th>
+                                                        <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Kilometraje total</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Duración</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle' }} scope="col">Estatus</th>
                                                         <th style={{ padding: 0, border: '1px solid #C8C8C8', verticalAlign: 'middle', width: '80px' }} scope="col">Acciones</th>
@@ -1131,7 +1160,6 @@ export default function ReportComponent() {
                                                             {reportByStatus.results.map((trip, index) => (
                                                                 <tr key={index}>
                                                                     <td>{index + 1}</td>
-                                                                    <td>{trip.driverName}</td>
                                                                     <td>{convertUTCToLocal(trip.departureTime) + " hrs"}</td>
                                                                     <td>{trip.originName}</td>
                                                                     <td>{convertUTCToLocal(trip.arrivalTime) + " hrs"}</td>
@@ -1211,52 +1239,42 @@ export default function ReportComponent() {
                         {reportsCustomers && (
                             <div className="card-body p-3">
                                 <div className="row">
-                                    <div className="col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-center p-0 pl-4 mb-2 pr-4">
-                                        <label className='text-modal mr-2' htmlFor="start-time" style={{ marginTop: '4px' }}>Desde:</label>
-                                        <input
-                                            id="start-time"
-                                            className="form-control"
-                                            type="date"
-                                            value={startDate}
-                                            onChange={(e) => {
-                                                const newStartDate = e.target.value;
-                                                setStartDate(newStartDate);
-                                                if (endDate && newStartDate) {
-                                                    if (!validateDateRange(newStartDate, endDate)) {
-                                                        setDateError('La fecha de inicio no puede ser posterior a la fecha de fin');
-                                                    } else {
-                                                        setDateError('');
-                                                    }
-                                                }
-                                            }}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-lg-4 col-md-6 col-sm-6 col-12 d-flex align-items-center p-0 pl-4 mb-2 pr-4">
-                                        <label className='text-modal mr-2' htmlFor="end-time" style={{ marginTop: '4px' }}>Hasta:</label>
-                                        <input
-                                            id="end-time"
-                                            className="form-control"
-                                            type="date"
-                                            value={endDate}
-                                            min={startDate}
-                                            onChange={(e) => {
-                                                const newEndDate = e.target.value;
-                                                setEndDate(newEndDate);
-                                                if (startDate && newEndDate) {
-                                                    if (!validateDateRange(startDate, newEndDate)) {
-                                                        setDateError('La fecha de fin no puede ser anterior a la fecha de inicio');
-                                                    } else {
-                                                        setDateError('');
-                                                    }
-                                                }
-                                            }}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-lg-4 col-md-12 col-sm-12 col-12 p-0 pl-4 pr-4 mb-2">
-                                        <div className="d-flex align-items-center">
-                                            <label htmlFor="selectCount" className="mr-2 mb-0 text-modal">Cliente:</label>
+                                    <div className="col-12 d-flex flex-wrap justify-content-end px-4 mb-2">
+                                        <div className="d-flex align-items-center ml-3 mb-2" style={{ width: '280px' }}>
+                                            <label className="text-modal mr-2 mb-0">Fechas:</label>
+                                            <div className="flex-grow-1">
+                                                <DatePicker
+                                                    selectsRange={true}
+                                                    startDate={startDateObj}
+                                                    endDate={endDateObj}
+                                                    onChange={(update) => {
+                                                        setDateRange(update)
+                                                        const [start, end] = update
+                                                        const formattedStart = formatStringDate(start)
+                                                        const formattedEnd = formatStringDate(end)
+                                                        setStartDate(formattedStart)
+                                                        setEndDate(formattedEnd)
+
+                                                        if (start && end) {
+                                                            if (!validateDateRange(formattedStart, formattedEnd)) {
+                                                                setDateError('La fecha de inicio no puede ser posterior a la fecha de fin')
+                                                            } else {
+                                                                setDateError('')
+                                                            }
+                                                        } else {
+                                                            setDateError('')
+                                                        }
+                                                    }}
+                                                    isClearable={true}
+                                                    placeholderText="Selecciona el rango"
+                                                    dateFormat="dd/MM/yyyy"
+                                                    customInput={<CustomDatePickerInput />}
+                                                    locale="es"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="d-flex align-items-center ml-3 mb-2" style={{ width: '240px' }}>
+                                            <label className="text-modal mr-2 mb-0">Cliente:</label>
                                             <div className="flex-grow-1">
                                                 <select
                                                     className="form-control pl-1 p-0"

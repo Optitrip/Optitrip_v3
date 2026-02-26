@@ -283,15 +283,17 @@
           <div class="col-md-12">
             <div class="card" style="border-radius: 10px;">
               <div class="card-body">
-                <form>
+                <form autocomplete="on">
                   <div class="mb-3 p-5 text-center">
                     <img src="/logo_optitrip.png" alt="" height="150" />
                   </div>
                   <div class="mb-3 pl-4 pr-4">
-                    <input type="text" class="form-control" id="email" name="email" placeholder="Usuario">
+                    <input type="text" class="form-control" id="email" name="email" autocomplete="username"
+                      placeholder="Usuario">
                   </div>
                   <div class="mb-2 pl-4 pr-4">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña">
+                    <input type="password" class="form-control" id="password" name="password"
+                      autocomplete="current-password" placeholder="Contraseña">
                   </div>
                   <div class="mb-5 pl-4 pr-4">
                     <div class="form-check">
@@ -335,18 +337,6 @@
       showIndications.style.display = showIndications.style.display === 'none' ? 'block' : 'none';
       showRoutes.style.display = showRoutes.style.display === 'none' ? 'block' : 'none';
     }
-    document.addEventListener('DOMContentLoaded', () => {
-      const btnLogout = document.getElementById('logout');
-      
-      if (btnLogout) {
-        btnLogout.addEventListener('click', (e) => {
-          e.preventDefault(); 
-          localStorage.clear();
-          sessionStorage.clear();
-          window.location.reload();
-        });
-      }
-    });
   </script>
 </body>
 

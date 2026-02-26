@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const user = userData ? JSON.parse(userData) : null;
 
     if (token && user) {
-        // Decodificar el token para obtener la fecha de expiración
         const decodedToken = jwtDecode(token);
         const expirationDate = new Date(decodedToken.exp * 1000);
         const currentDate = new Date();
@@ -17,13 +16,20 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('user-count').textContent = user.name;
             showAuthenticatedView();
         } else {
-            // Limpiar sessionStorage si el token ha expirado
             sessionStorage.removeItem('token');
             sessionStorage.removeItem('data_user');
             showLoginForm();
         }
     } else {
         showLoginForm();
+    }
+
+    const savedEmail = localStorage.getItem('remembered_email');
+    if (savedEmail) {
+        const emailInput = document.getElementById('email');
+        const rememberCheckbox = document.getElementById('rememberMe');
+        if (emailInput) emailInput.value = savedEmail;
+        if (rememberCheckbox) rememberCheckbox.checked = true;
     }
 
     const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
@@ -42,6 +48,13 @@ async function handleLogin(event) {
     event.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+
+    const rememberMe = document.getElementById('rememberMe').checked;
+    if (rememberMe) {
+        localStorage.setItem('remembered_email', email);
+    } else {
+        localStorage.removeItem('remembered_email');
+    }
 
     try {
         const { data } = await loginService(email, password); // Obtener data que contiene token y usuario
@@ -109,8 +122,11 @@ async function handleLogin(event) {
 }
 
 function handleLogout() {
+    const rememberedEmail = localStorage.getItem('remembered_email');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('data_user');
+    localStorage.clear();
+    if (rememberedEmail) localStorage.setItem('remembered_email', rememberedEmail);
     window.location.reload();
 }
 

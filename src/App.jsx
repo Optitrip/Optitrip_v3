@@ -188,6 +188,7 @@ export default function App(props) {
     const mapRef = useRef(null);
     const sessionStorageUser = JSON.parse(sessionStorage.getItem('data_user')) || "";
     const email = sessionStorageUser.email;
+    const [isMapActive, setIsMapActive] = useState(false);
 
     const handleTrackingToggle = () => {
         const newState = !isTrackingOpen;
@@ -340,6 +341,10 @@ export default function App(props) {
                 setInitialized(false);
                 setShowBtnSearch(false);
             }
+            const menuMapEl = document.getElementById('menuMap');
+            const mapActive = menuMapEl?.classList.contains('btn-primary') ||
+                menuMapEl?.querySelector('a')?.classList.contains('btn-primary');
+            setIsMapActive(!!mapActive);
         };
 
         const observer = new MutationObserver(observerCallback);
@@ -348,6 +353,10 @@ export default function App(props) {
         observer.observe(reportSectionRef.current, { attributes: true, attributeFilter: ['style'] });
         observer.observe(menuRoutesRef.current, { attributes: true, attributeFilter: ['class'] }); // Observa cambios en la clase
 
+        const menuMapEl = document.getElementById('menuMap');
+        if (menuMapEl) {
+            observer.observe(menuMapEl, { attributes: true, attributeFilter: ['class'], subtree: true });
+        }
         observerCallback(); // Initial check
 
         return () => {
@@ -1694,11 +1703,9 @@ export default function App(props) {
                         </button>
                     )}
 
-                    {initialized && (
+                    {isMapActive && (
                         <HeavyTransportLayerComponent
-                            map={map}
-                            state={state}
-                            setState={setState}
+                            map={mapDrivers}
                         />
                     )}
                 </div>

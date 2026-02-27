@@ -809,6 +809,7 @@ export default function App(props) {
                 tracingDiv.style.display = 'none';
             }
 
+            setIsMapActive(false);
             setIsTrackingOpen(false);
             setIsAlertsOpen(false);
         };

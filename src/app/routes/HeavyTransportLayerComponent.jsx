@@ -28,15 +28,20 @@ export default function HeavyTransportLayerComponent({ map }) {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 id="btnHeavyTransport"
-                style={{ opacity: isOpen ? 0.8 : 1 }}
+                style={{
+                    opacity: 1,
+                    backgroundColor: isOpen ? '#E4E4E4' : '',
+                }}
             >
                 <img
-                    src="/iconos principales/grid icon.svg"
+                    src="/iconos principales/Icono camion.svg"
                     alt="Grid"
                     style={{
-                        width: '14px',
-                        height: '14px',
-                        filter: 'brightness(0) invert(1)'
+                        width: '22px',
+                        height: '22px',
+                        filter: isOpen
+                            ? 'brightness(0) saturate(100%) invert(60%) sepia(90%) saturate(500%) hue-rotate(360deg) brightness(100%)' // ← naranja
+                            : 'brightness(0) invert(1)'
                     }}
                 />
             </button>
@@ -135,12 +140,51 @@ export default function HeavyTransportLayerComponent({ map }) {
 
                         {isTruckLayerActive && (
                             <div style={{ marginTop: '15px', paddingTop: '10px', borderTop: '1px solid #ddd' }}>
-                                <p style={{ fontWeight: 'bold', marginBottom: '5px' }}>Simbología (Nativa HERE):</p>
-                                <ul style={{ paddingLeft: '20px', margin: 0, color: '#666' }}>
-                                    <li>Círculo Rojo: Prohibido</li>
-                                    <li>Triángulo Amarillo: Advertencia (Altura/Peso)</li>
-                                    <li>Icono Naranja: Materiales Peligrosos</li>
+                                <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>Simbología:</p>
+
+                                <ul style={{ listStyleType: 'none', paddingLeft: 0, margin: 0, color: '#666' }}>
+
+                                    {/* 1. Restricción de altura (Círculo rojo con texto) */}
+                                    <li style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                                        <div style={{
+                                            width: '20px', height: '20px', borderRadius: '50%',
+                                            border: '2px solid #E60000', backgroundColor: '#fff',
+                                            display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                            marginRight: '10px', flexShrink: 0,
+                                            fontSize: '8px', fontWeight: 'bold', color: '#000'
+                                        }}>
+                                            5m
+                                        </div>
+                                        <span>Restricción de altura</span>
+                                    </li>
+
+                                    {/* 2. Vía prohibida (Círculo rojo con camión) */}
+                                    <li style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                                        <div style={{
+                                            width: '20px', height: '20px', borderRadius: '50%',
+                                            border: '2px solid #E60000', backgroundColor: '#fff',
+                                            display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                            marginRight: '10px', flexShrink: 0
+                                        }}>
+                                            <i className="fas fa-truck" style={{ fontSize: '9px', color: '#000' }}></i>
+                                        </div>
+                                        <span>Vía prohibida para camiones</span>
+                                    </li>
+
+                                    {/* 3. Tramo con restricción (Línea morada) */}
+                                    <li style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+                                        <div style={{
+                                            width: '20px', height: '4px', backgroundColor: '#8B5CF6',
+                                            marginRight: '10px', flexShrink: 0, borderRadius: '2px'
+                                        }}></div>
+                                        <span>Tramo con restricción activa</span>
+                                    </li>
+
                                 </ul>
+
+                                <p style={{ marginTop: '10px', fontSize: '11px', color: '#999', lineHeight: 1.3 }}>
+                                    La cobertura de restricciones varía según la región.
+                                </p>
                             </div>
                         )}
                     </div>

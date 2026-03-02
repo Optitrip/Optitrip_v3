@@ -862,6 +862,52 @@ export default function App(props) {
         };
     }, [map, state]);
 
+    useEffect(() => {
+        const checkAccountStatus = async () => {
+            const storedUserData = sessionStorage.getItem('data_user');
+            if (!storedUserData) return;
+
+            const userData = JSON.parse(storedUserData);
+            if (!userData._id) return;
+
+            try {
+                const response = await fetch(`${base_url}/user/check/${userData._id}`);
+
+                if (response.status === 404) {
+                    // Limpiar sesión
+                    sessionStorage.removeItem('token');
+                    sessionStorage.removeItem('data_user');
+                    localStorage.removeItem('optitrip_isAlertsOpen');
+                    localStorage.removeItem('optitrip_isTrackingOpen');
+
+                    await Swal.fire({
+                        title: '¡Tu cuenta ha sido eliminada!',
+                        text: 'Tu cuenta fue eliminada por un administrador. Serás redirigido al inicio.',
+                        icon: 'warning',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Aceptar',
+                        allowOutsideClick: false,
+                        width: '400px',
+                        padding: '2rem',
+                        customClass: {
+                            title: 'title-handle',
+                            popup: 'popup-handle'
+                        }
+                    });
+
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Error verificando estado de cuenta:', error);
+            }
+        };
+
+        checkAccountStatus();
+        const intervalId = setInterval(checkAccountStatus, 30000);
+
+        return () => clearInterval(intervalId);
+    }, []);
+
     const handleContextMenu = (ev) => {
         const menuRoutes = document.getElementById('menuRoutes');
         // Verifica si el elemento tiene la clase btn-primary

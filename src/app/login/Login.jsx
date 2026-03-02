@@ -1,6 +1,6 @@
 // Login.jsx
 import React, { useState } from 'react';
-import { loginService } from '../../services/LoginService'; 
+import { loginService } from '../../services/LoginService';
 
 function Login({ onLogin }) {
     const [username, setUsername] = useState('');

@@ -72,20 +72,20 @@ export default function UserComponent(stateUser) {
         applyFilters();
     }, [filterName, filterType, selectedSuperiorAccount, dataUsers]);
 
-useEffect(() => {
+    useEffect(() => {
         const fetchAllowedRoles = async () => {
             const storedUserData = sessionStorage.getItem('data_user');
             if (storedUserData) {
                 const currentUser = JSON.parse(storedUserData);
-                
+
                 // Convertimos la primera letra a mayúscula para asegurar coincidencia
                 const rawRole = currentUser.role || currentUser.type_user; // Backup por si role no viene
-                const userRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase(); 
+                const userRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
 
                 // Mapeo de roles permitidos según jerarquía
                 const rolePermissions = {
-                    'Super administrador': ['Distribuidor', 'Administrador', 'Cliente', 'Conductor'], 
-                    'Super Administrador': ['Distribuidor', 'Administrador', 'Cliente', 'Conductor'], 
+                    'Super administrador': ['Distribuidor', 'Administrador', 'Cliente', 'Conductor'],
+                    'Super Administrador': ['Distribuidor', 'Administrador', 'Cliente', 'Conductor'],
                     'Distribuidor': ['Administrador', 'Cliente', 'Conductor'],
                     'Administrador': ['Cliente', 'Conductor']
                 };
@@ -359,7 +359,7 @@ useEffect(() => {
                     rol_id = '665a3fa1b9397c6a4a0756cd';
                     break;
                 case 'Distribuidor':
-                    rol_id = '6939a3190e7accac1da2c079'; 
+                    rol_id = '6939a3190e7accac1da2c079';
                     break;
                 case 'Cliente':
                     rol_id = '666744007348f2ae62817a74';

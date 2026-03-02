@@ -23,8 +23,8 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
     const [driversOffline, setDriversOffline] = useState(0);
     const [filteredDriversStatus, setFilteredDriversStatus] = useState([]);
     const [filterStatus, setFilterStatus] = useState('all');
+    const [searchMode, setSearchMode] = useState(false);
     const [updateInterval, setUpdateInterval] = useState(30000);
-
 
     // useEffect para establecer selectedSuperiorAccount una vez que userAuthenticatedEmail esté disponible
     useEffect(() => {
@@ -155,8 +155,24 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
     // Llamar a la función para obtener la estructura anidada
     const nestedSuperiorAccounts = nestAccounts(
         superiorAccounts,
-        rootAccountToRender 
+        rootAccountToRender
     );
+
+    const getAllEmailsInHierarchy = (accounts) => {
+        const emails = [];
+        const traverse = (obj) => {
+            Object.entries(obj).forEach(([account, subAccounts]) => {
+                emails.push(account);
+                if (typeof subAccounts === 'object' && !Array.isArray(subAccounts)) {
+                    traverse(subAccounts);
+                }
+            });
+        };
+        traverse(accounts);
+        return emails;
+    };
+
+    const allowedEmails = getAllEmailsInHierarchy(nestedSuperiorAccounts);
 
     // Función para determinar el color del ícono basado en el rol
     const getIconColor = (email) => {
@@ -234,10 +250,12 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
 
         if (value.trim() === "") {
             setSuggestions([]);
+            setSearchMode(false);
 
         } else {
             const filteredSuggestions = dataUsers.filter((user) =>
-                user.name.toLowerCase().includes(value.trim().toLowerCase())
+                user.name.toLowerCase().includes(value.trim().toLowerCase()) &&
+                allowedEmails.includes(user.email)
             );
             setSuggestions(filteredSuggestions);
         }
@@ -247,6 +265,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         setSelectedSuperiorAccount(email);
         setSearchInput("");
         setSuggestions([]);
+        setSearchMode(true);
     };
 
     const getCurrentLocalDateTime = (utcDateString) => {
@@ -463,12 +482,27 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                     </div>
                     <div className="pl-3 pr-3 mb-3">
                         <div className="card mt-2" style={{ borderColor: "#007bff", height: '30vh', overflowY: 'auto', overflowX: 'hidden' }}>
-                            {nestedSuperiorAccounts &&
+                            {searchMode ? (
+                                <div className="pl-2 pt-2" style={{ fontSize: 12 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <i className='fas fa-user mr-2' style={{ color: getIconColor(selectedSuperiorAccount), fontSize: 11 }}></i>
+                                        <span style={{ color: 'blue' }}>{selectedSuperiorAccount}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => { setSearchMode(false); }}
+                                        style={{ fontSize: 9, marginTop: 6, border: 'none', background: 'none', color: '#007BFF', cursor: 'pointer', padding: 0 }}
+                                    >
+                                        ✕ Ver todos
+                                    </button>
+                                </div>
+                            ) : (
+                                nestedSuperiorAccounts &&
                                 Object.keys(nestedSuperiorAccounts).map((account) => (
                                     <div key={account} className="mb-2">
                                         {renderNestedAccounts(nestedSuperiorAccounts)}
                                     </div>
-                                ))}
+                                ))
+                            )}
                         </div>
                     </div>
                     <div className="pl-3 pr-3 mb-3">
@@ -503,7 +537,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                 className={`btn btn-light btn-sm ${filterStatus === 'active' ? 'btn-status-active' : ''}`}
                                                 style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
                                             >
-                                                EN RUTA ({activeCount})
+                                                ACTIVO ({activeCount})
                                             </button>
                                         </div>
                                         <div className="col-3 pt-2 pb-2">
@@ -549,13 +583,15 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                             const percentage = routeProgress?.percentage || 0;
                                             const etaMinutes = routeProgress?.etaMinutes;
 
-                                            let etaFormatted = 'ETA no disponible';
+                                            let etaFormatted = '--:--';
                                             if (etaMinutes !== null && etaMinutes !== undefined) {
-                                                const hours = Math.floor(etaMinutes / 60);
-                                                const mins = etaMinutes % 60;
-                                                etaFormatted = hours > 0
-                                                    ? `${hours}H ${mins}MIN`
-                                                    : `${mins}MIN`;
+                                                if (etaMinutes > 0) {
+                                                    const hours = Math.floor(etaMinutes / 60);
+                                                    const mins = etaMinutes % 60;
+                                                    etaFormatted = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+                                                } else {
+                                                    etaFormatted = '00:00';
+                                                }
                                             }
 
                                             return (

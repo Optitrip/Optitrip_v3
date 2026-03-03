@@ -364,15 +364,15 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         }
     };
 
-    const offlineCount = filteredDrivers.filter(driver =>
+    const offlineCount = filteredDriversStatus.filter(driver =>
         driver.tracking && driver.tracking.status === "Fuera de línea"
     ).length;
 
-    const availableCount = filteredDrivers.filter(driver =>
+    const availableCount = filteredDriversStatus.filter(driver =>
         driver.tracking && driver.tracking.status === "Disponible"
     ).length;
 
-    const activeCount = filteredDrivers.filter(driver =>
+    const activeCount = filteredDriversStatus.filter(driver =>
         driver.tracking && driver.tracking.status === "Activo"
     ).length;
 
@@ -517,7 +517,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                 className={`btn btn-light btn-sm ${filterStatus === 'all' ? 'btn-status-active' : ''}`}
                                                 style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
                                             >
-                                                TODOS ({filteredDrivers.length})
+                                                TODOS ({filteredDriversStatus.length})
                                             </button>
                                         </div>
                                         <div className="col-3 pt-2 pb-2">

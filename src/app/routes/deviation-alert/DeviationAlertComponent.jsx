@@ -24,7 +24,7 @@ export default function DeviationAlertComponent({ state, setState }) {
 
     const handleToggleAlert = (enabled) => {
         setAlertEnabled(enabled);
-        
+
         if (enabled) {
             // Al activar, usa el valor actual del input (parseado)
             const currentValue = parseInt(inputValue) || 50;
@@ -58,21 +58,19 @@ export default function DeviationAlertComponent({ state, setState }) {
         }
     };
 
-    // Maneja la validación final cuando el usuario sale del input
     const handleBlur = () => {
         let finalValue = parseInt(inputValue);
 
         if (isNaN(finalValue)) {
             finalValue = 50;
-        } else if (finalValue < 10) {
-            finalValue = 10;
+        } else if (finalValue < 50) {
+            finalValue = 50;
         } else if (finalValue > 10000) {
             finalValue = 10000;
         }
 
         setInputValue(finalValue);
 
-        // Actualizar el estado global (siempre, para mantener sincronización)
         setState(prevState => ({
             ...prevState,
             deviationAlertDistance: finalValue

@@ -724,8 +724,8 @@ export default function ReportComponent() {
                             let imgEndY = photosY;
 
                             if (images && images.length > 0) {
-                                const imageWidth = 50;
-                                const imageHeight = 70;
+                                const imageWidth = 40;
+                                const imageHeight = 55;
                                 const margin = 10;
                                 let imgStartY = photosY + 5;
                                 let imgStartX = 14;
@@ -748,9 +748,9 @@ export default function ReportComponent() {
                             }
 
                             doc.setFont("helvetica", "bold");
-                            const signatureLabelY = imgEndY + 15;
+                            const signatureLabelY = imgEndY + 5;
                             doc.text(`Firma:`, centerX + 15, signatureLabelY);
-                            doc.addImage(imgSignature, 'PNG', centerX, signatureLabelY + 5, 50, 30);
+                            doc.addImage(imgSignature, 'PNG', centerX, signatureLabelY + 5, 40, 24);
 
                             // Calculamos el final de la firma + margen
                             startY = signatureLabelY + 40 + 15;

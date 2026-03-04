@@ -251,7 +251,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         if (value.trim() === "") {
             setSuggestions([]);
             setSearchMode(false);
-
+            setSelectedSuperiorAccount(email);
         } else {
             const filteredSuggestions = dataUsers.filter((user) =>
                 user.name.toLowerCase().includes(value.trim().toLowerCase()) &&
@@ -261,9 +261,9 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         }
     };
 
-    const handleSuggestionClick = (email) => {
+    const handleSuggestionClick = (email, name) => {
         setSelectedSuperiorAccount(email);
-        setSearchInput("");
+        setSearchInput(name);
         setSuggestions([]);
         setSearchMode(true);
     };
@@ -454,7 +454,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                     <li
                                                         key={suggestion.email}
                                                         className="list-group-item list-group-item-action count-option mb-2 p-2"
-                                                        onClick={() => handleSuggestionClick(suggestion.email)}
+                                                        onClick={() => handleSuggestionClick(suggestion.email, suggestion.name)}
                                                         style={{ cursor: "pointer", background: "#007BFF" }}
                                                     >
                                                         {suggestion.name}
@@ -468,7 +468,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                                     <li
                                                         key={suggestion.email}
                                                         className="list-group-item list-group-item-action count-option mb-2 p-2"
-                                                        onClick={() => handleSuggestionClick(suggestion.email)}
+                                                        onClick={() => handleSuggestionClick(suggestion.email, suggestion.name)}
                                                         style={{ cursor: "pointer", background: "#007BFF" }}
                                                     >
                                                         {suggestion.name}
@@ -488,12 +488,6 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                         <i className='fas fa-user mr-2' style={{ color: getIconColor(selectedSuperiorAccount), fontSize: 11 }}></i>
                                         <span style={{ color: 'blue' }}>{selectedSuperiorAccount}</span>
                                     </div>
-                                    <button
-                                        onClick={() => { setSearchMode(false); }}
-                                        style={{ fontSize: 9, marginTop: 6, border: 'none', background: 'none', color: '#007BFF', cursor: 'pointer', padding: 0 }}
-                                    >
-                                        ✕ Ver todos
-                                    </button>
                                 </div>
                             ) : (
                                 nestedSuperiorAccounts &&

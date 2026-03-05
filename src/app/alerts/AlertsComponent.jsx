@@ -165,11 +165,11 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         addAlertMarkerToMap(alert);
 
         // Dibujar ambas rutas
-        if (alert.type !== "DEVIATION_DETECTED" && 
-        alert.recalculatedRoute && 
-        alert.recalculatedRoute.polyline) {
-        drawOriginalAndRecalculatedRoutes(alert);
-    }
+        if (alert.type !== "DEVIATION_DETECTED" &&
+            alert.recalculatedRoute &&
+            alert.recalculatedRoute.polyline) {
+            drawOriginalAndRecalculatedRoutes(alert);
+        }
 
         // Mostrar popup
         showAlertPopup(alert)
@@ -223,10 +223,10 @@ export default function AlertsComponent({ isOpen, toggleOpen, selectedAlert, onA
         }
 
         const typeText = alert.type === "ORIGINAL_ROUTE"
-        ? "Alerta: Retomando ruta original" 
-        : alert.type === "NEW_DESTINATION"
-            ? "Alerta de ruta recalculada"
-            : "Alerta por desviación de ruta";
+            ? "Alerta: Retomando ruta original"
+            : alert.type === "NEW_DESTINATION"
+                ? "Alerta de ruta recalculada"
+                : "Alerta por desviación de ruta";
 
         const d = new Date(alert.timestamp);
         const dateStr = d.getFullYear() + "-" +

@@ -364,15 +364,26 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
         }
     };
 
-    const offlineCount = filteredDriversStatus.filter(driver =>
+    const driversForCount = filteredDrivers.filter(driver => {
+        if (!selectedSuperiorAccount) return true;
+        const ROOT_ACCOUNT = "optitripmex@gmail.com";
+        const isRoot = selectedSuperiorAccount === ROOT_ACCOUNT;
+        const isAdminOrDistributor = dataUsers.some(u => u.email === selectedSuperiorAccount);
+        const isSelf = selectedSuperiorAccount === email;
+        const isClientSelf = !isRoot && !isAdminOrDistributor && isSelf;
+        if (isClientSelf) return true;
+        return driver.superior_account === selectedSuperiorAccount;
+    });
+
+    const offlineCount = driversForCount.filter(driver =>
         driver.tracking && driver.tracking.status === "Fuera de línea"
     ).length;
 
-    const availableCount = filteredDriversStatus.filter(driver =>
+    const availableCount = driversForCount.filter(driver =>
         driver.tracking && driver.tracking.status === "Disponible"
     ).length;
 
-    const activeCount = filteredDriversStatus.filter(driver =>
+    const activeCount = driversForCount.filter(driver =>
         driver.tracking && driver.tracking.status === "Activo"
     ).length;
 
@@ -481,7 +492,7 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                         </div>
                     </div>
                     <div className="pl-3 pr-3 mb-3">
-                        <div className="card mt-2" style={{ borderColor: "#007bff", height: '30vh', overflowY: 'auto', overflowX: 'hidden' }}>
+                        <div className="card mt-2" style={{ borderColor: "#007bff", height: '22vh', overflowY: 'hidden', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}>
                             {searchMode ? (
                                 <div className="pl-2 pt-2" style={{ fontSize: 12 }}>
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -499,74 +510,55 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                             )}
                         </div>
                     </div>
-                    <div className="pl-3 pr-3 mb-3">
-                        <div className="card mt-2" style={{ borderColor: "#007bff", height: '30vh', overflowY: 'auto', overflowX: 'hidden' }}>
-                            {filteredDrivers.length > 0 ? (
-                                <>
-                                    <div className="row text-center px-2">
-                                        <div className="col-3 pt-2 pb-2">
-                                            <button
-                                                onClick={() => handleFilterStatusChange('all')}
-                                                type="button"
-                                                className={`btn btn-light btn-sm ${filterStatus === 'all' ? 'btn-status-active' : ''}`}
-                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
-                                            >
-                                                TODOS ({filteredDriversStatus.length})
-                                            </button>
-                                        </div>
-                                        <div className="col-3 pt-2 pb-2">
-                                            <button
-                                                onClick={() => handleFilterStatusChange('available')}
-                                                type="button"
-                                                className={`btn btn-light btn-sm ${filterStatus === 'available' ? 'btn-status-active' : ''}`}
-                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
-                                            >
-                                                DISPONIBLES ({availableCount})
-                                            </button>
-                                        </div>
-                                        <div className="col-3 pt-2 pb-2">
-                                            <button
-                                                onClick={() => handleFilterStatusChange('active')}
-                                                type="button"
-                                                className={`btn btn-light btn-sm ${filterStatus === 'active' ? 'btn-status-active' : ''}`}
-                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
-                                            >
-                                                ACTIVO ({activeCount})
-                                            </button>
-                                        </div>
-                                        <div className="col-3 pt-2 pb-2">
-                                            <button
-                                                onClick={() => handleFilterStatusChange('offline')}
-                                                type="button"
-                                                className={`btn btn-light btn-sm ${filterStatus === 'offline' ? 'btn-status-active' : ''}`}
-                                                style={{ borderColor: "#000000", borderRadius: 15, fontSize: 8 }}
-                                            >
-                                                OFFLINE ({offlineCount})
-                                            </button>
-                                        </div>
+                    {filteredDrivers.length > 0 ? (
+                        <>
+                            <div style={{ flexShrink: 0 }}>
+                                <div className="row text-center px-2" style={{ marginTop: 4, marginBottom: 0 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, padding: '6px 16px', width: '100%' }}>
+                                        <button onClick={() => handleFilterStatusChange('all')} type="button"
+                                            className="btn btn-sm"
+                                            style={{ flex: 1, borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8 }}>
+                                            TODOS ({driversForCount.length})
+                                        </button>
+                                        <button onClick={() => handleFilterStatusChange('available')} type="button"
+                                            className="btn btn-sm"
+                                            style={{ flex: 1, borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8 }}>
+                                            DISPONIBLES ({availableCount})
+                                        </button>
+                                        <button onClick={() => handleFilterStatusChange('active')} type="button"
+                                            className="btn btn-sm"
+                                            style={{ flex: 1, borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8 }}>
+                                            ACTIVO ({activeCount})
+                                        </button>
+                                        <button onClick={() => handleFilterStatusChange('offline')} type="button"
+                                            className="btn btn-sm"
+                                            style={{ flex: 1, borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8 }}>
+                                            OFFLINE ({offlineCount})
+                                        </button>
                                     </div>
-                                    <div className="row text-center mt-2">
-                                        <div className="col-12 pt-2 pb-2">
-                                            <select
-                                                id="updateInterval"
-                                                className="form-select form-select-sm"
-                                                value={updateInterval}
-                                                onChange={(e) => setUpdateInterval(Number(e.target.value))}
-                                                style={{ border: "noneS", color: "#000000", borderRadius: 15, fontSize: 10, backgroundColor: "rgb(206, 206, 206)" }}
-                                            >
-                                                <option value={30000}>Actualizar cada: 30 s</option>
-                                                <option value={60000}>Actualizar cada: 1 min</option>
-                                                <option value={90000}>Actualizar cada: 1:30 min</option>
-                                                <option value={120000}>Actualizar cada: 2 min</option>
-                                                <option value={150000}>Actualizar cada: 2:30 min</option>
-                                                <option value={180000}>Actualizar cada: 3 min</option>
-                                                <option value={210000}>Actualizar cada: 3:30 min</option>
-                                                <option value={240000}>Actualizar cada: 4 min</option>
-                                                <option value={270000}>Actualizar cada: 4:30 min</option>
-                                                <option value={300000}>Actualizar cada: 5 min</option>
-                                            </select>
-                                        </div>
+                                </div>
+                                <div className="row text-center mt-1">
+                                    <div className="col-12 pt-1 pb-1">
+                                        <select id="updateInterval" className="form-select form-select-sm"
+                                            value={updateInterval}
+                                            onChange={(e) => setUpdateInterval(Number(e.target.value))}
+                                            style={{ color: "#000000", borderRadius: 15, fontSize: 10, backgroundColor: "rgb(206, 206, 206)" }}>
+                                            <option value={30000}>Actualizar cada: 30 s</option>
+                                            <option value={60000}>Actualizar cada: 1 min</option>
+                                            <option value={90000}>Actualizar cada: 1:30 min</option>
+                                            <option value={120000}>Actualizar cada: 2 min</option>
+                                            <option value={150000}>Actualizar cada: 2:30 min</option>
+                                            <option value={180000}>Actualizar cada: 3 min</option>
+                                            <option value={210000}>Actualizar cada: 3:30 min</option>
+                                            <option value={240000}>Actualizar cada: 4 min</option>
+                                            <option value={270000}>Actualizar cada: 4:30 min</option>
+                                            <option value={300000}>Actualizar cada: 5 min</option>
+                                        </select>
                                     </div>
+                                </div>
+                            </div>
+                            <div className="pl-3 pr-3 mb-3">
+                                <div className="card mt-2" style={{ borderColor: "#007bff", height: '28vh', overflowY: 'auto', overflowX: 'hidden' }}>
                                     <div className="pt-2 pb-4">
                                         {filteredDriversStatus.map((driver, index) => {
                                             const driverStatus = driver.tracking?.status || 'Fuera de línea';
@@ -728,16 +720,19 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                                             );
                                         })}
                                     </div>
-                                </>
-                            ) : (
-                                <div className="col-12 mt-2">
-                                    <span className={'text-driver-date text-center'} style={{ fontSize: 10 }}>NO HAY CONDUCTORES ASOCIADOS A ESTA CUENTA</span>
                                 </div>
-                            )}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="col-12 mt-2 pl-3">
+                            <span className={'text-driver-date text-center'} style={{ fontSize: 10 }}>
+                                NO HAY CONDUCTORES ASOCIADOS A ESTA CUENTA
+                            </span>
                         </div>
-                    </div>
+                    )}
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

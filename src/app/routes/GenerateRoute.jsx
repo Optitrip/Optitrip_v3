@@ -432,7 +432,7 @@ export const here_api_routes = (state, setState, map, colors, index) => {
 // Función para reiniciar el módulo de rutas
 export const resetRoutesModule = (state, setState, map) => {
     console.log('Reiniciando módulo de rutas...');
-    
+
     // Limpiar las tarjetas de rutas
     const cardRoutes = document.getElementById('routes-container');
     if (cardRoutes) {

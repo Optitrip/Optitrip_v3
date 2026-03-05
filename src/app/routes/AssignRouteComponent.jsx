@@ -248,7 +248,8 @@ export default function AssignRouteComponent(state) {
                         polyline: section.polyline,
                         departureTime: section.departure?.time,
                         arrivalTime: section.arrival?.time,
-                        distance: section.summary?.length || 0
+                        distance: section.summary?.length || 0,
+                        duration: section.summary?.duration || 0
                     };
                 });
 

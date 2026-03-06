@@ -514,25 +514,25 @@ export default function TrackingComponent({ email, mapDrivers, state, addMarkerT
                         <>
                             <div style={{ flexShrink: 0 }}>
                                 <div className="row text-center px-2" style={{ marginTop: 4, marginBottom: 0 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, padding: '6px 16px', width: '100%' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, padding: '6px 16px', width: '100%' }}>
                                         <button onClick={() => handleFilterStatusChange('all')} type="button"
                                             className="btn btn-sm"
-                                            style={{ flex: 1, borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8 }}>
+                                            style={{ width: '25%', borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8, padding: '3px 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                             TODOS ({driversForCount.length})
                                         </button>
                                         <button onClick={() => handleFilterStatusChange('available')} type="button"
                                             className="btn btn-sm"
-                                            style={{ flex: 1, borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8 }}>
-                                            DISPONIBLES ({availableCount})
+                                            style={{ width: '25%', borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8, padding: '3px 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            DISPONIBLE ({availableCount})
                                         </button>
                                         <button onClick={() => handleFilterStatusChange('active')} type="button"
                                             className="btn btn-sm"
-                                            style={{ flex: 1, borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8 }}>
+                                            style={{ width: '25%', borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8, padding: '3px 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                             ACTIVO ({activeCount})
                                         </button>
                                         <button onClick={() => handleFilterStatusChange('offline')} type="button"
                                             className="btn btn-sm"
-                                            style={{ flex: 1, borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8 }}>
+                                            style={{ width: '25%', borderColor: "#000000", border: '1px solid', borderRadius: 15, fontSize: 8, padding: '3px 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                             OFFLINE ({offlineCount})
                                         </button>
                                     </div>

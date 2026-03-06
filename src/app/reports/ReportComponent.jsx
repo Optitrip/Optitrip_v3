@@ -645,6 +645,11 @@ export default function ReportComponent() {
                 doc.setFont("helvetica", "normal");
                 doc.text(`${reportByPoint.data.assignedByName}`, 14 + doc.getTextWidth("Asignación realizada por:      "), 102);
 
+                doc.setFont("helvetica", "bold");
+                doc.text(`Conductor:`, 14, 110);
+                doc.setFont("helvetica", "normal");
+                doc.text(`${reportByPoint.data.driverName}`, 14 + doc.getTextWidth("Conductor:      "), 110);
+
                 // Columna derecha
                 doc.setFont("helvetica", "bold");
                 doc.text(`Fecha de asignación:`, rightColumnX, 60);
@@ -658,12 +663,16 @@ export default function ReportComponent() {
 
                 // Título Sección Detallada
                 doc.setFontSize(14);
-                doc.text('Información detallada', 14, 128);
+                doc.text('Información detallada', 14, 136);
 
                 if (reportByPoint && !reportByPoint.error && reportByPoint.data.results && reportByPoint.data.results.length > 0) {
-                    let startY = 135;
+                    let startY = 143;
 
-                    reportByPoint.data.results.forEach((point) => {
+                    const sortedPoints = [...reportByPoint.data.results].sort((a, b) => {
+                        return new Date(a.createdAt) - new Date(b.createdAt);
+                    });
+
+                    sortedPoints.forEach((point, index) => {
                         const pointData = point.point[0];
                         const commentsText = point.comments && point.comments.trim() !== "" ? point.comments : "Sin comentarios";
                         const imgSignature = `data:image/png;base64,${point.signature}`;
@@ -671,9 +680,14 @@ export default function ReportComponent() {
                         const pageWidth = doc.internal.pageSize.getWidth();
                         const centerX = (pageWidth - 50) / 2;
 
-                        if (startY > 250) {
+                        if (index > 0) {
                             doc.addPage();
                             startY = 20;
+                        } else {
+                            if (startY > 250) {
+                                doc.addPage();
+                                startY = 20;
+                            }
                         }
 
                         if (pointData) {
@@ -687,7 +701,6 @@ export default function ReportComponent() {
                             doc.text(`${pointData.type}`, 14 + doc.getTextWidth("Tipo:  "), startY);
 
                             // 2. UBICACIÓN
-                            // Usamos splitTextToSize para que si la dirección es muy larga, baje de renglón
                             doc.setFont("helvetica", "bold");
                             doc.text(`Ubicación:`, 14, startY + lineHeight);
                             doc.setFont("helvetica", "normal");
@@ -738,6 +751,12 @@ export default function ReportComponent() {
                                         imgStartY += imageHeight + margin;
                                     }
 
+                                    if (imgStartY + imageHeight > 280) {
+                                        doc.addPage();
+                                        imgStartY = 20;
+                                        imgStartX = 14;
+                                    }
+
                                     doc.addImage(imgUrl, 'PNG', imgStartX, imgStartY, imageWidth, imageHeight);
                                     imgStartX += imageWidth + margin;
 
@@ -747,12 +766,18 @@ export default function ReportComponent() {
                                 imgEndY = photosY + 10;
                             }
 
+                            // 7. FIRMA
                             doc.setFont("helvetica", "bold");
-                            const signatureLabelY = imgEndY + 5;
+                            let signatureLabelY = imgEndY + 5;
+
+                            if (signatureLabelY + 30 > 280) {
+                                doc.addPage();
+                                signatureLabelY = 20;
+                            }
+
                             doc.text(`Firma:`, centerX + 15, signatureLabelY);
                             doc.addImage(imgSignature, 'PNG', centerX, signatureLabelY + 5, 40, 24);
 
-                            // Calculamos el final de la firma + margen
                             startY = signatureLabelY + 40 + 15;
                         }
                     });

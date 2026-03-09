@@ -770,7 +770,7 @@ export default function ReportComponent() {
                             doc.setFont("helvetica", "bold");
                             let signatureLabelY = imgEndY + 5;
 
-                            if (signatureLabelY + 30 > 280) {
+                            if (signatureLabelY + 30 > 295) {
                                 doc.addPage();
                                 signatureLabelY = 20;
                             }

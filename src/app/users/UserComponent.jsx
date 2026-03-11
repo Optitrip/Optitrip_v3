@@ -326,17 +326,22 @@ export default function UserComponent(stateUser) {
     };
 
     const handleCreateUser = async () => {
-        // Validar campos
         const errors = {};
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
         if (!newUser.type_user || newUser.type_user === 'Seleccionar opción') errors.type_user = true;
         if (!newUser.name.trim()) errors.name = true;
-        if (!newUser.email.trim()) errors.email = true;
+
+        if (!newUser.email.trim() || !emailRegex.test(newUser.email.trim())) {
+            errors.email = true;
+        }
+
         if (!newUser.phone.trim()) errors.phone = true;
 
         if (Object.keys(errors).length > 0) {
             setFieldErrors(errors);
             Swal.fire({
-                title: '¡Campos incompletos! Favor de completar los campos faltantes',
+                title: '¡Campos incompletos o inválidos! Favor de verificar los datos ingresados',
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Aceptar',
                 width: '400px',
@@ -346,10 +351,9 @@ export default function UserComponent(stateUser) {
                     popup: 'popup-handle'
                 }
             });
-            return; // Detener la ejecución
+            return;
         }
 
-        // Limpiar errores si todo está correcto
         setFieldErrors({});
 
         try {
@@ -377,7 +381,6 @@ export default function UserComponent(stateUser) {
             const { users } = await getUsersService();
             setDataUsers(users);
 
-            // Actualizar filteredUsers después de obtener los nuevos datos de los usuarios
             const filtered = users.filter(user => user.superior_account === selectedSuperiorAccount);
             setFilteredUsers(filtered);
 
@@ -391,7 +394,7 @@ export default function UserComponent(stateUser) {
                 rol_id: ''
             });
         } catch (error) {
-            // El modal permanece abierto para que el usuario corrija
+
         }
     };
 
